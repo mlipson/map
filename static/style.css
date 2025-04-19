@@ -1,0 +1,111 @@
+/* Version: Flatplan Grid v1.1 — Spread-aligned layout, centered container, visible Page 0 */
+
+
+.spread-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 30px 0; /* vertical spacing only */
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Page box styling */
+/* Core page box */
+.box {
+  position: relative;
+  border: 1px solid #ccc;
+  padding: 10px;
+  aspect-ratio: 3 / 4;
+  width: 150px;
+  text-align: center;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+
+  margin-right: 10px; /* tight page-to-page spacing by default */
+}
+
+/* Add wider gap between spreads (after every 2nd page) */
+.box:nth-child(2n) {
+  margin-right: 40px;
+}
+
+/* Remove right margin from the last box (for neat edge) */
+.box:last-child {
+  margin-right: 0;
+}
+
+/* Text layout within each box */
+.section {
+    margin-bottom: -0.5em;
+}
+
+.name-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.name {
+    font-variant: small-caps;
+    max-width: 80%;
+    word-wrap: break-word;
+    word-break: break-word;
+    text-align: center;
+    overflow-wrap: break-word;
+}
+
+/* Page number placement */
+.page-number {
+    position: absolute;
+    bottom: 10px;
+    font-size: 0.85em;
+    color: #555;
+}
+
+.page-number.even {
+    left: 10px;
+}
+
+.page-number.odd {
+    right: 10px;
+}
+
+/* Visual feedback during drag */
+.drag-ghost {
+    opacity: 0.4;
+}
+
+/* Placeholder (Page 0 or blank pages) */
+.placeholder {
+    background-color: #f2f2f2;
+    color: #aaa;
+    border-style: dashed;
+}
+
+.placeholder .name,
+.placeholder .section {
+    color: #bbb;
+}
+
+#page-0 {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.page-title {
+  text-align: center;
+}
+
+.upload-form {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Type-based background color coding */
+.edit { background-color: #B1FCFE; }
+.ad { background-color: #FFFFA6; }
+.unknown { background-color: #eee; }

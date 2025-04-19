@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Magazine Flatplan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <h2 class="page-title">Magazine Pagination View</h2>
+
+    <form action="/" method="post" enctype="multipart/form-data" class="upload-form">
+        <input type="file" name="file">
+        <input type="submit" value="Upload JSON">
+    </form>
+
+    {% if items %}
+    <div class="spread-container">
+        {% for item in items %}
+        <div id="page-{{ item['page number'] }}"
+            class="box {{ item['type'] if item['type'] in ['edit', 'ad', 'placeholder'] else 'unknown' }}">
+            <div class="section"><strong>{{ item['section'] }}</strong></div>
+            <div class="name-wrapper">
+                <div class="name">{{ item['name'] }}</div>
+            </div>
+            <div class="page-number {{ 'even' if item['page number'] % 2 == 0 else 'odd' }}">{{ item['page number'] }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="{{ url_for('static', filename='flatplan.js') }}"></script>
+</body>
+
+</html>
