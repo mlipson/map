@@ -1,73 +1,84 @@
-"""Python
-Flask application to upload a JSON file and display its contents in a table."""
 
+from flask import Flask, request, session, redirect, url_for, render_template, jsonify
+from werkzeug.utils import secure_filename
+from bson import ObjectId
+from datetime import datetime
+import pymongo
 import os
 import json
-from flask import Flask, render_template, request, jsonify
-import pymongo
 
-from werkzeug.utils import secure_filename
-
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# Setup Flask
 app = Flask(__name__)
-app.config["UPLOAD_FOLDER"] = "uploads"
-app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
+app.secret_key = 'your-secret-key'  # Replace with environment-secured secret in production
 
-os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-
-# Setup MongoDB Atlas
+# MongoDB setup
 mongo_client = pymongo.MongoClient(os.environ.get("MONGODB_URI"))
 db = mongo_client.get_database("flatplan")
+users = db.users
 layouts = db.layouts
 
-
-@app.route("/", methods=["GET", "POST"])
-def index():
-    """main route to handle file upload and display JSON data."""
-    items = []
-    if request.method == "POST":
-        file = request.files["file"]
-        if file and file.filename.endswith(".json"):
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-            file.save(filepath)
-            with open(filepath, "r", encoding="utf-8") as f:
-                items = json.load(f)
-
-            # Add visible placeholder Page 0 if first real page is Page 1
-            if items and items[0]["page number"] == 1:
-                items.insert(
-                    0,
-                    {
-                        "name": "—",
-                        "type": "placeholder",
-                        "section": "Start",
-                        "page number": 0,
-                    },
-                )
-
-            for item in items:
-                item["name"] = item.get("name", "").lower()
-
-    return render_template("index.html", items=items)
+app.config['UPLOAD_FOLDER'] = 'uploads'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
-@app.route("/save-layout", methods=["POST"])
-def save_layout():
-    """Save the layout to MongoDB"""
-    layout_data = request.json
-    print(layout_data)
-    if not layout_data:
-        return jsonify({"error": "No data provided"}), 400
-
-    result = layouts.insert_one({"layout": layout_data})
-
-    return jsonify({"status": "ok", "id": str(result.inserted_id)})
+@app.route('/')
+def home():
+    return render_template('login.html')
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+@app.route('/login', methods=['POST'])
+def login():
+    email = request.form.get('email')
+    if not email:
+        return "Email is required", 400
+
+    user = users.find_one({"email": email})
+    if not user:
+        user_id = users.insert_one({
+            "email": email,
+            "name": email.split('@')[0],
+            "created_at": datetime.utcnow()
+        }).inserted_id
+        user = users.find_one({"_id": user_id})
+
+    session['user_id'] = str(user['_id'])
+    return redirect(url_for('account'))
+
+
+@app.route('/account')
+def account():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('home'))
+
+    user = users.find_one({"_id": ObjectId(user_id)})
+    user_layouts = list(layouts.find({"account_id": ObjectId(user_id)}))
+    return render_template('account.html', user=user, layouts=user_layouts)
+
+
+@app.route('/layout/<layout_id>', methods=['GET', 'POST'])
+def view_layout(layout_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('home'))
+
+    layout_doc = layouts.find_one({"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)})
+
+    if request.method == 'POST':
+        layout_data = request.json
+        if not layout_data:
+            return jsonify({"error": "No data provided"}), 400
+
+        layouts.update_one(
+            {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)},
+            {"$set": {
+                "layout": layout_data,
+                "modified_date": datetime.utcnow()
+            }}
+        )
+        return jsonify({"status": "updated"})
+
+    if not layout_doc:
+        return "Layout not found", 404
+
+    return render_template('index.html', items=layout_doc['layout'])
+

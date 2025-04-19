@@ -1,0 +1,25 @@
+
+<!doctype html>
+<html>
+<head>
+  <title>My Layouts - Flatplan</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h2 class="page-title">Welcome, {{ user.name }}</h2>
+
+  <h3 class="page-title">Your Layouts</h3>
+  <ul>
+    {% for layout in layouts %}
+      <li>
+        <a href="{{ url_for('view_layout', layout_id=layout._id) }}">
+          {{ layout.publication_name }} – {{ layout.issue_name }}
+        </a>
+        (Last modified: {{ layout.modified_date.strftime('%Y-%m-%d') if layout.modified_date else 'N/A' }})
+      </li>
+    {% else %}
+      <li>No layouts saved yet.</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>
