@@ -1,37 +1,49 @@
 <!doctype html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Magazine Pagination View</title>
+    <meta name="description" content="Magazine Pagination View for managing layouts and pages.">
+    <meta name="keywords" content="magazine, pagination, layout, pages, management">
+    <title>Magazine Pagination Views</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 
 <body>
+
     <h2 class="page-title">Magazine Pagination View</h2>
 
     <form action="/" method="post" enctype="multipart/form-data" class="upload-form">
         <input type="file" name="file">
         <input type="submit" value="Upload JSON">
+        <input type="hidden" id="layout-id" value="{{ layout_id }}">
     </form>
 
-    <button id="save-layout-btn">Save Layout</button>
+    {% set fixed_items=items[:] %}
+    {% if (fixed_items|length - 1) % 2 !=0 %}
+    {% set _=fixed_items.append({'name': '—' , 'type' : 'placeholder' , 'section' : '' , 'page_number' : 9999}) %}
+    {% endif %}
 
-    {% set fixed_items=items[:] %} {% if (fixed_items|length - 1) % 2
-    !=0 %} {% set _=fixed_items.append({'name': '—' , 'type' : 'placeholder' , 'section' : '' , 'page number' :
-    9999}) %} {% endif %} <div class="spread-container">
+    {% if items %}
+    <div class="spread-container">
         {% for item in fixed_items %}
-        <div id="page-{{ item['page number'] }}"
+        <div id="page-{{ item['page_number'] }}"
             class="box {{ item['type'] if item['type'] in ['edit', 'ad', 'placeholder'] else 'unknown' }}">
             <div class="section"><strong>{{ item['section'] }}</strong></div>
             <div class="name-wrapper">
                 <div class="name">{{ item['name'] }}</div>
             </div>
-            <div class="page-number {{ 'even' if item['page number'] % 2 == 0 else 'odd' }}">{{ item['page number'] }}
+            <div class="page-number {{ 'even' if item['page_number'] % 2 == 0 else 'odd' }}">{{ item['page_number']
+                }}
             </div>
         </div>
         {% endfor %}
     </div>
+    {% endif %}
+
+    {{layout_id}}
+
+    <button id="save-layout-btn">Save Layout</button>
 
     <script src="{{ url_for('static', filename='flatplan.js') }}"></script>
 </body>

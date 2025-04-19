@@ -42,19 +42,20 @@ function getCurrentLayoutAsJSON() {
 }
 
 
-document.getElementById('save-layout-btn').addEventListener('click', () => {
-  const layout = getCurrentLayoutAsJSON();
+/* run after SortableJS & updatePageNumbers() have been defined */
+document.addEventListener('DOMContentLoaded', () => {
+  const saveBtn  = document.getElementById('save-layout-btn');
+  const layoutId = document.getElementById('layout-id').value;   // ← gets the ID
 
-  fetch('/save-layout', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(layout)
-  }).then(res => {
-    if (res.ok) {
-      alert('Layout saved successfully!');
-    } else {
-      alert('Error saving layout.');
-    }
+  saveBtn.addEventListener('click', () => {
+    const layout = getCurrentLayoutAsJSON();
+
+    fetch(`/layout/${layoutId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(layout)
+    })
+    .then(res => res.ok ? alert('Layout saved!') : alert('Save failed.'));
   });
 });
 
