@@ -2,8 +2,9 @@
 <html>
 
 <head>
-    <title>Magazine Flatplan</title>
+    <title>Magazine Pagination View</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 
 <body>
@@ -14,9 +15,13 @@
         <input type="submit" value="Upload JSON">
     </form>
 
-    {% if items %}
+    {% set fixed_items = items[:] %}
+    {% if (fixed_items|length - 1) % 2 != 0 %}
+    {% set _ = fixed_items.append({'name': '—', 'type': 'placeholder', 'section': '', 'page number': 9999}) %}
+    {% endif %}
+
     <div class="spread-container">
-        {% for item in items %}
+        {% for item in fixed_items %}
         <div id="page-{{ item['page number'] }}"
             class="box {{ item['type'] if item['type'] in ['edit', 'ad', 'placeholder'] else 'unknown' }}">
             <div class="section"><strong>{{ item['section'] }}</strong></div>
@@ -28,9 +33,7 @@
         </div>
         {% endfor %}
     </div>
-    {% endif %}
 
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="{{ url_for('static', filename='flatplan.js') }}"></script>
 </body>
 
