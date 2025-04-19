@@ -19,6 +19,46 @@ function updatePageNumbers() {
   });
 }
 
+function getCurrentLayoutAsJSON() {
+  const boxes = document.querySelectorAll('.spread-container .box');
+  const layout = [];
+
+  boxes.forEach(box => {
+    const id = box.id;
+    if (id === "page-0") return; // skip placeholder
+
+    layout.push({
+      id: id, // e.g., "page-3"
+      name: box.querySelector('.name')?.textContent,
+      section: box.querySelector('.section')?.textContent,
+      page_number: parseInt(box.getAttribute('data-page-number'), 10),
+      type: box.classList.contains('edit') ? 'edit' :
+            box.classList.contains('ad') ? 'ad' :
+            box.classList.contains('placeholder') ? 'placeholder' : 'unknown'
+    });
+  });
+
+  return layout;
+}
+
+
+document.getElementById('save-layout-btn').addEventListener('click', () => {
+  const layout = getCurrentLayoutAsJSON();
+
+  fetch('/save-layout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(layout)
+  }).then(res => {
+    if (res.ok) {
+      alert('Layout saved successfully!');
+    } else {
+      alert('Error saving layout.');
+    }
+  });
+});
+
+
 Sortable.create(document.querySelector('.spread-container'), {
   animation: 150,
   ghostClass: 'drag-ghost',

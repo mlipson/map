@@ -15,12 +15,11 @@
         <input type="submit" value="Upload JSON">
     </form>
 
-    {% set fixed_items = items[:] %}
-    {% if (fixed_items|length - 1) % 2 != 0 %}
-    {% set _ = fixed_items.append({'name': '—', 'type': 'placeholder', 'section': '', 'page number': 9999}) %}
-    {% endif %}
+    <button id="save-layout-btn">Save Layout</button>
 
-    <div class="spread-container">
+    {% set fixed_items=items[:] %} {% if (fixed_items|length - 1) % 2
+    !=0 %} {% set _=fixed_items.append({'name': '—' , 'type' : 'placeholder' , 'section' : '' , 'page number' :
+    9999}) %} {% endif %} <div class="spread-container">
         {% for item in fixed_items %}
         <div id="page-{{ item['page number'] }}"
             class="box {{ item['type'] if item['type'] in ['edit', 'ad', 'placeholder'] else 'unknown' }}">
