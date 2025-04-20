@@ -36,11 +36,19 @@ app.config["UPLOAD_FOLDER"] = "uploads"
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 
+# Update the home route to render the new index.html template
 @app.route("/")
 def home():
+    return render_template("index.html")
+
+
+# Add a new route for the login page
+@app.route("/login", methods=["GET"])
+def login_page():
     return render_template("login.html")
 
 
+# Update the login route to handle only POST requests
 @app.route("/login", methods=["POST"])
 def login():
     email = request.form.get("email")
@@ -60,6 +68,14 @@ def login():
 
     session["user_id"] = str(user["_id"])
     return redirect(url_for("account"))
+
+
+# Add a logout route
+@app.route("/logout")
+def logout():
+    """Log out a user by clearing their session."""
+    session.clear()
+    return redirect(url_for("home"))
 
 
 @app.route("/account")
