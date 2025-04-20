@@ -57,6 +57,61 @@
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         transition: all 0.2s ease;
     }
+
+    /* Dropdown menu styles */
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        background-color: white;
+        min-width: 200px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        z-index: 1;
+        border-radius: 0.375rem;
+        overflow: hidden;
+    }
+
+    .dropdown-content a,
+    .dropdown-content button,
+    .dropdown-content label {
+        color: #4F46E5;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        text-align: left;
+        font-size: 0.875rem;
+        border: none;
+        background: none;
+        width: 100%;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .dropdown-content .dropdown-divider {
+        border-top: 1px solid #E5E7EB;
+        margin: 4px 0;
+    }
+
+    .dropdown-content a:hover,
+    .dropdown-content button:hover,
+    .dropdown-content label:hover {
+        background-color: #F3F4F6;
+    }
+
+    .dropdown-content.show {
+        display: block !important;
+    }
+
+    /* File input hidden but accessible */
+    #file-upload {
+        position: absolute;
+        left: -9999px;
+    }
 </style>
 {% endblock %}
 
@@ -68,25 +123,80 @@
                 <h2 class="text-white text-xl font-bold">{{ layout_doc.publication_name }}</h2>
                 <p class="text-indigo-100 text-sm">{{ layout_doc.issue_name }}</p>
             </div>
-            <button id="save-layout-btn"
-                class="bg-white text-indigo-600 py-2 px-4 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 text-sm font-medium">
-                Save Layout
-            </button>
+            <div class="flex items-center space-x-2">
+                <button id="save-layout-btn"
+                    class="bg-white text-indigo-600 py-2 px-4 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 text-sm font-medium">
+                    Save Layout
+                </button>
+                <!-- Dropdown menu trigger -->
+                <div class="dropdown">
+                    <button id="menu-button"
+                        class="bg-white text-indigo-600 py-2 px-3 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 text-sm font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <!-- Dropdown menu content -->
+                    <div id="dropdown-menu" class="dropdown-content">
+                        <form id="json-upload-form" action="{{ url_for('view_layout', layout_id=layout_id) }}"
+                            method="post" enctype="multipart/form-data">
+                            <label for="file-upload" class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                Import JSON
+                                <input id="file-upload" name="file" type="file" accept=".json"
+                                    onchange="document.getElementById('json-upload-form').submit()">
+                            </label>
+                        </form>
+                        <button id="download-json-btn" class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Export JSON
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button id="download-pdf-btn" class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            Export PDF
+                        </button>
+                        <button id="download-jpeg-btn" class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Export JPEG
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button id="share-btn" class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            </svg>
+                            Share Layout
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="p-6">
-            <form action="/" method="post" enctype="multipart/form-data" class="flex justify-center mb-6 space-x-2">
-                <div class="flex items-center space-x-2">
-                    <label for="file-upload"
-                        class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500">
-                        <span class="py-2 px-3 border border-gray-300 rounded-md shadow-sm">Choose JSON file</span>
-                        <input id="file-upload" name="file" type="file" class="sr-only">
-                    </label>
-                    <button type="submit"
-                        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Upload
-                    </button>
-                </div>
+            <!-- Hidden form for uploads (kept for compatibility) -->
+            <form id="main-upload-form" action="{{ url_for('view_layout', layout_id=layout_id) }}" method="post"
+                enctype="multipart/form-data" class="hidden">
+                <input type="file" id="main-file-upload" name="file">
                 <input type="hidden" id="layout-id" value="{{ layout_id }}">
             </form>
 
@@ -238,4 +348,56 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='flatplan.js') }}"></script>
 <script src="{{ url_for('static', filename='page-editor.js') }}"></script>
+<!-- New JavaScript to handle the dropdown menu and export functions -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Dropdown menu toggle
+        const menuButton = document.getElementById('menu-button');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+
+        menuButton.addEventListener('click', function () {
+            dropdownMenu.classList.toggle('show');
+        });
+
+        // Close the dropdown if clicked outside
+        window.addEventListener('click', function (event) {
+            if (!event.target.matches('#menu-button') && !event.target.closest('#menu-button')) {
+                if (dropdownMenu.classList.contains('show')) {
+                    dropdownMenu.classList.remove('show');
+                }
+            }
+        });
+
+        // JSON Download functionality
+        document.getElementById('download-json-btn').addEventListener('click', function () {
+            const layout = getCurrentLayoutAsJSON();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(layout, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "layout-" + document.getElementById('layout-id').value + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        });
+
+        // PDF Export functionality (placeholder)
+        document.getElementById('download-pdf-btn').addEventListener('click', function () {
+            alert('PDF export functionality coming soon!');
+            // Future implementation would use a library like html2pdf.js or jsPDF
+            // or make a backend call to generate the PDF
+        });
+
+        // JPEG Export functionality (placeholder)
+        document.getElementById('download-jpeg-btn').addEventListener('click', function () {
+            alert('JPEG export functionality coming soon!');
+            // Future implementation would use html2canvas or make a backend call
+        });
+
+        // Share functionality (placeholder)
+        document.getElementById('share-btn').addEventListener('click', function () {
+            alert('Sharing functionality coming soon!');
+            // Future implementation for sharing via email, link, etc.
+        });
+    });
+</script>
 {% endblock %}
