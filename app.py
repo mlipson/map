@@ -205,6 +205,39 @@ def create_layout():
     return render_template("create_layout.html")
 
 
+@app.route("/clone_layout/<layout_id>")
+def clone_layout(layout_id):
+    """Clone an existing layout."""
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("home"))
+
+    # Fetch the original layout
+    original_layout = layouts.find_one(
+        {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)}
+    )
+
+    if not original_layout:
+        flash("Layout not found", "error")
+        return redirect(url_for("account"))
+
+    # Create a clone with modified name
+    clone_data = {
+        "account_id": ObjectId(user_id),
+        "publication_name": original_layout["publication_name"],
+        "issue_name": original_layout["issue_name"] + " (Clone)",
+        "publication_date": original_layout.get("publication_date"),
+        "modified_date": datetime.now(timezone.utc),
+        "layout": original_layout["layout"],  # Copy the entire layout structure
+    }
+
+    # Insert the clone into the database
+    new_layout_id = layouts.insert_one(clone_data).inserted_id
+
+    flash("Layout cloned successfully", "success")
+    return redirect(url_for("view_layout", layout_id=new_layout_id))
+
+
 @app.route("/api/page/<layout_id>", methods=["POST"])
 def add_page(layout_id):
     """API endpoint to add a new page to a layout."""
