@@ -1,8 +1,8 @@
 """Flask app for Flatplan with MongoDB integration."""
 
 import os
-from datetime import datetime, timezone
 import json
+from datetime import datetime, timezone
 
 from flask import (
     Flask,
@@ -25,7 +25,9 @@ app.secret_key = (
 )
 
 # MongoDB setup
-mongo_client = pymongo.MongoClient(os.environ.get("MONGODB_URI"))
+mongo_client = pymongo.MongoClient(
+    os.environ.get("MONGODB_URI", "mongodb://localhost:27017/")
+)
 db = mongo_client.get_database("flatplan")
 users = db.users
 layouts = db.layouts
@@ -86,7 +88,7 @@ def view_layout(layout_id):
         return "Layout not found", 404
 
     if request.method == "POST":
-        if "file" in request.files:
+        if request.files and "file" in request.files:
             # Handle file upload
             file = request.files["file"]
             if file and file.filename.endswith(".json"):
@@ -148,7 +150,10 @@ def view_layout(layout_id):
         item["name"] = item.get("name", "").lower()
 
     return render_template(
-        "layout.html", items=layout_doc["layout"], layout_id=layout_id
+        "layout.html",
+        items=layout_doc["layout"],
+        layout_id=layout_id,
+        layout_doc=layout_doc,  # Pass the entire layout document to the template
     )
 
 
@@ -182,6 +187,103 @@ def create_layout():
         return redirect(url_for("view_layout", layout_id=layout_id))
 
     return render_template("create_layout.html")
+
+
+@app.route("/api/page/<layout_id>", methods=["POST"])
+def add_page(layout_id):
+    """API endpoint to add a new page to a layout."""
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    layout_doc = layouts.find_one(
+        {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)}
+    )
+
+    if not layout_doc:
+        return jsonify({"error": "Layout not found"}), 404
+
+    page_data = request.json
+    if not page_data:
+        return jsonify({"error": "No page data provided"}), 400
+
+    # Add an ID to the page data if not present
+    if "id" not in page_data:
+        page_data["id"] = f"page-{int(datetime.now().timestamp())}"
+
+    # Get the layout's current pages
+    current_layout = layout_doc["layout"]
+
+    # Add the new page
+    current_layout.append(page_data)
+
+    # Update the layout in the database
+    layouts.update_one(
+        {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)},
+        {
+            "$set": {
+                "layout": current_layout,
+                "modified_date": datetime.now(timezone.utc),
+            }
+        },
+    )
+
+    return jsonify({"status": "added", "page_id": page_data["id"]})
+
+
+@app.route("/api/page/<layout_id>/<page_id>", methods=["PUT", "DELETE"])
+def manage_page(layout_id, page_id):
+    """API endpoint to update or delete a page in a layout."""
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    layout_doc = layouts.find_one(
+        {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)}
+    )
+
+    if not layout_doc:
+        return jsonify({"error": "Layout not found"}), 404
+
+    current_layout = layout_doc["layout"]
+
+    if request.method == "PUT":
+        # Update an existing page
+        page_data = request.json
+        if not page_data:
+            return jsonify({"error": "No page data provided"}), 400
+
+        # Find and update the page
+        page_updated = False
+        for i, page in enumerate(current_layout):
+            if page.get("id") == page_id:
+                current_layout[i] = page_data
+                page_updated = True
+                break
+
+        if not page_updated:
+            return jsonify({"error": "Page not found in layout"}), 404
+
+    elif request.method == "DELETE":
+        # Delete a page
+        initial_length = len(current_layout)
+        current_layout = [page for page in current_layout if page.get("id") != page_id]
+
+        if len(current_layout) == initial_length:
+            return jsonify({"error": "Page not found in layout"}), 404
+
+    # Update the layout in the database
+    layouts.update_one(
+        {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)},
+        {
+            "$set": {
+                "layout": current_layout,
+                "modified_date": datetime.now(timezone.utc),
+            }
+        },
+    )
+
+    return jsonify({"status": "success"})
 
 
 @app.errorhandler(404)
