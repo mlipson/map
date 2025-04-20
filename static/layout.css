@@ -106,3 +106,13 @@
     position: absolute;
     left: -9999px;
 }
+
+    /* Hover effect for circular buttons in toolbar */
+    .toolbar-button:hover {
+        transform: scale(1.05);
+    }
+
+    /* Hover effect for close button */
+    #close-layout-btn:hover {
+        transform: scale(1.1);
+    }
