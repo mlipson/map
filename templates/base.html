@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Flatplan{% endblock %}</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Tailwind configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        edit: '#B1FCFE',     // Light blue for editorial content
+                        ad: '#FFFFA6',       // Light yellow for ads
+                        placeholder: '#F3F4F6' // Light gray for placeholders
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Original CSS for compatibility during transition -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <header class="bg-indigo-600 text-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <h1 class="text-2xl font-bold">Magazine Flatplan</h1>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-100 py-4 mt-8 border-t">
+        <div class="container mx-auto px-4 text-gray-500 text-center text-sm">
+            &copy; 2025 Flatplan App
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

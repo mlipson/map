@@ -1,25 +1,59 @@
+{% extends "base.html" %}
 
-<!doctype html>
-<html>
-<head>
-  <title>My Layouts - Flatplan</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-  <h2 class="page-title">Welcome, {{ user.name }}</h2>
+{% block title %}My Layouts - Flatplan{% endblock %}
 
-  <h3 class="page-title">Your Layouts</h3>
-  <ul>
-    {% for layout in layouts %}
-      <li>
-        <a href="{{ url_for('view_layout', layout_id=layout._id) }}">
-          {{ layout.publication_name }} – {{ layout.issue_name }}
-        </a>
-        (Last modified: {{ layout.modified_date.strftime('%Y-%m-%d') if layout.modified_date else 'N/A' }})
-      </li>
-    {% else %}
-      <li>No layouts saved yet.</li>
-    {% endfor %}
-  </ul>
-</body>
-</html>
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="bg-indigo-600 py-4 px-6">
+            <h2 class="text-white text-xl font-bold">Welcome, {{ user.name }}</h2>
+        </div>
+
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Your Layouts</h3>
+                <a href="#"
+                    class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm">
+                    + New Layout
+                </a>
+            </div>
+
+            {% if layouts %}
+            <div class="bg-white border rounded-md divide-y">
+                {% for layout in layouts %}
+                <div class="p-4 flex justify-between items-center hover:bg-gray-50">
+                    <div>
+                        <a href="{{ url_for('view_layout', layout_id=layout._id) }}"
+                            class="text-indigo-600 font-medium hover:text-indigo-800">
+                            {{ layout.publication_name }} – {{ layout.issue_name }}
+                        </a>
+                        <p class="text-sm text-gray-500">
+                            Last modified: {{ layout.modified_date.strftime('%Y-%m-%d') if layout.modified_date else
+                            'N/A' }}
+                        </p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="{{ url_for('view_layout', layout_id=layout._id) }}"
+                            class="text-indigo-600 hover:text-indigo-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="bg-white border rounded-md p-8 text-center">
+                <p class="text-gray-500">No layouts saved yet.</p>
+                <p class="text-sm text-gray-400 mt-2">Create your first layout to get started.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

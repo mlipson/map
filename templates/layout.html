@@ -1,51 +1,115 @@
-<!doctype html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta name="description" content="Magazine Pagination View for managing layouts and pages.">
-    <meta name="keywords" content="magazine, pagination, layout, pages, management">
-    <title>Magazine Pagination Views</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-</head>
+{% block title %}Magazine Pagination View{% endblock %}
 
-<body>
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<style>
+    /* Keep critical CSS from original style.css for the drag functionality */
+    .spread-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 30px 0;
+        /* vertical spacing only */
+        max-width: 1200px;
+        margin: 0 auto;
+    }
 
-    <h2 class="page-title">Magazine Pagination View</h2>
+    /* Add wider gap between spreads (after every 2nd page) */
+    .box:nth-child(2n) {
+        margin-right: 40px;
+    }
 
-    <form action="/" method="post" enctype="multipart/form-data" class="upload-form">
-        <input type="file" name="file">
-        <input type="submit" value="Upload JSON">
-        <input type="hidden" id="layout-id" value="{{ layout_id }}">
-    </form>
+    /* Page number placement within box */
+    .page-number {
+        position: absolute;
+        bottom: 10px;
+        font-size: 0.85em;
+    }
 
-    {% set fixed_items=items[:] %}
-    {% if (fixed_items|length - 1) % 2 !=0 %}
-    {% set _=fixed_items.append({'name': '—' , 'type' : 'placeholder' , 'section' : '' , 'page_number' : 9999}) %}
-    {% endif %}
+    .page-number.even {
+        left: 10px;
+    }
 
-    {% if items %}
-    <div class="spread-container">
-        {% for item in fixed_items %}
-        <div id="page-{{ item['page_number'] }}"
-            class="box {{ item['type'] if item['type'] in ['edit', 'ad', 'placeholder'] else 'unknown' }}">
-            <div class="section"><strong>{{ item['section'] }}</strong></div>
-            <div class="name-wrapper">
-                <div class="name">{{ item['name'] }}</div>
+    .page-number.odd {
+        right: 10px;
+    }
+
+    /* Visual feedback during drag */
+    .drag-ghost {
+        opacity: 0.4;
+    }
+
+    #page-0 {
+        visibility: hidden;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="bg-white shadow-md rounded-lg overflow-hidden mb-6">
+        <div class="bg-indigo-600 py-4 px-6 flex justify-between items-center">
+            <h2 class="text-white text-xl font-bold">Magazine Pagination View</h2>
+            <button id="save-layout-btn"
+                class="bg-white text-indigo-600 py-2 px-4 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 text-sm font-medium">
+                Save Layout
+            </button>
+        </div>
+
+        <div class="p-6">
+            <form action="/" method="post" enctype="multipart/form-data" class="flex justify-center mb-6 space-x-2">
+                <div class="flex items-center space-x-2">
+                    <label for="file-upload"
+                        class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500">
+                        <span class="py-2 px-3 border border-gray-300 rounded-md shadow-sm">Choose JSON file</span>
+                        <input id="file-upload" name="file" type="file" class="sr-only">
+                    </label>
+                    <button type="submit"
+                        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Upload
+                    </button>
+                </div>
+                <input type="hidden" id="layout-id" value="{{ layout_id }}">
+            </form>
+
+            {% set fixed_items=items[:] %}
+            {% if (fixed_items|length - 1) % 2 !=0 %}
+            {% set _=fixed_items.append({'name': '—' , 'type' : 'placeholder' , 'section' : '' , 'page_number' : 9999})
+            %}
+            {% endif %}
+
+            {% if items %}
+            <div class="spread-container">
+                {% for item in fixed_items %}
+                <div id="page-{{ item['page_number'] }}"
+                    class="box rounded border {{ item['type'] if item['type'] in ['edit', 'ad', 'placeholder'] else 'unknown' }} relative p-3 aspect-[3/4] w-36 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm"
+                    style="background-color: {% if item['type'] == 'edit' %}#B1FCFE{% elif item['type'] == 'ad' %}#FFFFA6{% elif item['type'] == 'placeholder' %}#F3F4F6{% else %}#EEEEEE{% endif %};">
+
+                    <div class="section font-semibold text-xs text-gray-700 mb-0.5">{{ item['section'] }}</div>
+                    <div class="name-wrapper flex-1 flex items-center justify-center">
+                        <div class="name font-medium max-w-[80%] break-words text-center text-gray-800">{{ item['name']
+                            }}</div>
+                    </div>
+                    <div
+                        class="page-number {{ 'even' if item['page_number'] % 2 == 0 else 'odd' }} text-gray-500 text-xs">
+                        {{ item['page_number'] }}
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-            <div class="page-number {{ 'even' if item['page_number'] % 2 == 0 else 'odd' }}">{{ item['page_number']
-                }}
+            {% endif %}
+
+            <div class="mt-4 text-xs text-gray-400">
+                Layout ID: {{layout_id}}
             </div>
         </div>
-        {% endfor %}
     </div>
-    {% endif %}
+</div>
+{% endblock %}
 
-    {{layout_id}}
-
-    <button id="save-layout-btn">Save Layout</button>
-
-    <script src="{{ url_for('static', filename='flatplan.js') }}"></script>
-</body>
-
-</html>
+{% block scripts %}
+<script src="{{ url_for('static', filename='flatplan.js') }}"></script>
+{% endblock %}
