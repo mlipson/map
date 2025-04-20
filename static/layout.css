@@ -1,0 +1,108 @@
+/* layout.css - Specific styles for the layout editor page */
+
+/* Spread container layout */
+.spread-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 30px 0; /* vertical spacing only */
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Add wider gap between spreads (after every 2nd page) */
+.box:nth-child(2n) {
+    margin-right: 40px;
+}
+
+/* Page number placement within box */
+.page-number {
+    position: absolute;
+    bottom: 10px;
+    font-size: 0.85em;
+}
+
+.page-number.even {
+    left: 10px;
+}
+
+.page-number.odd {
+    right: 10px;
+}
+
+/* Visual feedback during drag */
+.drag-ghost {
+    opacity: 0.4;
+}
+
+#page-0 {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Add cursor pointer to boxes for edit mode */
+.box:not(#page-0) {
+    cursor: pointer;
+}
+
+/* Transition for hover effect */
+.box:not(#page-0):hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+/* Dropdown menu styles */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: white;
+    min-width: 200px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.dropdown-content a,
+.dropdown-content button,
+.dropdown-content label {
+    color: #4F46E5;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+    font-size: 0.875rem;
+    border: none;
+    background: none;
+    width: 100%;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.dropdown-content .dropdown-divider {
+    border-top: 1px solid #E5E7EB;
+    margin: 4px 0;
+}
+
+.dropdown-content a:hover,
+.dropdown-content button:hover,
+.dropdown-content label:hover {
+    background-color: #F3F4F6;
+}
+
+.dropdown-content.show {
+    display: block !important;
+}
+
+/* File input hidden but accessible */
+#file-upload {
+    position: absolute;
+    left: -9999px;
+}

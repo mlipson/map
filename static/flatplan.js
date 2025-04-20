@@ -104,23 +104,35 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----- Menu Functionality -----
+  // Add menu handling code
+  console.log("Menu functionality loading...");
+
+  // Elements
   const menuButton = document.getElementById('menu-button');
   const dropdownMenu = document.getElementById('dropdown-menu');
 
-  // Only initialize menu if elements exist
-  if (menuButton && dropdownMenu) {
-    console.log("Menu elements found, initializing menu");
+  // Log which elements were found to help debug
+  console.log("Menu button found:", !!menuButton);
+  console.log("Dropdown menu found:", !!dropdownMenu);
 
-    // Toggle dropdown when clicking the menu button
-    menuButton.addEventListener('click', (e) => {
+  if (menuButton && dropdownMenu) {
+    // Toggle dropdown menu
+    menuButton.addEventListener('click', function(e) {
+      console.log("Menu button clicked");
       e.stopPropagation();
 
-      // Toggle display with direct style manipulation for reliability
+      // Get the current state
+      console.log("Current display style:", dropdownMenu.style.display);
+
+      // Force visibility using direct style manipulation
       if (dropdownMenu.style.display === 'block') {
+        console.log("Setting to none");
         dropdownMenu.style.display = 'none';
       } else {
+        console.log("Setting to block");
         dropdownMenu.style.display = 'block';
-        // Ensure proper positioning
+
+        // Also force these styles to ensure visibility
         dropdownMenu.style.position = 'absolute';
         dropdownMenu.style.zIndex = '1000';
         dropdownMenu.style.right = '0';
@@ -130,51 +142,51 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Close dropdown when clicking outside
-    window.addEventListener('click', (event) => {
+    window.addEventListener('click', function(event) {
       if (!event.target.matches('#menu-button') &&
           !menuButton.contains(event.target) &&
           !dropdownMenu.contains(event.target)) {
         dropdownMenu.style.display = 'none';
       }
     });
+  }
 
-    // ----- Export Options -----
+  // ----- Export Options -----
 
-    // JSON Export
-    const downloadJsonBtn = document.getElementById('download-json-btn');
-    if (downloadJsonBtn) {
-      downloadJsonBtn.addEventListener('click', () => {
-        const layout = getCurrentLayoutAsJSON();
-        downloadJSON(layout, `flatplan-${layoutId || 'export'}`);
-      });
-    }
+  // JSON Export
+  const downloadJsonBtn = document.getElementById('download-json-btn');
+  if (downloadJsonBtn) {
+    downloadJsonBtn.addEventListener('click', function() {
+      const layout = getCurrentLayoutAsJSON();
+      downloadJSON(layout, `flatplan-${layoutId || 'export'}`);
+    });
+  }
 
-    // PDF Export (placeholder)
-    const downloadPdfBtn = document.getElementById('download-pdf-btn');
-    if (downloadPdfBtn) {
-      downloadPdfBtn.addEventListener('click', () => {
-        alert('PDF export functionality coming soon!');
-        // Future implementation
-      });
-    }
+  // PDF Export (placeholder)
+  const downloadPdfBtn = document.getElementById('download-pdf-btn');
+  if (downloadPdfBtn) {
+    downloadPdfBtn.addEventListener('click', function() {
+      alert('PDF export functionality coming soon!');
+      // Future implementation
+    });
+  }
 
-    // JPEG Export (placeholder)
-    const downloadJpegBtn = document.getElementById('download-jpeg-btn');
-    if (downloadJpegBtn) {
-      downloadJpegBtn.addEventListener('click', () => {
-        alert('JPEG export functionality coming soon!');
-        // Future implementation
-      });
-    }
+  // JPEG Export (placeholder)
+  const downloadJpegBtn = document.getElementById('download-jpeg-btn');
+  if (downloadJpegBtn) {
+    downloadJpegBtn.addEventListener('click', function() {
+      alert('JPEG export functionality coming soon!');
+      // Future implementation
+    });
+  }
 
-    // Share functionality (placeholder)
-    const shareBtn = document.getElementById('share-btn');
-    if (shareBtn) {
-      shareBtn.addEventListener('click', () => {
-        alert('Sharing functionality coming soon!');
-        // Future implementation
-      });
-    }
+  // Share functionality (placeholder)
+  const shareBtn = document.getElementById('share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', function() {
+      alert('Sharing functionality coming soon!');
+      // Future implementation
+    });
   }
 });
 
