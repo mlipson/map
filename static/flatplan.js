@@ -1,8 +1,19 @@
+/**
+ * Flatplan application JavaScript
+ * Handles page management, drag-and-drop, menu interactions, and exports
+ */
+
+// ===== Core Page Functions =====
+
+/**
+ * Updates page numbers based on their current order in the DOM
+ * Called after drag operations to maintain sequential numbering
+ */
 function updatePageNumbers() {
   const boxes = document.querySelectorAll('.spread-container .box');
   let visibleIndex = 0;
 
-  boxes.forEach((box, i) => {
+  boxes.forEach((box) => {
     if (box.id === 'page-0') return; // skip placeholder
     visibleIndex += 1;
 
@@ -19,6 +30,11 @@ function updatePageNumbers() {
   });
 }
 
+/**
+ * Extracts the current layout as a JSON structure from the DOM
+ * Used for saving and exporting
+ * @returns {Array} Array of page objects with properties
+ */
 function getCurrentLayoutAsJSON() {
   const boxes = document.querySelectorAll('.spread-container .box');
   const layout = [];
@@ -41,185 +57,146 @@ function getCurrentLayoutAsJSON() {
   return layout;
 }
 
-
-/* run after SortableJS & updatePageNumbers() have been defined */
-document.addEventListener('DOMContentLoaded', () => {
-  const saveBtn  = document.getElementById('save-layout-btn');
-  const layoutId = document.getElementById('layout-id').value;   // ← gets the ID
-
-  saveBtn.addEventListener('click', () => {
-    const layout = getCurrentLayoutAsJSON();
-
-    fetch(`/layout/${layoutId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(layout)
-    })
-    .then(res => res.ok ? alert('Layout saved!') : alert('Save failed.'));
-  });
-});
-
-
-Sortable.create(document.querySelector('.spread-container'), {
-  animation: 150,
-  ghostClass: 'drag-ghost',
-  filter: "#page-0",
-  preventOnFilter: false,
-  onEnd: function () {
-    updatePageNumbers();
-  }
-});
-
-updatePageNumbers();
-
 /**
- * Menu functionality for the Flatplan application
- * Handles dropdown menu interactions and export options
+ * Helper function to download JSON data
+ * @param {Object} data - The data to download as JSON
+ * @param {String} filename - The name of the file
  */
+function downloadJSON(data, filename) {
+  // Convert the data to a JSON string with pretty formatting
+  const jsonStr = JSON.stringify(data, null, 2);
 
-document.addEventListener('DOMContentLoaded', function () {
+  // Create a data URI
+  const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(jsonStr)}`;
 
-    console.log("Menu functionality loading...");
-    // Elements
-    const menuButton = document.getElementById('menu-button');
-    const dropdownMenu = document.getElementById('dropdown-menu');
-    const downloadJsonBtn = document.getElementById('download-json-btn');
-    const downloadPdfBtn = document.getElementById('download-pdf-btn');
-    const downloadJpegBtn = document.getElementById('download-jpeg-btn');
-    const shareBtn = document.getElementById('share-btn');
+  // Create a temporary anchor element
+  const link = document.createElement('a');
+  link.setAttribute('href', dataUri);
+  link.setAttribute('download', `${filename}.json`);
 
-        // Log which elements were found to help debug
-    console.log("Menu button found:", !!menuButton);
-    console.log("Dropdown menu found:", !!dropdownMenu);
+  // Append to the document, click, and remove
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 
-    menuButton.addEventListener('click', function(e) {
-    e.stopPropagation();
+// ===== Event Listeners =====
 
-    // Toggle class for styling
-    dropdownMenu.classList.toggle('show');
+// Initialize everything once the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("Initializing Flatplan JS...");
 
-    // Also set inline style directly as a fallback
-    if (dropdownMenu.classList.contains('show')) {
-        dropdownMenu.style.display = 'block';
-    } else {
-        dropdownMenu.style.display = '';  // Reset to default
-    }
-});
+  // ----- Layout Save Functionality -----
+  const saveBtn = document.getElementById('save-layout-btn');
+  const layoutId = document.getElementById('layout-id')?.value;
 
-    // Get the current state
-    console.log("Current display style:", dropdownMenu.style.display);
+  if (saveBtn && layoutId) {
+    saveBtn.addEventListener('click', () => {
+      const layout = getCurrentLayoutAsJSON();
 
-    // Force visibility
-    if (dropdownMenu.style.display === 'block') {
-        console.log("Setting to none");
+      fetch(`/layout/${layoutId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(layout)
+      })
+      .then(res => res.ok ? alert('Layout saved!') : alert('Save failed.'));
+    });
+  }
+
+  // ----- Menu Functionality -----
+  const menuButton = document.getElementById('menu-button');
+  const dropdownMenu = document.getElementById('dropdown-menu');
+
+  // Only initialize menu if elements exist
+  if (menuButton && dropdownMenu) {
+    console.log("Menu elements found, initializing menu");
+
+    // Toggle dropdown when clicking the menu button
+    menuButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+
+      // Toggle display with direct style manipulation for reliability
+      if (dropdownMenu.style.display === 'block') {
         dropdownMenu.style.display = 'none';
-    } else {
-        console.log("Setting to block");
+      } else {
         dropdownMenu.style.display = 'block';
-
-        // Also force these styles to ensure visibility
+        // Ensure proper positioning
         dropdownMenu.style.position = 'absolute';
         dropdownMenu.style.zIndex = '1000';
         dropdownMenu.style.right = '0';
         dropdownMenu.style.top = '100%';
         dropdownMenu.style.backgroundColor = 'white';
-    }
-});
-        // Close dropdown when clicking outside
-        window.addEventListener('click', function(event) {
-            if (!event.target.matches('#menu-button') && !menuButton.contains(event.target) &&
-                !dropdownMenu.contains(event.target)) {
-                if (dropdownMenu.classList.contains('show')) {
-                    dropdownMenu.classList.remove('show');
-                }
-            }
-        });
-    } else {
-        console.error("Menu elements not found in DOM");
-    }
+      }
+    });
 
-    // JSON Download functionality
+    // Close dropdown when clicking outside
+    window.addEventListener('click', (event) => {
+      if (!event.target.matches('#menu-button') &&
+          !menuButton.contains(event.target) &&
+          !dropdownMenu.contains(event.target)) {
+        dropdownMenu.style.display = 'none';
+      }
+    });
+
+    // ----- Export Options -----
+
+    // JSON Export
+    const downloadJsonBtn = document.getElementById('download-json-btn');
     if (downloadJsonBtn) {
-        downloadJsonBtn.addEventListener('click', function() {
-            const layout = getCurrentLayoutAsJSON();
-            downloadJSON(layout, `flatplan-${document.getElementById('layout-id').value}`);
-        });
+      downloadJsonBtn.addEventListener('click', () => {
+        const layout = getCurrentLayoutAsJSON();
+        downloadJSON(layout, `flatplan-${layoutId || 'export'}`);
+      });
     }
 
-    // PDF Export functionality (placeholder)
+    // PDF Export (placeholder)
+    const downloadPdfBtn = document.getElementById('download-pdf-btn');
     if (downloadPdfBtn) {
-        downloadPdfBtn.addEventListener('click', function() {
-            alert('PDF export functionality coming soon!');
-            // Future implementation with html2pdf.js or similar
-            // generatePDF();
-        });
+      downloadPdfBtn.addEventListener('click', () => {
+        alert('PDF export functionality coming soon!');
+        // Future implementation
+      });
     }
 
-    // JPEG Export functionality (placeholder)
+    // JPEG Export (placeholder)
+    const downloadJpegBtn = document.getElementById('download-jpeg-btn');
     if (downloadJpegBtn) {
-        downloadJpegBtn.addEventListener('click', function() {
-            alert('JPEG export functionality coming soon!');
-            // Future implementation with html2canvas or similar
-            // generateJPEG();
-        });
+      downloadJpegBtn.addEventListener('click', () => {
+        alert('JPEG export functionality coming soon!');
+        // Future implementation
+      });
     }
 
     // Share functionality (placeholder)
+    const shareBtn = document.getElementById('share-btn');
     if (shareBtn) {
-        shareBtn.addEventListener('click', function() {
-            alert('Sharing functionality coming soon!');
-            // Future implementation for sharing
-            // shareLayout();
-        });
+      shareBtn.addEventListener('click', () => {
+        alert('Sharing functionality coming soon!');
+        // Future implementation
+      });
     }
-
-    /**
-     * Helper function to download JSON data
-     * @param {Object} data - The data to download as JSON
-     * @param {String} filename - The name of the file
-     */
-    function downloadJSON(data, filename) {
-        // Convert the data to a JSON string with pretty formatting
-        const jsonStr = JSON.stringify(data, null, 2);
-
-        // Create a data URI
-        const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(jsonStr)}`;
-
-        // Create a temporary anchor element
-        const link = document.createElement('a');
-        link.setAttribute('href', dataUri);
-        link.setAttribute('download', `${filename}.json`);
-
-        // Append to the document, click, and remove
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    /**
-     * Future function to generate PDF
-     * This would be implemented with a library like html2pdf.js or jsPDF
-     */
-    function generatePDF() {
-        // PDF generation code would go here
-        console.log("PDF generation not yet implemented");
-    }
-
-    /**
-     * Future function to generate JPEG
-     * This would be implemented with html2canvas or similar
-     */
-    function generateJPEG() {
-        // JPEG generation code would go here
-        console.log("JPEG generation not yet implemented");
-    }
-
-    /**
-     * Future function to share the layout
-     * This could include email sharing, link generation, etc.
-     */
-    function shareLayout() {
-        // Sharing implementation would go here
-        console.log("Sharing functionality not yet implemented");
-    }
+  }
 });
+
+// ===== Initialize Sortable (OUTSIDE the DOMContentLoaded handler) =====
+// This ensures it's available when the DOM is ready and doesn't get
+// delayed by other event handlers
+
+// Find the sortable container
+const sortableContainer = document.querySelector('.spread-container');
+
+// Only initialize if the container exists
+if (sortableContainer) {
+  Sortable.create(sortableContainer, {
+    animation: 150,
+    ghostClass: 'drag-ghost',
+    filter: "#page-0",
+    preventOnFilter: false,
+    onEnd: function() {
+      updatePageNumbers();
+    }
+  });
+
+  // Initial page numbering
+  updatePageNumbers();
+}
