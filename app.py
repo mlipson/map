@@ -380,6 +380,59 @@ def manage_page(layout_id, page_id):
     return jsonify({"status": "success"})
 
 
+@app.route("/api/layout/<layout_id>/analytics", methods=["GET"])
+def get_layout_analytics(layout_id):
+    """API endpoint to get analytics for a layout."""
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    layout_doc = layouts.find_one(
+        {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)}
+    )
+
+    if not layout_doc:
+        return jsonify({"error": "Layout not found"}), 404
+
+    # Initialize analytics structure
+    analytics = {
+        "publication_name": layout_doc.get("publication_name", "Unnamed Publication"),
+        "issue_name": layout_doc.get("issue_name", "Unnamed Issue"),
+        "total_pages": len(layout_doc["layout"]),
+        "page_types": {
+            "edit": {"total": 0, "sections": {}},
+            "ad": {"total": 0, "sections": {}},
+            "placeholder": {"total": 0, "sections": {}},
+            "unknown": {"total": 0, "sections": {}},
+        },
+    }
+
+    # Process each page in the layout
+    for page in layout_doc["layout"]:
+        # Skip placeholder Page 0
+        if page.get("page_number") == 0:
+            continue
+
+        # Get page type and section
+        page_type = page.get("type", "unknown").lower()
+        if page_type not in analytics["page_types"]:
+            page_type = "unknown"
+
+        section = page.get("section", "Uncategorized")
+
+        # Increment counts
+        analytics["page_types"][page_type]["total"] += 1
+
+        # Initialize section counter if needed
+        if section not in analytics["page_types"][page_type]["sections"]:
+            analytics["page_types"][page_type]["sections"][section] = 0
+
+        # Increment section counter
+        analytics["page_types"][page_type]["sections"][section] += 1
+
+    return jsonify(analytics)
+
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html"), 404
