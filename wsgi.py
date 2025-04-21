@@ -4,6 +4,6 @@ import os
 from app import app
 
 if __name__ == "__main__":
-    PORT = int(os.getenv("PORT", "8080"))
+    port = int(os.environ.get("PORT", 8080))
     DEBUG = os.getenv("DEBUG", "False").lower() in ["true", "1", "t"]
-    app.run(port=PORT, debug=DEBUG)
+    app.run(host="0.0.0.0", port=port, debug=DEBUG)
