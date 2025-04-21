@@ -1,17 +1,68 @@
 /**
  * Page Editor functionality for Flatplan application
- * Handles modals for editing page properties, adding new pages, and deleting pages
+ * Handles modals for editing page properties, adding new pages, deleting pages,
+ * and editing layout metadata
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     // Select DOM elements
-    const modal = document.getElementById('page-editor-modal');
+    const pageModal = document.getElementById('page-editor-modal');
+    const layoutModal = document.getElementById('edit-layout-modal');
     const editForm = document.getElementById('page-edit-form');
     const closeModalBtn = document.getElementById('close-modal-btn');
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
     const deletePageBtn = document.getElementById('delete-page-btn');
     const addPageBtn = document.getElementById('add-page-btn');
-    const layoutId = document.getElementById('layout-id').value;
+    const layoutId = document.getElementById('layout-id')?.value;
+
+    // ===== Layout Metadata Edit Functions =====
+
+    // Initialize layout edit buttons with direct event listener attachment
+    const layoutEditButtons = document.querySelectorAll('[data-action="edit-layout"]');
+    console.log('Found layout edit buttons:', layoutEditButtons.length);
+
+    layoutEditButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Edit layout button clicked');
+
+            const layoutId = this.getAttribute('data-layout-id');
+            const publicationName = this.getAttribute('data-publication-name');
+            const issueName = this.getAttribute('data-issue-name');
+            const publicationDate = this.getAttribute('data-publication-date') || '';
+            const returnTo = this.getAttribute('data-return-to');
+
+            console.log('Opening modal with data:', {
+                layoutId,
+                publicationName,
+                issueName,
+                publicationDate,
+                returnTo
+            });
+
+            openLayoutEditModal(layoutId, publicationName, issueName, publicationDate, returnTo);
+        });
+    });
+
+    // Add a global click handler as a fallback for dynamically added elements
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('[data-action="edit-layout"]')) {
+            const button = e.target.closest('[data-action="edit-layout"]');
+            e.preventDefault();
+
+            const layoutId = button.getAttribute('data-layout-id');
+            const publicationName = button.getAttribute('data-publication-name');
+            const issueName = button.getAttribute('data-issue-name');
+            const publicationDate = button.getAttribute('data-publication-date') || '';
+            const returnTo = button.getAttribute('data-return-to');
+
+            openLayoutEditModal(layoutId, publicationName, issueName, publicationDate, returnTo);
+        }
+
+        if (e.target.closest('[data-action="close-layout-modal"]')) {
+            closeLayoutEditModal();
+        }
+    });
 
     // Make pages clickable to edit
     document.querySelectorAll('.spread-container .box').forEach(box => {
@@ -47,6 +98,55 @@ document.addEventListener('DOMContentLoaded', () => {
         addPageBtn.addEventListener('click', addNewPage);
     }
 
+    // Close modal if clicking outside of it
+    window.addEventListener('click', function(event) {
+        if (layoutModal && event.target === layoutModal) {
+            closeLayoutEditModal();
+        }
+        if (pageModal && event.target === pageModal) {
+            closeModal();
+        }
+    });
+
+    /**
+     * Opens the layout edit modal with metadata
+     * @param {string} layoutId - The layout ID
+     * @param {string} publicationName - The publication name
+     * @param {string} issueName - The issue name
+     * @param {string} publicationDate - The publication date
+     * @param {string} returnTo - Where to return after editing ('layout' or 'account')
+     */
+    window.openLayoutEditModal = function(layoutId, publicationName, issueName, publicationDate, returnTo) {
+        console.log('openLayoutEditModal called with:', {
+            layoutId, publicationName, issueName, publicationDate, returnTo
+        });
+
+        if (!layoutModal) {
+            console.error('Layout modal element not found!');
+            return;
+        }
+
+        // Set form values
+        document.getElementById('edit-layout-id').value = layoutId;
+        document.getElementById('edit-publication-name').value = publicationName;
+        document.getElementById('edit-issue-name').value = issueName;
+        document.getElementById('edit-publication-date').value = publicationDate;
+        document.getElementById('edit-return-to').value = returnTo;
+
+        // Show modal
+        layoutModal.classList.remove('hidden');
+        console.log('Modal should now be visible');
+    }
+
+    /**
+     * Closes the layout edit modal
+     */
+    window.closeLayoutEditModal = function() {
+        if (layoutModal) {
+            layoutModal.classList.add('hidden');
+        }
+    }
+
     /**
      * Opens the edit modal with page data
      * @param {HTMLElement} pageBox - The page box element
@@ -70,14 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('modal-title').textContent = `Edit Page ${pageNumber}`;
 
         // Show the modal
-        modal.classList.remove('hidden');
+        pageModal.classList.remove('hidden');
     }
 
     /**
      * Closes the modal
      */
     function closeModal() {
-        modal.classList.add('hidden');
+        pageModal.classList.add('hidden');
     }
 
     /**

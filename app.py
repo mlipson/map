@@ -238,6 +238,51 @@ def clone_layout(layout_id):
     return redirect(url_for("view_layout", layout_id=new_layout_id))
 
 
+@app.route("/edit_layout_metadata", methods=["POST"])
+def edit_layout_metadata():
+    """Update the metadata for a layout."""
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("home"))
+
+    layout_id = request.form.get("layout_id")
+    publication_name = request.form.get("publication_name")
+    issue_name = request.form.get("issue_name")
+    publication_date = request.form.get("publication_date")
+    return_to = request.form.get("return_to", "account")  # Default to account view
+
+    if not all([layout_id, publication_name, issue_name]):
+        flash("Publication name and issue name are required", "error")
+        if return_to == "layout":
+            return redirect(url_for("view_layout", layout_id=layout_id))
+        else:
+            return redirect(url_for("account"))
+
+    # Update the layout metadata
+    result = layouts.update_one(
+        {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)},
+        {
+            "$set": {
+                "publication_name": publication_name,
+                "issue_name": issue_name,
+                "publication_date": publication_date,
+                "modified_date": datetime.now(timezone.utc),
+            }
+        },
+    )
+
+    if result.modified_count > 0:
+        flash("Layout details updated successfully", "success")
+    else:
+        flash("No changes were made or layout not found", "error")
+
+    # Redirect based on where the edit was initiated
+    if return_to == "layout":
+        return redirect(url_for("view_layout", layout_id=layout_id))
+    else:
+        return redirect(url_for("account"))
+
+
 @app.route("/api/page/<layout_id>", methods=["POST"])
 def add_page(layout_id):
     """API endpoint to add a new page to a layout."""
