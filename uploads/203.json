@@ -1,0 +1,746 @@
+[
+{
+  "page_number" : "1",
+  "section" : "FOB",
+  "type" : "edit",
+  "name" : "Cover"
+},
+{
+  "page_number" : "2",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Harry Winston"
+},
+{
+  "page_number" : "3",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Harry Winston"
+},
+{
+  "page_number" : "4",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Christian Dior"
+},
+{
+  "page_number" : "5",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Christian Dior"
+},
+{
+  "page_number" : "6",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Prada"
+},
+{
+  "page_number" : "7",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Prada"
+},
+{
+  "page_number" : "8",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Saint Laurent"
+},
+{
+  "page_number" : "9",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Saint Laurent"
+},
+{
+  "page_number" : "10",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Bulgari"
+},
+{
+  "page_number" : "11",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Bulgari"
+},
+{
+  "page_number" : "12",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Loewe"
+},
+{
+  "page_number" : "13",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Loewe"
+},
+{
+  "page_number" : "14",
+  "section" : "FOB",
+  "type" : "edit",
+  "name" : "Founder's Note"
+},
+{
+  "page_number" : "15",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Orlebar Brown"
+},
+{
+  "page_number" : "16",
+  "section" : "FOB",
+  "type" : "edit",
+  "name" : "TOC"
+},
+{
+  "page_number" : "17",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Jaeger Le Coultre"
+},
+{
+  "page_number" : "18",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Lugano Diamonds"
+},
+{
+  "page_number" : "19",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Lugano Diamonds"
+},
+{
+  "page_number" : "20",
+  "section" : "FOB",
+  "type" : "edit",
+  "name" : "TOC"
+},
+{
+  "page_number" : "21",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Loro Piana"
+},
+{
+  "page_number" : "22",
+  "section" : "FOB",
+  "type" : "edit",
+  "name" : "Masthead"
+},
+{
+  "page_number" : "23",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "IWC Schaffhausen"
+},
+{
+  "page_number" : "24",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Graff"
+},
+{
+  "page_number" : "25",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Graff"
+},
+{
+  "page_number" : "26",
+  "section" : "FOB",
+  "type" : "edit",
+  "name" : "Contributors"
+},
+{
+  "page_number" : "27",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Omni La Costa"
+},
+{
+  "page_number" : "28",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "True Love Always"
+},
+{
+  "page_number" : "29",
+  "section" : "Opener",
+  "type" : "edit",
+  "name" : "Statement"
+},
+{
+  "page_number" : "30",
+  "section" : "Style News",
+  "type" : "edit",
+  "name" : "Statement"
+},
+{
+  "page_number" : "31",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Chopard"
+},
+{
+  "page_number" : "32",
+  "section" : "Style News",
+  "type" : "edit",
+  "name" : "Statement"
+},
+{
+  "page_number" : "33",
+  "section" : "Style News",
+  "type" : "edit",
+  "name" : "Statement"
+},
+{
+  "page_number" : "34",
+  "section" : "Art + Design News",
+  "type" : "edit",
+  "name" : "Statement"
+},
+{
+  "page_number" : "35",
+  "section" : "Art + Design News",
+  "type" : "edit",
+  "name" : "Statement"
+},
+{
+  "page_number" : "36",
+  "section" : "Art + Design News",
+  "type" : "edit",
+  "name" : "Statement"
+},
+{
+  "page_number" : "37",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Pomellato"
+},
+{
+  "page_number" : "38",
+  "section" : "Art + Design News",
+  "type" : "edit",
+  "name" : "Statement"
+},
+{
+  "page_number" : "39",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Belmond El Encanto"
+},
+{
+  "page_number" : "40",
+  "section" : "Art + Design News",
+  "type" : "edit",
+  "name" : "Statement"
+},
+{
+  "page_number" : "41",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Ojai Valley Inn"
+},
+{
+  "page_number" : "42",
+  "section" : "Dining News",
+  "type" : "edit",
+  "name" : "Statement"
+},
+{
+  "page_number" : "43",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "High Camp Supply"
+},
+{
+  "page_number" : "44",
+  "section" : "Style News",
+  "type" : "edit",
+  "name" : "Statement"
+},
+{
+  "page_number" : "45",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Rosewood Miramar"
+},
+{
+  "page_number" : "46",
+  "section" : "Long Read",
+  "type" : "edit",
+  "name" : "Statement"
+},
+{
+  "page_number" : "47",
+  "section" : "Long Read",
+  "type" : "edit",
+  "name" : "Statement"
+},
+{
+  "page_number" : "48",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Graind Wailea"
+},
+{
+  "page_number" : "49",
+  "section" : "Well Opener",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "50",
+  "section" : "Adria",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "51",
+  "section" : "Adria",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "52",
+  "section" : "Adria",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "53",
+  "section" : "Adria",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "54",
+  "section" : "Adria",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "55",
+  "section" : "Adria",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "56",
+  "section" : "Adria",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "57",
+  "section" : "Adria",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "58",
+  "section" : "Adria",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "59",
+  "section" : "Adria",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "60",
+  "section" : "Adria",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "61",
+  "section" : "Adria",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "62",
+  "section" : "Jewelry",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "63",
+  "section" : "Jewelry",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "64",
+  "section" : "Jewelry",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "65",
+  "section" : "Jewelry",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "66",
+  "section" : "Jewelry",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "67",
+  "section" : "Jewelry",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "68",
+  "section" : "Jewelry",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "69",
+  "section" : "Jewelry",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "70",
+  "section" : "Jewelry",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "71",
+  "section" : "Jewelry",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "72",
+  "section" : "Filoli",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "73",
+  "section" : "Filoli",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "74",
+  "section" : "Filoli",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "75",
+  "section" : "Filoli",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "76",
+  "section" : "Filoli",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "77",
+  "section" : "Filoli",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "78",
+  "section" : "Filoli",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "79",
+  "section" : "Filoli",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "80",
+  "section" : "Filoli",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "81",
+  "section" : "Filoli",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "82",
+  "section" : "Stan Bitters",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "83",
+  "section" : "Stan Bitters",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "84",
+  "section" : "Stan Bitters",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "85",
+  "section" : "Stan Bitters",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "86",
+  "section" : "Stan Bitters",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "87",
+  "section" : "Stan Bitters",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "88",
+  "section" : "Stan Bitters",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "89",
+  "section" : "Stan Bitters",
+  "type" : "edit",
+  "name" : "Feature"
+},
+{
+  "page_number" : "90",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Bernardus Lodge & Spa"
+},
+{
+  "page_number" : "91",
+  "section" : "Cover",
+  "type" : "edit",
+  "name" : "Weddings"
+},
+{
+  "page_number" : "92",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Graff - Weddings"
+},
+{
+  "page_number" : "93",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Graff - Weddings"
+},
+{
+  "page_number" : "94",
+  "section" : "News",
+  "type" : "edit",
+  "name" : "Weddings"
+},
+{
+  "page_number" : "95",
+  "section" : "News",
+  "type" : "edit",
+  "name" : "Weddings"
+},
+{
+  "page_number" : "96",
+  "section" : "News",
+  "type" : "edit",
+  "name" : "Weddings"
+},
+{
+  "page_number" : "97",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Foundrae"
+},
+{
+  "page_number" : "98",
+  "section" : "Travel",
+  "type" : "edit",
+  "name" : "Weddings"
+},
+{
+  "page_number" : "99",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Play Date Vintage Bridal"
+},
+{
+  "page_number" : "100",
+  "section" : "Registry",
+  "type" : "edit",
+  "name" : "Weddings"
+},
+{
+  "page_number" : "101",
+  "section" : "tbd",
+  "type" : "edit",
+  "name" : "Weddings Feature"
+},
+{
+  "page_number" : "102",
+  "section" : "tbd",
+  "type" : "edit",
+  "name" : "Weddings Feature"
+},
+{
+  "page_number" : "103",
+  "section" : "tbd",
+  "type" : "edit",
+  "name" : "Weddings Feature"
+},
+{
+  "page_number" : "104",
+  "section" : "tbd",
+  "type" : "edit",
+  "name" : "Weddings Feature"
+},
+{
+  "page_number" : "105",
+  "section" : "tbd",
+  "type" : "edit",
+  "name" : "Weddings Feature"
+},
+{
+  "page_number" : "106",
+  "section" : "tbd",
+  "type" : "edit",
+  "name" : "Weddings Feature"
+},
+{
+  "page_number" : "107",
+  "section" : "tbd",
+  "type" : "edit",
+  "name" : "Weddings Feature"
+},
+{
+  "page_number" : "108",
+  "section" : "tbd",
+  "type" : "edit",
+  "name" : "Weddings Feature"
+},
+{
+  "page_number" : "109",
+  "section" : "tbd",
+  "type" : "edit",
+  "name" : "Weddings Feature"
+},
+{
+  "page_number" : "110",
+  "section" : "tbd",
+  "type" : "edit",
+  "name" : "Weddings Feature"
+},
+{
+  "page_number" : "111",
+  "section" : "tbd",
+  "type" : "edit",
+  "name" : "Weddings Feature"
+},
+{
+  "page_number" : "112",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "China Eastern Air"
+},
+{
+  "page_number" : "113",
+  "section" : "Travel",
+  "type" : "edit",
+  "name" : "Discoveries"
+},
+{
+  "page_number" : "114",
+  "section" : "Travel",
+  "type" : "edit",
+  "name" : "Discoveries"
+},
+{
+  "page_number" : "115",
+  "section" : "Travel",
+  "type" : "edit",
+  "name" : "Discoveries"
+},
+{
+  "page_number" : "116",
+  "section" : "Travel",
+  "type" : "edit",
+  "name" : "Discoveries"
+},
+{
+  "page_number" : "117",
+  "section" : "Travel",
+  "type" : "edit",
+  "name" : "Discoveries"
+},
+{
+  "page_number" : "118",
+  "section" : "Beauty",
+  "type" : "edit",
+  "name" : "Discoveries"
+},
+{
+  "page_number" : "119",
+  "section" : "Beauty",
+  "type" : "edit",
+  "name" : "Discoveries"
+},
+{
+  "page_number" : "120",
+  "section" : "Beauty",
+  "type" : "edit",
+  "name" : "Discoveries"
+},
+{
+  "page_number" : "121",
+  "section" : "Runover",
+  "type" : "edit",
+  "name" : "BOB"
+},
+{
+  "page_number" : "122",
+  "section" : "Zen Moment",
+  "type" : "edit",
+  "name" : "BOB"
+},
+{
+  "page_number" : "123",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Miller Knoll"
+},
+{
+  "page_number" : "124",
+  "section" : "Paid",
+  "type" : "ad",
+  "name" : "Rolex Watch"
+}
+]
