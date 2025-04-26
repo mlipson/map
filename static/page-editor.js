@@ -14,6 +14,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const deletePageBtn = document.getElementById('delete-page-btn');
     const addPageBtn = document.getElementById('add-page-btn');
     const layoutId = document.getElementById('layout-id')?.value;
+    const sectionSelect = document.getElementById('edit-page-section');
+
+    if (sectionSelect) {
+        sectionSelect.addEventListener('change', function(e) {
+            if (this.value === 'add_new_section') {
+                // Reset selection to previous value to avoid having "Add New Section" as selected value
+                this.value = document.getElementById('temp-section-value')?.value || '';
+
+                // Prompt for new section name
+                const newSection = window.prompt('Enter new section name:');
+
+                if (newSection && newSection.trim() !== '') {
+                    // Add new option to dropdown
+                    const newOption = document.createElement('option');
+                    newOption.value = newSection.trim();
+                    newOption.textContent = newSection.trim();
+
+                    // Insert before the "Add New Section" option
+                    this.insertBefore(newOption, this.lastChild);
+
+                    // Select the new option
+                    newOption.selected = true;
+                }
+            } else {
+                // Store current selection in a hidden field for reference
+                // in case user clicks "Add New Section" and then cancels
+                let tempField = document.getElementById('temp-section-value');
+                if (!tempField) {
+                    tempField = document.createElement('input');
+                    tempField.type = 'hidden';
+                    tempField.id = 'temp-section-value';
+                    document.getElementById('page-edit-form').appendChild(tempField);
+                }
+                tempField.value = this.value;
+            }
+        });
+    }
 
     // ===== Layout Metadata Edit Functions =====
 
@@ -147,31 +184,94 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Opens the edit modal with page data
-     * @param {HTMLElement} pageBox - The page box element
-     */
-    function openEditModal(pageBox) {
-        // Get page data
-        const pageId = pageBox.id;
-        const pageName = pageBox.querySelector('.name')?.textContent || '';
-        const pageSection = pageBox.querySelector('.section')?.textContent || '';
-        const pageNumber = pageBox.getAttribute('data-page-number');
-        const pageType = pageBox.classList.contains('edit') ? 'edit' :
-                         pageBox.classList.contains('ad') ? 'ad' :
-                         pageBox.classList.contains('placeholder') ? 'placeholder' : 'unknown';
+  /**
+ * Opens the edit modal with page data
+ * @param {HTMLElement} pageBox - The page box element
+ */
+function openEditModal(pageBox) {
+    // Get page data (existing code)
+    const pageId = pageBox.id;
+    const pageName = pageBox.querySelector('.name')?.textContent || '';
+    const pageSection = pageBox.querySelector('.section')?.textContent || '';
+    const pageNumber = pageBox.getAttribute('data-page-number');
+    const pageType = pageBox.classList.contains('edit') ? 'edit' :
+                     pageBox.classList.contains('ad') ? 'ad' :
+                     pageBox.classList.contains('placeholder') ? 'placeholder' : 'unknown';
 
-        // Fill the form
-        document.getElementById('edit-page-id').value = pageId;
-        document.getElementById('edit-page-name').value = pageName;
-        document.getElementById('edit-page-type').value = pageType;
-        document.getElementById('edit-page-section').value = pageSection;
-        document.getElementById('edit-page-number').value = pageNumber;
-        document.getElementById('modal-title').textContent = `Edit Page ${pageNumber}`;
+    // Fill the form (existing code)
+    document.getElementById('edit-page-id').value = pageId;
+    document.getElementById('edit-page-name').value = pageName;
+    document.getElementById('edit-page-type').value = pageType;
+    document.getElementById('edit-page-number').value = pageNumber;
+    document.getElementById('modal-title').textContent = `Edit Page ${pageNumber}`;
 
-        // Show the modal
-        pageModal.classList.remove('hidden');
+    // Build section dropdown options dynamically
+    const sectionSelect = document.getElementById('edit-page-section');
+    sectionSelect.innerHTML = ''; // Clear existing options
+
+    // Standard sections that always appear (common in magazine layouts)
+    const defaultSections = [
+        { value: 'FOB', label: 'Front of Book' },
+        { value: 'Feature', label: 'Feature' },
+        { value: 'BOB', label: 'Back of Book' },
+        { value: 'Cover', label: 'Cover' },
+        { value: 'paid', label: 'Paid Advertisement' },
+        { value: 'house', label: 'House Advertisement' }
+    ];
+
+    // Get unique sections from current layout
+    const existingSections = new Set();
+    document.querySelectorAll('.spread-container .box').forEach(box => {
+        const section = box.querySelector('.section')?.textContent;
+        if (section && !defaultSections.some(s => s.value === section)) {
+            existingSections.add(section);
+        }
+    });
+
+    // Add default sections first
+    defaultSections.forEach(section => {
+        const option = document.createElement('option');
+        option.value = section.value;
+        option.textContent = section.label;
+        sectionSelect.appendChild(option);
+    });
+
+    // Add section divider if we have custom sections
+    if (existingSections.size > 0) {
+        const divider = document.createElement('option');
+        divider.disabled = true;
+        divider.textContent = '──────────────';
+        sectionSelect.appendChild(divider);
+
+        // Add existing custom sections
+        Array.from(existingSections).sort().forEach(section => {
+            const option = document.createElement('option');
+            option.value = section;
+            option.textContent = section;
+            sectionSelect.appendChild(option);
+        });
     }
+
+    // Add "Add New Section" option
+    const addNewOption = document.createElement('option');
+    addNewOption.value = 'add_new_section';
+    addNewOption.textContent = '+ Add New Section';
+    sectionSelect.appendChild(addNewOption);
+
+    // Set the current section
+    if (pageSection) {
+        // Try to find and select the current section
+        for (let i = 0; i < sectionSelect.options.length; i++) {
+            if (sectionSelect.options[i].value === pageSection) {
+                sectionSelect.selectedIndex = i;
+                break;
+            }
+        }
+    }
+
+    // Show the modal
+    pageModal.classList.remove('hidden');
+}
 
     /**
      * Closes the modal
@@ -180,42 +280,58 @@ document.addEventListener('DOMContentLoaded', () => {
         pageModal.classList.add('hidden');
     }
 
-    /**
-     * Saves page edits to the UI (changes will be committed to DB on layout save)
-     */
-    function savePageEdits() {
-        const pageId = document.getElementById('edit-page-id').value;
-        const pageName = document.getElementById('edit-page-name').value;
-        const pageType = document.getElementById('edit-page-type').value;
-        const pageSection = document.getElementById('edit-page-section').value;
+   /**
+ * Saves page edits to the UI (changes will be committed to DB on layout save)
+ */
+function savePageEdits() {
+    const pageId = document.getElementById('edit-page-id').value;
+    const pageName = document.getElementById('edit-page-name').value;
+    const pageType = document.getElementById('edit-page-type').value;
+    const pageSection = document.getElementById('edit-page-section').value;
 
-        // Get the page element
-        const pageBox = document.getElementById(pageId);
-        if (!pageBox) return;
+    // Get the page element
+    const pageBox = document.getElementById(pageId);
+    if (!pageBox) return;
 
-        // Update the page element
-        pageBox.querySelector('.name').textContent = pageName;
-        pageBox.querySelector('.section').textContent = pageSection;
+    // Update the page element
+    pageBox.querySelector('.name').textContent = pageName;
+    pageBox.querySelector('.section').textContent = pageSection;
 
-        // Update the page type (class)
-        pageBox.classList.remove('edit', 'ad', 'placeholder', 'unknown');
-        pageBox.classList.add(pageType);
+    // Update the page type (class)
+    pageBox.classList.remove('edit', 'ad', 'placeholder', 'unknown', 'bonus', 'promo');
+    pageBox.classList.add(pageType);
 
-        // Update the background color
+    // Determine background color based on type and special sections
+    let bgColor;
+
+    if (pageType === 'ad' && pageSection === 'Bonus') {
+        bgColor = '#9999f8';
+        pageBox.classList.add('bonus');
+    }
+    else if (pageType === 'ad' && pageSection === 'Promo') {
+        bgColor = '#b1fca3';
+        pageBox.classList.add('promo');
+    }
+    else {
+        // Standard background colors
         const bgColors = {
             'edit': '#B1FCFE',
             'ad': '#FFFFA6',
             'placeholder': '#F3F4F6',
             'unknown': '#EEEEEE'
         };
-        pageBox.style.backgroundColor = bgColors[pageType];
-
-        // Close the modal
-        closeModal();
-
-        // Show notification
-        showNotification('Page updated', 'success');
+        bgColor = bgColors[pageType];
     }
+
+    // Apply the background color
+    pageBox.style.backgroundColor = bgColor;
+
+    // Close the modal
+    closeModal();
+
+    // Show notification
+    showNotification('Page updated', 'success');
+}
 
     /**
      * Deletes a page

@@ -108,4 +108,6 @@
 /* Type-based background color coding */
 .edit { background-color: #B1FCFE; }
 .ad { background-color: #FFFFA6; }
+.bonus { background-color: #9999f8; } /* Special color for Bonus section */
+.promo { background-color: #b1fca3; } /* Special color for Promo section */
 .unknown { background-color: #eee; }

@@ -1,7 +1,6 @@
 """Flask app for Flatplan with MongoDB integration."""
 
 import os
-import json
 from datetime import datetime, timezone
 
 from flask import (
@@ -14,7 +13,6 @@ from flask import (
     jsonify,
     flash,
 )
-from werkzeug.utils import secure_filename
 from bson import ObjectId
 import pymongo
 
@@ -31,9 +29,6 @@ mongo_client = pymongo.MongoClient(
 db = mongo_client.get_database("flatplan")
 users = db.users
 layouts = db.layouts
-
-app.config["UPLOAD_FOLDER"] = "uploads"
-os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 
 # Update the home route to render the new index.html template
@@ -104,54 +99,24 @@ def view_layout(layout_id):
         return "Layout not found", 404
 
     if request.method == "POST":
-        if request.files and "file" in request.files:
-            # Handle file upload
-            file = request.files["file"]
-            if file and file.filename.endswith(".json"):
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-                file.save(file_path)
-
-                try:
-                    with open(file_path, "r") as f:
-                        layout_data = json.load(f)
-
-                    # Update layout with new data
-                    layouts.update_one(
-                        {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)},
-                        {
-                            "$set": {
-                                "layout": layout_data,
-                                "modified_date": datetime.now(timezone.utc),
-                            }
-                        },
-                    )
-                    return redirect(url_for("view_layout", layout_id=layout_id))
-                except Exception as e:
-                    return f"Error processing JSON: {str(e)}", 400
-
-            return "Invalid file format, please upload a JSON file", 400
-
         # Handle JSON data from AJAX
         layout_data = request.json
-        if not layout_data:
-            return jsonify({"error": "No data provided"}), 400
-
-        layouts.update_one(
-            {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)},
-            {
-                "$set": {
-                    "layout": layout_data,
-                    "modified_date": datetime.now(timezone.utc),
-                }
-            },
-        )
-        return jsonify({"status": "updated"})
+        if layout_data:
+            layouts.update_one(
+                {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)},
+                {
+                    "$set": {
+                        "layout": layout_data,
+                        "modified_date": datetime.now(timezone.utc),
+                    }
+                },
+            )
+            return jsonify({"status": "updated"})
 
     items = layout_doc["layout"]
 
     # Add visible placeholder Page 0 if first real page is Page 1
-    if items and items[0]["page_number"] == 1:
+    if items and items[0].get("page_number") == 1:
         items.insert(
             0,
             {

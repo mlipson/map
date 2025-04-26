@@ -44,7 +44,6 @@ function getCurrentLayoutAsJSON() {
     if (id === "page-0") return; // skip placeholder
 
     layout.push({
-      id: id, // e.g., "page-3"
       name: box.querySelector('.name')?.textContent,
       section: box.querySelector('.section')?.textContent,
       page_number: parseInt(box.getAttribute('data-page-number'), 10),
