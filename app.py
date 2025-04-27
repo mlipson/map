@@ -1,12 +1,9 @@
 """Flask app for Flatplan with MongoDB integration."""
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 import os
 from datetime import datetime, timezone
-
+from bson import ObjectId
+import pymongo
 from flask import (
     Flask,
     request,
@@ -17,10 +14,6 @@ from flask import (
     jsonify,
     flash,
 )
-from bson import ObjectId
-import pymongo
-
-
 from flask_login import (
     LoginManager,
     UserMixin,
@@ -36,6 +29,9 @@ from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
@@ -143,48 +139,6 @@ def index():
         # return render_template("index.html", layouts=user_layouts)
         return redirect(url_for("account"))
     return render_template("index.html")
-
-
-# # Update the home route to render the new index.html template
-# @app.route("/")
-# def home():
-#     return render_template("index.html")
-
-
-# # Add a new route for the login page
-# @app.route("/login", methods=["GET"])
-# def login_page():
-#     return render_template("login.html")
-
-
-# # Update the login route to handle only POST requests
-# @app.route("/login", methods=["POST"])
-# def login():
-#     email = request.form.get("email")
-#     if not email:
-#         return "Email is required", 400
-
-#     user = users.find_one({"email": email})
-#     if not user:
-#         user_id = users.insert_one(
-#             {
-#                 "email": email,
-#                 "name": email.split("@")[0],
-#                 "created_at": datetime.now(timezone.utc),
-#             }
-#         ).inserted_id
-#         user = users.find_one({"_id": user_id})
-
-#     session["user_id"] = str(user["_id"])
-#     return redirect(url_for("account"))
-
-
-# # Add a logout route
-# @app.route("/logout")
-# def logout():
-#     """Log out a user by clearing their session."""
-#     session.clear()
-#     return redirect(url_for("home"))
 
 
 # Routes for authentication
