@@ -16,7 +16,7 @@
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-gray-800">Your Layouts</h3>
-                <a href="{{ url_for('create_layout') }}"
+                <a href="{{ url_for('layout.create_layout') }}"
                     class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm">
                     + New Layout
                 </a>
@@ -27,7 +27,7 @@
                 {% for layout in layouts %}
                 <div class="p-4 flex justify-between items-center hover:bg-gray-50">
                     <div>
-                        <a href="{{ url_for('view_layout', layout_id=layout._id) }}"
+                        <a href="{{ url_for('layout.view_layout', layout_id=layout._id) }}"
                             class="text-indigo-600 font-medium hover:text-indigo-800">
                             {{ layout.publication_name }} – {{ layout.issue_name }}
                         </a>
@@ -59,7 +59,7 @@
                             </svg>
                         </a>
                         <!-- Clone button -->
-                        <a href="{{ url_for('clone_layout', layout_id=layout._id) }}"
+                        <a href="{{ url_for('layout.clone_layout', layout_id=layout._id) }}"
                             class="text-indigo-600 hover:text-indigo-800" title="Clone this layout">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
@@ -77,7 +77,7 @@
                             </svg>
                         </a>
                         <!-- View button (existing) -->
-                        <a href="{{ url_for('view_layout', layout_id=layout._id) }}"
+                        <a href="{{ url_for('layout.view_layout', layout_id=layout._id) }}"
                             class="text-indigo-600 hover:text-indigo-800" title="View this layout">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
@@ -114,7 +114,7 @@
             </button>
         </div>
 
-        <form id="edit-layout-form" action="{{ url_for('edit_layout_metadata') }}" method="post" class="p-6">
+        <form id="edit-layout-form" action="{{ url_for('layout.edit_layout_metadata') }}" method="post" class="p-6">
             <input type="hidden" id="edit-layout-id" name="layout_id">
             <input type="hidden" id="edit-return-to" name="return_to">
 

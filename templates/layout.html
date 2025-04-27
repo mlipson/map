@@ -59,8 +59,8 @@
                         </svg>
                     </button>
                     <!-- Hidden file input -->
-                    <form id="json-upload-form" action="{{ url_for('view_layout', layout_id=layout_id) }}" method="post"
-                        enctype="multipart/form-data" class="hidden">
+                    <form id="json-upload-form" action="{{ url_for('layout.view_layout', layout_id=layout_id) }}"
+                        method="post" enctype="multipart/form-data" class="hidden">
                         <input id="file-upload" name="file" type="file" accept=".json" class="hidden"
                             onchange="document.getElementById('json-upload-form').submit()">
                     </form>
@@ -120,7 +120,7 @@
                     </button>
 
                     <!-- Close Layout Button (integrated into toolbar) -->
-                    <a href="{{ url_for('account') }}" id="close-layout-btn"
+                    <a href="{{ url_for('main.account') }}" id="close-layout-btn"
                         class="p-2 rounded-full bg-white text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 transition-all"
                         title="Close Layout">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -135,7 +135,7 @@
 
         <div class="p-6">
             <!-- Hidden form for uploads (kept for compatibility) -->
-            <form id="main-upload-form" action="{{ url_for('view_layout', layout_id=layout_id) }}" method="post"
+            <form id="main-upload-form" action="{{ url_for('layout.view_layout', layout_id=layout_id) }}" method="post"
                 enctype="multipart/form-data" class="hidden">
                 <input type="file" id="main-file-upload" name="file">
                 <input type="hidden" id="layout-id" value="{{ layout_id }}">
@@ -302,7 +302,7 @@
             </button>
         </div>
 
-        <form id="edit-layout-form" action="{{ url_for('edit_layout_metadata') }}" method="post" class="p-6">
+        <form id="edit-layout-form" action="{{ url_for('layout.edit_layout_metadata') }}" method="post" class="p-6">
             <input type="hidden" id="edit-layout-id" name="layout_id" value="{{ layout_id }}">
             <input type="hidden" id="edit-return-to" name="return_to" value="layout">
 
