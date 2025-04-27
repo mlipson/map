@@ -4,7 +4,7 @@
 <div class="share-layout-container">
     <h1>Share Layout</h1>
     <h3>{{ layout.name }}</h3>
-    <form method="POST" action="{{ url_for('share_layout', layout_id=layout._id) }}">
+    <form method="POST" action="{{ url_for('layout.share_layout', layout_id=layout._id) }}">
         {{ form.hidden_tag() }}
         <div class="form-group">
             {{ form.email.label }}
