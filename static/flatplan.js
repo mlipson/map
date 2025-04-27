@@ -187,6 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Future implementation
     });
   }
+
+
 });
 
 // ===== Initialize Sortable (OUTSIDE the DOMContentLoaded handler) =====

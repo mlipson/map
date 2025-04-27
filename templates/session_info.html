@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Session Information</h1>
+
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Current User</h2>
+        <div class="grid grid-cols-1 gap-4">
+            <div>
+                <span class="font-medium">User ID:</span>
+                <span class="ml-2">{{ session_data.current_user.id }}</span>
+            </div>
+            <div>
+                <span class="font-medium">Email:</span>
+                <span class="ml-2">{{ session_data.current_user.email }}</span>
+            </div>
+            <div>
+                <span class="font-medium">Authenticated:</span>
+                <span class="ml-2">{{ session_data.current_user.is_authenticated }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Session Variables</h2>
+        {% if session_data.session_items %}
+        <div class="overflow-auto">
+            <table class="min-w-full">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="text-left py-2 px-4">Key</th>
+                        <th class="text-left py-2 px-4">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key, value in session_data.session_items.items() %}
+                    <tr class="border-t">
+                        <td class="py-2 px-4 font-medium">{{ key }}</td>
+                        <td class="py-2 px-4">{{ value }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-gray-600">No session variables found.</p>
+        {% endif %}
+    </div>
+
+    <div class="mt-6">
+        <a href="{{ url_for('index') }}" class="text-blue-600 hover:underline">Return to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

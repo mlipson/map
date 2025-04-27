@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="access-code-container">
+    <h1>Enter Access Code</h1>
+    <p>This layout requires an access code to view.</p>
+    <form method="POST" action="{{ url_for('view_shared_layout', layout_id=layout_id) }}">
+        <div class="form-group">
+            <label for="access_code">Access Code</label>
+            <input type="text" class="form-control" id="access_code" name="access_code" required>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">View Layout</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

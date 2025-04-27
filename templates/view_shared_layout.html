@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}{{ layout_doc.publication_name }} - {{ layout_doc.issue_name }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='layout.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="bg-white shadow-md rounded-lg overflow-hidden mb-6 relative">
+        <!-- Simplified header for shared view -->
+        <div class="bg-indigo-600 py-4 px-6">
+            <!-- Title Section -->
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-white text-xl font-bold">{{ layout_doc.publication_name }}</h2>
+                    <p class="text-indigo-100 text-sm">{{ layout_doc.issue_name }}</p>
+                </div>
+
+                <!-- Shared badge -->
+                <div class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                    Shared View (Read Only)
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <!-- Layout key/legend -->
+            <div class="mb-6 bg-gray-50 rounded-md p-3 flex items-center justify-center space-x-8">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-[#B1FCFE] rounded mr-2"></div>
+                    <span class="text-sm text-gray-600">Editorial</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-[#FFFFA6] rounded mr-2"></div>
+                    <span class="text-sm text-gray-600">Advertisement</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-[#F3F4F6] rounded mr-2"></div>
+                    <span class="text-sm text-gray-600">Placeholder</span>
+                </div>
+            </div>
+
+            {% set fixed_items=items[:] %}
+            {% if (fixed_items|length - 1) % 2 !=0 %}
+            {% set _=fixed_items.append({'name': '—' , 'type' : 'placeholder' , 'section' : '' , 'page_number' : 9999})
+            %}
+            {% endif %}
+
+            {% if items %}
+            <div class="spread-container">
+                {% for item in fixed_items %}
+                <div id="page-{{ item['page_number'] }}"
+                    class="box rounded border {{ item['type'] if item['type'] in ['edit', 'ad', 'placeholder'] else 'unknown' }} {{ 'bonus' if item['type'] == 'ad' and item['section'] == 'Bonus' else 'promo' if item['type'] == 'ad' and item['section'] == 'Promo' else '' }} relative p-3 aspect-[3/4] w-36 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm"
+                    style="background-color: {% if item['type'] == 'ad' and item['section'] == 'Bonus' %}#9999f8{% elif item['type'] == 'ad' and item['section'] == 'Promo' %}#b1fca3{% elif item['type'] == 'edit' %}#B1FCFE{% elif item['type'] == 'ad' %}#FFFFA6{% elif item['type'] == 'placeholder' %}#F3F4F6{% else %}#EEEEEE{% endif %};"
+                    data-page-number="{{ item['page_number'] }}">
+
+                    <div class="section font-semibold text-xs text-gray-700 mb-0.5">{{ item['section'] }}</div>
+                    <div class="name-wrapper flex-1 flex items-center justify-center">
+                        <div class="name font-medium max-w-[80%] break-words text-center text-gray-800">{{ item['name']
+                            }}</div>
+                    </div>
+                    <div
+                        class="page-number {{ 'even' if item['page_number'] % 2 == 0 else 'odd' }} text-gray-500 text-xs">
+                        {{ item['page_number'] }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12 bg-gray-50 rounded-lg">
+                <p class="text-gray-500">No pages in this layout.</p>
+            </div>
+            {% endif %}
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-500">This is a read-only view. Contact the owner for editing access.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
