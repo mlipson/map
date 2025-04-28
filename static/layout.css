@@ -2,12 +2,12 @@
 
 /* Spread container layout */
 .spread-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 30px 0; /* vertical spacing only */
-    max-width: 1200px;
-    margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 30px 0; /* vertical spacing only */
+  max-width: 1400px; /* Increased from 1200px */
+  margin: 0 auto;
 }
 
 /* Add wider gap between spreads (after every 2nd page) */

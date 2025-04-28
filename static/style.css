@@ -17,13 +17,12 @@
   border: 1px solid #ccc;
   padding: 10px;
   aspect-ratio: 3 / 4;
-  width: 150px;
+  width: 130px; /* Reduced from 150px */
   text-align: center;
   font-family: sans-serif;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-
   margin-right: 10px; /* tight page-to-page spacing by default */
 }
 
@@ -51,11 +50,21 @@
 
 .name {
     font-variant: small-caps;
-    max-width: 80%;
+    max-width: 90%; /* Increased from 80% to use more of the available space */
     word-wrap: break-word;
     word-break: break-word;
     text-align: center;
     overflow-wrap: break-word;
+    font-size: 0.875rem; /* text-sm equivalent in fixed rem size */
+    line-height: 1.1; /* Tighter line height for multi-line text */
+}
+
+.name.truncate-long {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Limit to 3 lines */
+    -webkit-box-orient: vertical;
 }
 
 /* Page number placement */
