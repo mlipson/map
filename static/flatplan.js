@@ -179,15 +179,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Share functionality (placeholder)
-  const shareBtn = document.getElementById('share-btn');
-  if (shareBtn) {
+// Share functionality
+const shareBtn = document.getElementById('share-btn');
+if (shareBtn) {
     shareBtn.addEventListener('click', function() {
-      alert('Sharing functionality coming soon!');
-      // Future implementation
+        const layoutId = document.getElementById('layout-id').value;
+        if (layoutId) {
+            // Redirect to the share layout page with the layout ID
+            window.location.href = `/share/${layoutId}`;
+        } else {
+            alert('Cannot share: Layout ID not found.');
+        }
     });
-  }
-
+}
 
 });
 

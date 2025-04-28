@@ -39,19 +39,46 @@ def view_layout(layout_id):
         return "Layout not found", 404
 
     if request.method == "POST":
-        # Handle JSON data from AJAX
-        layout_data = request.json
-        if layout_data:
-            layouts.update_one(
-                {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)},
-                {
-                    "$set": {
-                        "layout": layout_data,
-                        "modified_date": datetime.now(timezone.utc),
-                    }
-                },
-            )
-            return jsonify({"status": "updated"})
+        # Check if this is a JSON content type (AJAX request)
+        if request.is_json:
+            layout_data = request.json
+            if layout_data:
+                layouts.update_one(
+                    {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)},
+                    {
+                        "$set": {
+                            "layout": layout_data,
+                            "modified_date": datetime.now(timezone.utc),
+                        }
+                    },
+                )
+                return jsonify({"status": "updated"})
+        # Check if this is a file upload
+        elif "file" in request.files:
+            file = request.files["file"]
+            if file and file.filename.endswith(".json"):
+                try:
+                    # Read and parse the JSON file
+                    import json
+
+                    layout_data = json.loads(file.read().decode("utf-8"))
+
+                    # Update the layout in the database
+                    layouts.update_one(
+                        {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)},
+                        {
+                            "$set": {
+                                "layout": layout_data,
+                                "modified_date": datetime.now(timezone.utc),
+                            }
+                        },
+                    )
+                    flash("Layout updated from JSON file")
+                except Exception as e:
+                    flash(f"Error processing JSON file: {str(e)}", "error")
+
+                # Redirect to refresh the page with the new data
+                return redirect(url_for("layout.view_layout", layout_id=layout_id))
 
     items = layout_doc["layout"]
 
