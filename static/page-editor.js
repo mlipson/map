@@ -350,50 +350,53 @@ function savePageEdits() {
         }
     }
 
-    /**
-     * Adds a new page
-     */
-    function addNewPage() {
-        // Get the spread container
-        const spreadContainer = document.querySelector('.spread-container');
+/**
+ * Adds a new page
+ */
+function addNewPage() {
+    // Get the spread container
+    const spreadContainer = document.querySelector('.spread-container');
 
-        // Create a new page element
-        const boxes = document.querySelectorAll('.spread-container .box');
-        const newPageNumber = boxes.length; // Next number after existing boxes
-        const newPageId = `page-${Date.now()}`; // Unique ID using timestamp
+    // Create a new page element
+    const boxes = document.querySelectorAll('.spread-container .box');
+    const newPageNumber = boxes.length; // Next number after existing boxes
+    const newPageId = `page-${Date.now()}`; // Unique ID using timestamp
 
-        const newPage = document.createElement('div');
-        newPage.id = newPageId;
-        newPage.className = 'box placeholder rounded border relative p-3 aspect-[3/4] w-36 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm';
-        newPage.style.backgroundColor = '#F3F4F6';
+    const newPage = document.createElement('div');
+    newPage.id = newPageId;
+    // Updated class with w-32 instead of w-36 to match new sizing
+    newPage.className = 'box placeholder rounded border relative p-3 aspect-[3/4] w-32 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm';
 
-        newPage.innerHTML = `
-            <div class="section font-semibold text-xs text-gray-700 mb-0.5">New</div>
-            <div class="name-wrapper flex-1 flex items-center justify-center">
-                <div class="name font-medium max-w-[80%] break-words text-center text-gray-800">New Page</div>
-            </div>
-            <div class="page-number odd text-gray-500 text-xs">${newPageNumber}</div>
-        `;
+    // No need for inline style since we're using the placeholder class
+    // newPage.style.backgroundColor = '#F3F4F6';
 
-        // Add the new page to the end of the spread container
-        spreadContainer.appendChild(newPage);
+    newPage.innerHTML = `
+        <div class="section font-semibold text-xs text-gray-700 mb-0.5">New</div>
+        <div class="name-wrapper flex-1 flex items-center justify-center">
+            <div class="name font-medium text-sm max-w-[90%] break-words text-center text-gray-800">New Page</div>
+        </div>
+        <div class="page-number odd text-gray-500 text-xs">${newPageNumber}</div>
+    `;
 
-        // Update page numbers
-        updatePageNumbers();
+    // Add the new page to the end of the spread container
+    spreadContainer.appendChild(newPage);
 
-        // Make the new page clickable
-        newPage.addEventListener('click', (e) => {
-            if (e.currentTarget === newPage) {
-                openEditModal(newPage);
-            }
-        });
+    // Update page numbers
+    updatePageNumbers();
 
-        // Open the edit modal for the new page
-        openEditModal(newPage);
+    // Make the new page clickable
+    newPage.addEventListener('click', (e) => {
+        if (e.currentTarget === newPage) {
+            openEditModal(newPage);
+        }
+    });
 
-        // Show notification
-        showNotification('New page added', 'success');
-    }
+    // Open the edit modal for the new page
+    openEditModal(newPage);
+
+    // Show notification
+    showNotification('New page added', 'success');
+}
 
     /**
      * Updates page numbers for all pages
