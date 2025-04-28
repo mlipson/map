@@ -381,12 +381,23 @@
                 </div>
 
                 <!-- Advertisement Pages Section -->
-                <div>
+                <div class="mb-4">
                     <p class="font-medium flex justify-between border-b pb-1 mb-2">
                         <span class="text-gray-700">Advertisement Pages:</span>
                         <span id="analytics-ad-pages" class="font-bold"></span>
                     </p>
                     <ul id="analytics-ad-sections" class="pl-4 space-y-1 text-sm">
+                        <!-- Section details will be inserted here -->
+                    </ul>
+                </div>
+
+                <!-- Placeholder Pages Section -->
+                <div>
+                    <p class="font-medium flex justify-between border-b pb-1 mb-2">
+                        <span class="text-gray-700">Placeholder Pages:</span>
+                        <span id="analytics-placeholder-pages" class="font-bold"></span>
+                    </p>
+                    <ul id="analytics-placeholder-sections" class="pl-4 space-y-1 text-sm">
                         <!-- Section details will be inserted here -->
                     </ul>
                 </div>
@@ -401,6 +412,7 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block scripts %}

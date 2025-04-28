@@ -114,56 +114,97 @@ document.addEventListener('DOMContentLoaded', () => {
         return analytics;
     }
 
-    /**
-     * Updates the analytics modal content with the aggregated data
-     * @param {string} publicationName - The publication name
-     * @param {string} issueName - The issue name
-     * @param {Object} analytics - The aggregated analytics data
-     */
-    function updateAnalyticsModalContent(publicationName, issueName, analytics) {
-        // Get the modal content container
-        const contentContainer = document.getElementById('analytics-content');
-        if (!contentContainer) return;
+/**
+ * Updates the analytics modal content with the aggregated data
+ * @param {string} publicationName - The publication name
+ * @param {string} issueName - The issue name
+ * @param {Object} analytics - The aggregated analytics data
+ */
+function updateAnalyticsModalContent(publicationName, issueName, analytics) {
+    // Get the modal content container
+    const contentContainer = document.getElementById('analytics-content');
+    if (!contentContainer) return;
 
-        // Update publication info
-        document.getElementById('analytics-publication-name').textContent = publicationName;
-        document.getElementById('analytics-issue-name').textContent = issueName;
+    // Update publication info
+    document.getElementById('analytics-publication-name').textContent = publicationName;
+    document.getElementById('analytics-issue-name').textContent = issueName;
 
-        // Update total page count
-        document.getElementById('analytics-total-pages').textContent = analytics.totalPages;
+    // Update total page count
+    document.getElementById('analytics-total-pages').textContent = analytics.totalPages;
 
-        // Update editorial pages
-        const editPagesCount = document.getElementById('analytics-edit-pages');
-        const editSectionsList = document.getElementById('analytics-edit-sections');
+    // Update editorial pages
+    const editPagesCount = document.getElementById('analytics-edit-pages');
+    const editSectionsList = document.getElementById('analytics-edit-sections');
 
-        if (editPagesCount && editSectionsList) {
-            editPagesCount.textContent = analytics.pageTypes.edit.total;
-            editSectionsList.innerHTML = '';
+    if (editPagesCount && editSectionsList) {
+        editPagesCount.textContent = analytics.pageTypes.edit.total;
+        editSectionsList.innerHTML = '';
 
-            // Add sections
-            Object.entries(analytics.pageTypes.edit.sections).forEach(([section, count]) => {
-                const li = document.createElement('li');
-                li.className = 'flex justify-between';
-                li.innerHTML = `<span>${section}:</span> <span>${count}</span>`;
-                editSectionsList.appendChild(li);
-            });
-        }
+        // Add sections
+        Object.entries(analytics.pageTypes.edit.sections).forEach(([section, count]) => {
+            const li = document.createElement('li');
+            li.className = 'flex justify-between';
+            li.innerHTML = `<span>${section}:</span> <span>${count}</span>`;
+            editSectionsList.appendChild(li);
+        });
 
-        // Update advertisement pages
-        const adPagesCount = document.getElementById('analytics-ad-pages');
-        const adSectionsList = document.getElementById('analytics-ad-sections');
-
-        if (adPagesCount && adSectionsList) {
-            adPagesCount.textContent = analytics.pageTypes.ad.total;
-            adSectionsList.innerHTML = '';
-
-            // Add sections
-            Object.entries(analytics.pageTypes.ad.sections).forEach(([section, count]) => {
-                const li = document.createElement('li');
-                li.className = 'flex justify-between';
-                li.innerHTML = `<span>${section}:</span> <span>${count}</span>`;
-                adSectionsList.appendChild(li);
-            });
+        // If no sections, show a message
+        if (Object.keys(analytics.pageTypes.edit.sections).length === 0) {
+            const li = document.createElement('li');
+            li.textContent = 'No editorial sections';
+            li.className = 'text-gray-500 italic';
+            editSectionsList.appendChild(li);
         }
     }
+
+    // Update advertisement pages
+    const adPagesCount = document.getElementById('analytics-ad-pages');
+    const adSectionsList = document.getElementById('analytics-ad-sections');
+
+    if (adPagesCount && adSectionsList) {
+        adPagesCount.textContent = analytics.pageTypes.ad.total;
+        adSectionsList.innerHTML = '';
+
+        // Add sections
+        Object.entries(analytics.pageTypes.ad.sections).forEach(([section, count]) => {
+            const li = document.createElement('li');
+            li.className = 'flex justify-between';
+            li.innerHTML = `<span>${section}:</span> <span>${count}</span>`;
+            adSectionsList.appendChild(li);
+        });
+
+        // If no sections, show a message
+        if (Object.keys(analytics.pageTypes.ad.sections).length === 0) {
+            const li = document.createElement('li');
+            li.textContent = 'No advertisement sections';
+            li.className = 'text-gray-500 italic';
+            adSectionsList.appendChild(li);
+        }
+    }
+
+    // Update placeholder pages
+    const placeholderPagesCount = document.getElementById('analytics-placeholder-pages');
+    const placeholderSectionsList = document.getElementById('analytics-placeholder-sections');
+
+    if (placeholderPagesCount && placeholderSectionsList) {
+        placeholderPagesCount.textContent = analytics.pageTypes.placeholder.total;
+        placeholderSectionsList.innerHTML = '';
+
+        // Add sections
+        Object.entries(analytics.pageTypes.placeholder.sections).forEach(([section, count]) => {
+            const li = document.createElement('li');
+            li.className = 'flex justify-between';
+            li.innerHTML = `<span>${section}:</span> <span>${count}</span>`;
+            placeholderSectionsList.appendChild(li);
+        });
+
+        // If no sections, show a message
+        if (Object.keys(analytics.pageTypes.placeholder.sections).length === 0) {
+            const li = document.createElement('li');
+            li.textContent = 'No placeholder sections';
+            li.className = 'text-gray-500 italic';
+            placeholderSectionsList.appendChild(li);
+        }
+    }
+}
 });

@@ -164,7 +164,8 @@
     </div>
 </div>
 
-<!-- Analytics Modal -->
+
+<!-- Analytics Modal (for account.html) -->
 <div id="analytics-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
     <div class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all max-w-lg w-full">
         <div class="bg-indigo-600 py-4 px-6 flex justify-between items-center">
@@ -200,12 +201,23 @@
                 </div>
 
                 <!-- Advertisement Pages Section -->
-                <div>
+                <div class="mb-4">
                     <p class="font-medium flex justify-between border-b pb-1 mb-2">
                         <span class="text-gray-700">Advertisement Pages:</span>
                         <span id="analytics-ad-pages" class="font-bold"></span>
                     </p>
                     <ul id="analytics-ad-sections" class="pl-4 space-y-1 text-sm">
+                        <!-- Section details will be inserted here -->
+                    </ul>
+                </div>
+
+                <!-- Placeholder Pages Section -->
+                <div>
+                    <p class="font-medium flex justify-between border-b pb-1 mb-2">
+                        <span class="text-gray-700">Placeholder Pages:</span>
+                        <span id="analytics-placeholder-pages" class="font-bold"></span>
+                    </p>
+                    <ul id="analytics-placeholder-sections" class="pl-4 space-y-1 text-sm">
                         <!-- Section details will be inserted here -->
                     </ul>
                 </div>
@@ -220,6 +232,7 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block scripts %}
