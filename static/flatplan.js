@@ -79,6 +79,142 @@ function downloadJSON(data, filename) {
   document.body.removeChild(link);
 }
 
+
+
+/**
+ * Exports the current layout as a JPEG image
+ */
+function exportAsJPEG() {
+  // Use html2canvas to capture the spread container
+  const spreadContainer = document.querySelector('.spread-container');
+
+  if (!spreadContainer) {
+    alert('No layout found to export');
+    return;
+  }
+
+  // Show loading indicator
+  const loadingIndicator = document.createElement('div');
+  loadingIndicator.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+  loadingIndicator.innerHTML = '<div class="bg-white p-4 rounded-md shadow-lg"><p class="text-gray-800">Generating image...</p></div>';
+  document.body.appendChild(loadingIndicator);
+
+  // Use html2canvas to capture the content
+  html2canvas(spreadContainer, {
+    backgroundColor: '#ffffff',
+    scale: 2, // Higher quality
+    logging: false,
+    useCORS: true
+  }).then(canvas => {
+    // Convert canvas to data URL
+    const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+
+    // Create download link
+    const link = document.createElement('a');
+    const publicationName = document.querySelector('.text-xl.font-bold')?.textContent || 'flatplan';
+    const issueName = document.querySelector('.text-indigo-100.text-sm')?.textContent || 'export';
+    const filename = `${publicationName}-${issueName}.jpg`.replace(/\s+/g, '-').toLowerCase();
+
+    link.download = filename;
+    link.href = dataURL;
+
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Remove loading indicator
+    document.body.removeChild(loadingIndicator);
+  }).catch(error => {
+    console.error('Error generating JPEG:', error);
+    alert('Error generating JPEG. Please try again.');
+    document.body.removeChild(loadingIndicator);
+  });
+}
+
+
+/**
+ * Exports the current layout as a PDF document
+ */
+function exportAsPDF() {
+  // Use html2canvas and jsPDF
+  const spreadContainer = document.querySelector('.spread-container');
+
+  if (!spreadContainer) {
+    alert('No layout found to export');
+    return;
+  }
+
+  // Show loading indicator
+  const loadingIndicator = document.createElement('div');
+  loadingIndicator.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+  loadingIndicator.innerHTML = '<div class="bg-white p-4 rounded-md shadow-lg"><p class="text-gray-800">Generating PDF...</p></div>';
+  document.body.appendChild(loadingIndicator);
+
+  // Use html2canvas to capture the content
+  html2canvas(spreadContainer, {
+    backgroundColor: '#ffffff',
+    scale: 2, // Higher quality
+    logging: false,
+    useCORS: true
+  }).then(canvas => {
+    // Initialize PDF document - use landscape orientation which works better for flatplan layouts
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    // Get publication details for the filename
+    const publicationName = document.querySelector('.text-xl.font-bold')?.textContent || 'flatplan';
+    const issueName = document.querySelector('.text-indigo-100.text-sm')?.textContent || 'export';
+    const filename = `${publicationName}-${issueName}.pdf`.replace(/\s+/g, '-').toLowerCase();
+
+    // Add the canvas as an image to the PDF
+    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const canvasRatio = canvas.height / canvas.width;
+
+    // Calculate dimensions to fit within the PDF
+    let imgWidth = pdfWidth;
+    let imgHeight = imgWidth * canvasRatio;
+
+    // If image height exceeds page height, scale down
+    if (imgHeight > pdfHeight) {
+      imgHeight = pdfHeight;
+      imgWidth = imgHeight / canvasRatio;
+    }
+
+    // Center the image on the page
+    const x = (pdfWidth - imgWidth) / 2;
+    const y = (pdfHeight - imgHeight) / 2;
+
+    // Add the image to the PDF
+    pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
+
+    // Add metadata to the PDF
+    pdf.setProperties({
+      title: `${publicationName} - ${issueName} Layout`,
+      subject: 'Magazine Layout',
+      author: 'Flatplan App',
+      creator: 'Flatplan App',
+      creationDate: new Date()
+    });
+
+    // Generate the PDF and trigger download
+    pdf.save(filename);
+
+    // Remove loading indicator
+    document.body.removeChild(loadingIndicator);
+  }).catch(error => {
+    console.error('Error generating PDF:', error);
+    alert('Error generating PDF. Please try again.');
+    document.body.removeChild(loadingIndicator);
+  });
+}
+
 // ===== Event Listeners =====
 
 // Initialize everything once the DOM is fully loaded
@@ -161,23 +297,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // PDF Export (placeholder)
-  const downloadPdfBtn = document.getElementById('download-pdf-btn');
-  if (downloadPdfBtn) {
-    downloadPdfBtn.addEventListener('click', function() {
-      alert('PDF export functionality coming soon!');
-      // Future implementation
-    });
-  }
+// PDF Export
+const downloadPdfBtn = document.getElementById('download-pdf-btn');
+if (downloadPdfBtn) {
+  downloadPdfBtn.addEventListener('click', exportAsPDF);
+}
 
-  // JPEG Export (placeholder)
-  const downloadJpegBtn = document.getElementById('download-jpeg-btn');
-  if (downloadJpegBtn) {
-    downloadJpegBtn.addEventListener('click', function() {
-      alert('JPEG export functionality coming soon!');
-      // Future implementation
-    });
-  }
+// JPEG Export
+const downloadJpegBtn = document.getElementById('download-jpeg-btn');
+if (downloadJpegBtn) {
+  downloadJpegBtn.addEventListener('click', exportAsJPEG);
+}
 
 // Share functionality
 const shareBtn = document.getElementById('share-btn');
