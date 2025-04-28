@@ -110,7 +110,7 @@ def manage_page(layout_id, page_id):
 @api_bp.route("/api/layout/<layout_id>/analytics", methods=["GET"])
 def get_layout_analytics(layout_id):
     """API endpoint to get analytics for a layout."""
-    user_id = session.get("user_id")
+    user_id = session.get("_user_id")
     if not user_id:
         return jsonify({"error": "Unauthorized"}), 401
 
@@ -156,5 +156,7 @@ def get_layout_analytics(layout_id):
 
         # Increment section counter
         analytics["page_types"][page_type]["sections"][section] += 1
+
+    print("Analytics data:", analytics)
 
     return jsonify(analytics)
