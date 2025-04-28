@@ -322,3 +322,33 @@ def edit_layout_metadata():
         return redirect(url_for("layout.view_layout", layout_id=layout_id))
     else:
         return redirect(url_for("main.account"))
+
+
+@layout_bp.route("/delete_layout/<layout_id>", methods=["POST"])
+@login_required
+def delete_layout(layout_id):
+    """Delete a layout permanently."""
+    user_id = session.get("_user_id")
+    if not user_id:
+        return redirect(url_for("main.index"))
+
+    # Check if the layout exists and belongs to the user
+    layout = layouts.find_one(
+        {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)}
+    )
+
+    if not layout:
+        flash("Layout not found or you don't have permission to delete it.", "error")
+        return redirect(url_for("main.account"))
+
+    # Delete the layout
+    result = layouts.delete_one(
+        {"_id": ObjectId(layout_id), "account_id": ObjectId(user_id)}
+    )
+
+    if result.deleted_count > 0:
+        flash("Layout deleted successfully.", "success")
+    else:
+        flash("Failed to delete layout.", "error")
+
+    return redirect(url_for("main.account"))
