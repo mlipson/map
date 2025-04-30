@@ -49,7 +49,8 @@ function getCurrentLayoutAsJSON() {
       page_number: parseInt(box.getAttribute('data-page-number'), 10),
       type: box.classList.contains('edit') ? 'edit' :
             box.classList.contains('ad') ? 'ad' :
-            box.classList.contains('placeholder') ? 'placeholder' : 'unknown'
+            box.classList.contains('placeholder') ? 'placeholder' : 'unknown',
+      form_break: box.hasAttribute('data-form-break') // Add this line
     });
   });
 

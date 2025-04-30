@@ -184,12 +184,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-  /**
+/**
  * Opens the edit modal with page data
  * @param {HTMLElement} pageBox - The page box element
  */
 function openEditModal(pageBox) {
-    // Get page data (existing code)
+    // Get page data
     const pageId = pageBox.id;
     const pageName = pageBox.querySelector('.name')?.textContent || '';
     const pageSection = pageBox.querySelector('.section')?.textContent || '';
@@ -197,13 +197,19 @@ function openEditModal(pageBox) {
     const pageType = pageBox.classList.contains('edit') ? 'edit' :
                      pageBox.classList.contains('ad') ? 'ad' :
                      pageBox.classList.contains('placeholder') ? 'placeholder' : 'unknown';
+    const formBreak = pageBox.hasAttribute('data-form-break');
 
-    // Fill the form (existing code)
+    // Fill the form
     document.getElementById('edit-page-id').value = pageId;
     document.getElementById('edit-page-name').value = pageName;
     document.getElementById('edit-page-type').value = pageType;
     document.getElementById('edit-page-number').value = pageNumber;
     document.getElementById('modal-title').textContent = `Edit Page ${pageNumber}`;
+
+    // Set form break checkbox
+    if (document.getElementById('edit-page-form-break')) {
+        document.getElementById('edit-page-form-break').checked = formBreak;
+    }
 
     // Build section dropdown options dynamically
     const sectionSelect = document.getElementById('edit-page-section');
@@ -280,7 +286,7 @@ function openEditModal(pageBox) {
         pageModal.classList.add('hidden');
     }
 
-   /**
+/**
  * Saves page edits to the UI (changes will be committed to DB on layout save)
  */
 function savePageEdits() {
@@ -288,6 +294,7 @@ function savePageEdits() {
     const pageName = document.getElementById('edit-page-name').value;
     const pageType = document.getElementById('edit-page-type').value;
     const pageSection = document.getElementById('edit-page-section').value;
+    const formBreak = document.getElementById('edit-page-form-break').checked;
 
     // Get the page element
     const pageBox = document.getElementById(pageId);
@@ -300,6 +307,15 @@ function savePageEdits() {
     // Update the page type (class)
     pageBox.classList.remove('edit', 'ad', 'placeholder', 'unknown', 'bonus', 'promo');
     pageBox.classList.add(pageType);
+
+    // Handle form break (add or remove as needed)
+    if (formBreak) {
+        pageBox.setAttribute('data-form-break', 'true');
+        pageBox.classList.add('form-break');
+    } else {
+        pageBox.removeAttribute('data-form-break');
+        pageBox.classList.remove('form-break');
+    }
 
     // Determine background color based on type and special sections
     let bgColor;
