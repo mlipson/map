@@ -43,14 +43,29 @@ function getCurrentLayoutAsJSON() {
     const id = box.id;
     if (id === "page-0") return; // skip placeholder
 
+    // Get fractional ads data if available
+    let fractionalAds = [];
+    if (box.classList.contains('mixed')) {
+      const fractionalAdsData = box.getAttribute('data-fractional-ads');
+      if (fractionalAdsData) {
+        try {
+          fractionalAds = JSON.parse(fractionalAdsData);
+        } catch (e) {
+          console.error('Error parsing fractional ads data:', e);
+        }
+      }
+    }
+
     layout.push({
       name: box.querySelector('.name')?.textContent,
       section: box.querySelector('.section')?.textContent,
       page_number: parseInt(box.getAttribute('data-page-number'), 10),
       type: box.classList.contains('edit') ? 'edit' :
             box.classList.contains('ad') ? 'ad' :
+            box.classList.contains('mixed') ? 'mixed' :  // Add mixed type
             box.classList.contains('placeholder') ? 'placeholder' : 'unknown',
-      form_break: box.hasAttribute('data-form-break') // Add this line
+      form_break: box.hasAttribute('data-form-break'),
+      fractional_ads: fractionalAds  // Add fractional ads data
     });
   });
 

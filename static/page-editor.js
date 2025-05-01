@@ -1,7 +1,7 @@
 /**
  * Page Editor functionality for Flatplan application
  * Handles modals for editing page properties, adding new pages, deleting pages,
- * and editing layout metadata
+ * editing layout metadata, and managing fractional advertisements
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,7 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const addPageBtn = document.getElementById('add-page-btn');
     const layoutId = document.getElementById('layout-id')?.value;
     const sectionSelect = document.getElementById('edit-page-section');
+    const pageTypeSelect = document.getElementById('edit-page-type');
+    const fractionalAdsContainer = document.getElementById('fractional-ads-container');
+    const addFractionalAdBtn = document.getElementById('add-fractional-ad-btn');
 
+    // Set up section selection handling
     if (sectionSelect) {
         sectionSelect.addEventListener('change', function(e) {
             if (this.value === 'add_new_section') {
@@ -49,6 +53,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 tempField.value = this.value;
             }
+        });
+    }
+
+    // Page type change handler to show/hide fractional ads section
+    if (pageTypeSelect) {
+        pageTypeSelect.addEventListener('change', function() {
+            if (this.value === 'mixed') {
+                if (fractionalAdsContainer) {
+                    fractionalAdsContainer.classList.remove('hidden');
+                    // Add an empty fractional ad form if there are none
+                    const adsList = document.getElementById('fractional-ads-list');
+                    if (adsList && adsList.children.length === 0) {
+                        addFractionalAdForm();
+                    }
+                }
+            } else {
+                if (fractionalAdsContainer) {
+                    fractionalAdsContainer.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // Add button for adding new fractional ad forms
+    if (addFractionalAdBtn) {
+        addFractionalAdBtn.addEventListener('click', function() {
+            addFractionalAdForm();
         });
     }
 
@@ -173,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show modal
         layoutModal.classList.remove('hidden');
         console.log('Modal should now be visible');
-    }
+    };
 
     /**
      * Closes the layout edit modal
@@ -182,102 +213,147 @@ document.addEventListener('DOMContentLoaded', () => {
         if (layoutModal) {
             layoutModal.classList.add('hidden');
         }
-    }
+    };
 
-/**
- * Opens the edit modal with page data
- * @param {HTMLElement} pageBox - The page box element
- */
-function openEditModal(pageBox) {
-    // Get page data
-    const pageId = pageBox.id;
-    const pageName = pageBox.querySelector('.name')?.textContent || '';
-    const pageSection = pageBox.querySelector('.section')?.textContent || '';
-    const pageNumber = pageBox.getAttribute('data-page-number');
-    const pageType = pageBox.classList.contains('edit') ? 'edit' :
-                     pageBox.classList.contains('ad') ? 'ad' :
-                     pageBox.classList.contains('placeholder') ? 'placeholder' : 'unknown';
-    const formBreak = pageBox.hasAttribute('data-form-break');
+    /**
+     * Opens the edit modal with page data, including support for fractional ads
+     * @param {HTMLElement} pageBox - The page box element
+     */
+    function openEditModal(pageBox) {
+        // Get page data
+        const pageId = pageBox.id;
+        const pageName = pageBox.querySelector('.name')?.textContent || '';
+        const pageSection = pageBox.querySelector('.section')?.textContent || '';
+        const pageNumber = pageBox.getAttribute('data-page-number');
+        const formBreak = pageBox.hasAttribute('data-form-break');
 
-    // Fill the form
-    document.getElementById('edit-page-id').value = pageId;
-    document.getElementById('edit-page-name').value = pageName;
-    document.getElementById('edit-page-type').value = pageType;
-    document.getElementById('edit-page-number').value = pageNumber;
-    document.getElementById('modal-title').textContent = `Edit Page ${pageNumber}`;
+        // Determine page type, now including "mixed" type
+        let pageType = 'unknown';
+        if (pageBox.classList.contains('edit')) pageType = 'edit';
+        else if (pageBox.classList.contains('ad')) pageType = 'ad';
+        else if (pageBox.classList.contains('mixed')) pageType = 'mixed';
+        else if (pageBox.classList.contains('placeholder')) pageType = 'placeholder';
 
-    // Set form break checkbox
-    if (document.getElementById('edit-page-form-break')) {
-        document.getElementById('edit-page-form-break').checked = formBreak;
-    }
+        // Get fractional ads data if present
+        let fractionalAds = [];
+        if (pageType === 'mixed') {
+            // Try to get fractional ads from data attribute first
+            const fractionalAdsData = pageBox.getAttribute('data-fractional-ads');
+            if (fractionalAdsData) {
+                try {
+                    fractionalAds = JSON.parse(fractionalAdsData);
+                } catch (e) {
+                    console.error('Error parsing fractional ads data:', e);
+                }
+            }
 
-    // Build section dropdown options dynamically
-    const sectionSelect = document.getElementById('edit-page-section');
-    sectionSelect.innerHTML = ''; // Clear existing options
-
-    // Standard sections that always appear (common in magazine layouts)
-    const defaultSections = [
-        { value: 'FOB', label: 'Front of Book' },
-        { value: 'Feature', label: 'Feature' },
-        { value: 'BOB', label: 'Back of Book' },
-        { value: 'Cover', label: 'Cover' },
-        { value: 'paid', label: 'Paid Advertisement' },
-        { value: 'house', label: 'House Advertisement' }
-    ];
-
-    // Get unique sections from current layout
-    const existingSections = new Set();
-    document.querySelectorAll('.spread-container .box').forEach(box => {
-        const section = box.querySelector('.section')?.textContent;
-        if (section && !defaultSections.some(s => s.value === section)) {
-            existingSections.add(section);
-        }
-    });
-
-    // Add default sections first
-    defaultSections.forEach(section => {
-        const option = document.createElement('option');
-        option.value = section.value;
-        option.textContent = section.label;
-        sectionSelect.appendChild(option);
-    });
-
-    // Add section divider if we have custom sections
-    if (existingSections.size > 0) {
-        const divider = document.createElement('option');
-        divider.disabled = true;
-        divider.textContent = '──────────────';
-        sectionSelect.appendChild(divider);
-
-        // Add existing custom sections
-        Array.from(existingSections).sort().forEach(section => {
-            const option = document.createElement('option');
-            option.value = section;
-            option.textContent = section;
-            sectionSelect.appendChild(option);
-        });
-    }
-
-    // Add "Add New Section" option
-    const addNewOption = document.createElement('option');
-    addNewOption.value = 'add_new_section';
-    addNewOption.textContent = '+ Add New Section';
-    sectionSelect.appendChild(addNewOption);
-
-    // Set the current section
-    if (pageSection) {
-        // Try to find and select the current section
-        for (let i = 0; i < sectionSelect.options.length; i++) {
-            if (sectionSelect.options[i].value === pageSection) {
-                sectionSelect.selectedIndex = i;
-                break;
+            // If no data attribute or parsing failed, try to get from DOM elements
+            if (fractionalAds.length === 0) {
+                const fractionalElements = pageBox.querySelectorAll('.fractional-ad');
+                fractionalElements.forEach(el => {
+                    fractionalAds.push({
+                        id: el.getAttribute('data-id'),
+                        name: el.getAttribute('data-name'),
+                        section: el.getAttribute('data-section'),
+                        size: el.getAttribute('data-size'),
+                        position: el.getAttribute('data-position')
+                    });
+                });
             }
         }
-    }
 
-    // Show the modal
-    pageModal.classList.remove('hidden');
-}
+        // Fill the form
+        document.getElementById('edit-page-id').value = pageId;
+        document.getElementById('edit-page-name').value = pageName;
+        document.getElementById('edit-page-type').value = pageType;
+        document.getElementById('edit-page-number').value = pageNumber;
+        document.getElementById('modal-title').textContent = `Edit Page ${pageNumber}`;
+
+        // Set form break checkbox
+        if (document.getElementById('edit-page-form-break')) {
+            document.getElementById('edit-page-form-break').checked = formBreak;
+        }
+
+        // Build section dropdown options dynamically
+        const sectionSelect = document.getElementById('edit-page-section');
+        if (sectionSelect) {
+            sectionSelect.innerHTML = ''; // Clear existing options
+
+            // Standard sections that always appear (common in magazine layouts)
+            const defaultSections = [
+                { value: 'FOB', label: 'Front of Book' },
+                { value: 'Feature', label: 'Feature' },
+                { value: 'BOB', label: 'Back of Book' },
+                { value: 'Cover', label: 'Cover' },
+                { value: 'paid', label: 'Paid Advertisement' },
+                { value: 'house', label: 'House Advertisement' }
+            ];
+
+            // Get unique sections from current layout
+            const existingSections = new Set();
+            document.querySelectorAll('.spread-container .box').forEach(box => {
+                const section = box.querySelector('.section')?.textContent;
+                if (section && !defaultSections.some(s => s.value === section)) {
+                    existingSections.add(section);
+                }
+            });
+
+            // Add default sections first
+            defaultSections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section.value;
+                option.textContent = section.label;
+                sectionSelect.appendChild(option);
+            });
+
+            // Add section divider if we have custom sections
+            if (existingSections.size > 0) {
+                const divider = document.createElement('option');
+                divider.disabled = true;
+                divider.textContent = '──────────────';
+                sectionSelect.appendChild(divider);
+
+                // Add existing custom sections
+                Array.from(existingSections).sort().forEach(section => {
+                    const option = document.createElement('option');
+                    option.value = section;
+                    option.textContent = section;
+                    sectionSelect.appendChild(option);
+                });
+            }
+
+            // Add "Add New Section" option
+            const addNewOption = document.createElement('option');
+            addNewOption.value = 'add_new_section';
+            addNewOption.textContent = '+ Add New Section';
+            sectionSelect.appendChild(addNewOption);
+
+            // Set the current section
+            if (pageSection) {
+                // Try to find and select the current section
+                for (let i = 0; i < sectionSelect.options.length; i++) {
+                    if (sectionSelect.options[i].value === pageSection) {
+                        sectionSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Handle fractional ads container visibility and population
+        if (fractionalAdsContainer) {
+            if (pageType === 'mixed') {
+                fractionalAdsContainer.classList.remove('hidden');
+                populateFractionalAds(fractionalAds);
+            } else {
+                fractionalAdsContainer.classList.add('hidden');
+                clearFractionalAds();
+            }
+        }
+
+        // Show the modal
+        pageModal.classList.remove('hidden');
+    }
 
     /**
      * Closes the modal
@@ -286,68 +362,94 @@ function openEditModal(pageBox) {
         pageModal.classList.add('hidden');
     }
 
-/**
- * Saves page edits to the UI (changes will be committed to DB on layout save)
- */
-function savePageEdits() {
-    const pageId = document.getElementById('edit-page-id').value;
-    const pageName = document.getElementById('edit-page-name').value;
-    const pageType = document.getElementById('edit-page-type').value;
-    const pageSection = document.getElementById('edit-page-section').value;
-    const formBreak = document.getElementById('edit-page-form-break').checked;
+    /**
+     * Saves page edits to the UI (changes will be committed to DB on layout save)
+     */
+    function savePageEdits() {
+        const pageId = document.getElementById('edit-page-id').value;
+        const pageName = document.getElementById('edit-page-name').value.trim(); // Add trim() here
+        const pageType = document.getElementById('edit-page-type').value;
+        const pageSection = document.getElementById('edit-page-section').value.trim(); // Also trim section
+        const formBreak = document.getElementById('edit-page-form-break').checked;
 
-    // Get the page element
-    const pageBox = document.getElementById(pageId);
-    if (!pageBox) return;
+        // Collect fractional ads data if page type is "mixed"
+        const fractionalAds = pageType === 'mixed' ? collectFractionalAdsData() : [];
 
-    // Update the page element
-    pageBox.querySelector('.name').textContent = pageName;
-    pageBox.querySelector('.section').textContent = pageSection;
+        // Get the page element
+        const pageBox = document.getElementById(pageId);
+        if (!pageBox) return;
 
-    // Update the page type (class)
-    pageBox.classList.remove('edit', 'ad', 'placeholder', 'unknown', 'bonus', 'promo');
-    pageBox.classList.add(pageType);
+        // Update the page element
+        pageBox.querySelector('.name').textContent = pageName;
+        pageBox.querySelector('.section').textContent = pageSection;
 
-    // Handle form break (add or remove as needed)
-    if (formBreak) {
-        pageBox.setAttribute('data-form-break', 'true');
-        pageBox.classList.add('form-break');
-    } else {
-        pageBox.removeAttribute('data-form-break');
-        pageBox.classList.remove('form-break');
+        // Update the page type (class)
+        pageBox.classList.remove('edit', 'ad', 'mixed', 'placeholder', 'unknown', 'bonus', 'promo');
+        pageBox.classList.add(pageType);
+
+        // Handle form break (add or remove as needed)
+        if (formBreak) {
+            pageBox.setAttribute('data-form-break', 'true');
+            pageBox.classList.add('form-break');
+        } else {
+            pageBox.removeAttribute('data-form-break');
+            pageBox.classList.remove('form-break');
+        }
+
+        // Determine background color based on type and special sections
+        let bgColor;
+
+        if (pageType === 'ad' && pageSection === 'Bonus') {
+            bgColor = '#9999f8';
+            pageBox.classList.add('bonus');
+        }
+        else if (pageType === 'ad' && pageSection === 'Promo') {
+            bgColor = '#b1fca3';
+            pageBox.classList.add('promo');
+        }
+        else {
+            // Standard background colors
+            const bgColors = {
+                'edit': '#B1FCFE',
+                'ad': '#FFFFA6',
+                'mixed': '#FFFFFF', // White background for mixed content
+                'placeholder': '#F3F4F6',
+                'unknown': '#EEEEEE'
+            };
+            bgColor = bgColors[pageType];
+        }
+
+        // Apply the background color
+        pageBox.style.backgroundColor = bgColor;
+
+        // Handle fractional ads for mixed content pages
+        if (pageType === 'mixed') {
+            // Clear existing fractional ads
+            const existingFractionalAds = pageBox.querySelectorAll('.fractional-ad');
+            existingFractionalAds.forEach(el => el.remove());
+
+            // Add the new fractional ads
+            fractionalAds.forEach(ad => {
+                addFractionalAdToPage(pageBox, ad);
+            });
+
+            // Store fractional ads data in a data attribute for later retrieval
+            pageBox.setAttribute('data-fractional-ads', JSON.stringify(fractionalAds));
+        } else {
+            // Remove any existing fractional ads
+            const existingFractionalAds = pageBox.querySelectorAll('.fractional-ad');
+            existingFractionalAds.forEach(el => el.remove());
+
+            // Remove the data attribute
+            pageBox.removeAttribute('data-fractional-ads');
+        }
+
+        // Close the modal
+        closeModal();
+
+        // Show notification
+        showNotification('Page updated', 'success');
     }
-
-    // Determine background color based on type and special sections
-    let bgColor;
-
-    if (pageType === 'ad' && pageSection === 'Bonus') {
-        bgColor = '#9999f8';
-        pageBox.classList.add('bonus');
-    }
-    else if (pageType === 'ad' && pageSection === 'Promo') {
-        bgColor = '#b1fca3';
-        pageBox.classList.add('promo');
-    }
-    else {
-        // Standard background colors
-        const bgColors = {
-            'edit': '#B1FCFE',
-            'ad': '#FFFFA6',
-            'placeholder': '#F3F4F6',
-            'unknown': '#EEEEEE'
-        };
-        bgColor = bgColors[pageType];
-    }
-
-    // Apply the background color
-    pageBox.style.backgroundColor = bgColor;
-
-    // Close the modal
-    closeModal();
-
-    // Show notification
-    showNotification('Page updated', 'success');
-}
 
     /**
      * Deletes a page
@@ -366,53 +468,50 @@ function savePageEdits() {
         }
     }
 
-/**
- * Adds a new page
- */
-function addNewPage() {
-    // Get the spread container
-    const spreadContainer = document.querySelector('.spread-container');
+    /**
+     * Adds a new page
+     */
+    function addNewPage() {
+        // Get the spread container
+        const spreadContainer = document.querySelector('.spread-container');
 
-    // Create a new page element
-    const boxes = document.querySelectorAll('.spread-container .box');
-    const newPageNumber = boxes.length; // Next number after existing boxes
-    const newPageId = `page-${Date.now()}`; // Unique ID using timestamp
+        // Create a new page element
+        const boxes = document.querySelectorAll('.spread-container .box');
+        const newPageNumber = boxes.length; // Next number after existing boxes
+        const newPageId = `page-${Date.now()}`; // Unique ID using timestamp
 
-    const newPage = document.createElement('div');
-    newPage.id = newPageId;
-    // Updated class with w-32 instead of w-36 to match new sizing
-    newPage.className = 'box placeholder rounded border relative p-3 aspect-[3/4] w-32 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm';
+        const newPage = document.createElement('div');
+        newPage.id = newPageId;
+        // Updated class with w-32 instead of w-36 to match new sizing
+        newPage.className = 'box placeholder rounded border relative p-3 aspect-[3/4] w-32 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm';
 
-    // No need for inline style since we're using the placeholder class
-    // newPage.style.backgroundColor = '#F3F4F6';
+        newPage.innerHTML = `
+            <div class="section font-semibold text-xs text-gray-700 mb-0.5">New</div>
+            <div class="name-wrapper flex-1 flex items-center justify-center">
+                <div class="name font-medium text-sm max-w-[90%] break-words text-center text-gray-800">New Page</div>
+            </div>
+            <div class="page-number odd text-gray-500 text-xs">${newPageNumber}</div>
+        `;
 
-    newPage.innerHTML = `
-        <div class="section font-semibold text-xs text-gray-700 mb-0.5">New</div>
-        <div class="name-wrapper flex-1 flex items-center justify-center">
-            <div class="name font-medium text-sm max-w-[90%] break-words text-center text-gray-800">New Page</div>
-        </div>
-        <div class="page-number odd text-gray-500 text-xs">${newPageNumber}</div>
-    `;
+        // Add the new page to the end of the spread container
+        spreadContainer.appendChild(newPage);
 
-    // Add the new page to the end of the spread container
-    spreadContainer.appendChild(newPage);
+        // Update page numbers
+        updatePageNumbers();
 
-    // Update page numbers
-    updatePageNumbers();
+        // Make the new page clickable
+        newPage.addEventListener('click', (e) => {
+            if (e.currentTarget === newPage) {
+                openEditModal(newPage);
+            }
+        });
 
-    // Make the new page clickable
-    newPage.addEventListener('click', (e) => {
-        if (e.currentTarget === newPage) {
-            openEditModal(newPage);
-        }
-    });
+        // Open the edit modal for the new page
+        openEditModal(newPage);
 
-    // Open the edit modal for the new page
-    openEditModal(newPage);
-
-    // Show notification
-    showNotification('New page added', 'success');
-}
+        // Show notification
+        showNotification('New page added', 'success');
+    }
 
     /**
      * Updates page numbers for all pages
@@ -461,4 +560,255 @@ function addNewPage() {
             notification.remove();
         }, 3000);
     }
+
+    /**
+     * Fractional Ads Functions
+     * These functions manage the creation, editing, and display of fractional advertisements
+     */
+
+    /**
+     * Populates the fractional ads UI with existing fractional ads
+     * @param {Array} fractionalAds - Array of fractional ad objects
+     */
+    function populateFractionalAds(fractionalAds) {
+        const container = document.getElementById('fractional-ads-list');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (fractionalAds.length === 0) {
+            // Add one empty form by default
+            addFractionalAdForm();
+            return;
+        }
+
+        // Add a form for each existing fractional ad
+        fractionalAds.forEach(ad => {
+            addFractionalAdForm(ad);
+        });
+    }
+
+    /**
+     * Adds a new fractional ad form to the UI
+     * @param {Object} adData - Optional existing ad data to populate the form
+     */
+    function addFractionalAdForm(adData = null) {
+        const container = document.getElementById('fractional-ads-list');
+        if (!container) return;
+
+        const formId = `fractional-ad-${Date.now()}`;
+
+        const formHtml = `
+            <div class="fractional-ad-form p-3 bg-gray-50 rounded-md mb-3" id="${formId}">
+                <input type="hidden" name="fractional_ad_id" value="${adData?.id || ''}">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-gray-700 text-xs font-medium mb-1">Ad Name</label>
+                        <input type="text" name="fractional_ad_name" value="${adData?.name || ''}"
+                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-xs font-medium mb-1">Section</label>
+                        <input type="text" name="fractional_ad_section" value="${adData?.section || 'paid'}"
+                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-xs font-medium mb-1">Size</label>
+                        <select name="fractional_ad_size"
+                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+                            <option value="1/4" ${adData?.size === '1/4' ? 'selected' : ''}>1/4 page</option>
+                            <option value="1/3" ${adData?.size === '1/3' ? 'selected' : ''}>1/3 page</option>
+                            <option value="1/2" ${adData?.size === '1/2' ? 'selected' : ''}>1/2 page</option>
+                            <option value="2/3" ${adData?.size === '2/3' ? 'selected' : ''}>2/3 page</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-xs font-medium mb-1">Position</label>
+                        <select name="fractional_ad_position"
+                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+                            <option value="top" ${adData?.position === 'top' ? 'selected' : ''}>Top</option>
+                            <option value="bottom" ${adData?.position === 'bottom' ? 'selected' : ''}>Bottom</option>
+                            <option value="left" ${adData?.position === 'left' ? 'selected' : ''}>Left</option>
+                            <option value="right" ${adData?.position === 'right' ? 'selected' : ''}>Right</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-2">
+                    <button type="button" onclick="removeFractionalAdForm('${formId}')"
+                        class="text-red-600 hover:text-red-800 text-xs">
+                        Remove
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Insert the new form
+        container.insertAdjacentHTML('beforeend', formHtml);
+    }
+
+    /**
+     * Removes a fractional ad form from the UI
+     * @param {string} formId - The ID of the form to remove
+     */
+    window.removeFractionalAdForm = function(formId) {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.remove();
+
+            // If no forms left, add an empty one
+            const container = document.getElementById('fractional-ads-list');
+            if (container && container.children.length === 0) {
+                addFractionalAdForm();
+            }
+        }
+    };
+
+    /**
+     * Clears all fractional ad forms
+     */
+    function clearFractionalAds() {
+        const container = document.getElementById('fractional-ads-list');
+        if (container) {
+            container.innerHTML = '';
+        }
+    }
+
+    /**
+     * Collects fractional ad data from the form
+     * @returns {Array} Array of fractional ad objects
+     */
+    function collectFractionalAdsData() {
+        const forms = document.querySelectorAll('.fractional-ad-form');
+        const fractionalAds = [];
+
+        forms.forEach(form => {
+            const id = form.querySelector('input[name="fractional_ad_id"]').value || `frac-${Date.now()}-${fractionalAds.length}`;
+            const name = form.querySelector('input[name="fractional_ad_name"]').value;
+            const section = form.querySelector('input[name="fractional_ad_section"]').value;
+            const size = form.querySelector('select[name="fractional_ad_size"]').value;
+            const position = form.querySelector('select[name="fractional_ad_position"]').value;
+
+            // Only add if it has a name
+            if (name.trim()) {
+                fractionalAds.push({ id, name, section, size, position });
+            }
+        });
+
+        return fractionalAds;
+    }
+
+    /**
+     * Adds a fractional ad to the page box
+     * @param {HTMLElement} pageBox - The page box element
+     * @param {Object} adData - The fractional ad data
+     */
+    function addFractionalAdToPage(pageBox, adData) {
+        // Create the fractional ad element
+        const adElement = document.createElement('div');
+        adElement.className = 'fractional-ad absolute bg-yellow-100 border border-yellow-300';
+        adElement.setAttribute('data-id', adData.id);
+        adElement.setAttribute('data-name', adData.name);
+        adElement.setAttribute('data-section', adData.section);
+        adElement.setAttribute('data-size', adData.size);
+        adElement.setAttribute('data-position', adData.position);
+
+        // Set size and position based on the ad data
+        const { size, position } = adData;
+
+        // Set CSS properties based on size and position
+        switch (position) {
+            case 'top':
+                adElement.style.top = '0';
+                adElement.style.left = '0';
+                adElement.style.right = '0';
+                adElement.style.height = getSizePercentage(size);
+                break;
+            case 'bottom':
+                adElement.style.bottom = '0';
+                adElement.style.left = '0';
+                adElement.style.right = '0';
+                adElement.style.height = getSizePercentage(size);
+                break;
+            case 'left':
+                adElement.style.top = '0';
+                adElement.style.left = '0';
+                adElement.style.bottom = '0';
+                adElement.style.width = getSizePercentage(size);
+                break;
+            case 'right':
+                adElement.style.top = '0';
+                adElement.style.right = '0';
+                adElement.style.bottom = '0';
+                adElement.style.width = getSizePercentage(size);
+                break;
+        }
+
+        // Add content to the fractional ad
+        adElement.innerHTML = `
+            <div class="text-xs font-medium text-center p-1">${adData.name}</div>
+        `;
+
+        // Add the ad element to the page box
+        pageBox.appendChild(adElement);
+    }
+
+    /**
+     * Gets the CSS percentage value for a fractional size
+     * @param {string} size - The fractional size (1/4, 1/3, 1/2, 2/3)
+     * @returns {string} CSS percentage value
+     */
+    function getSizePercentage(size) {
+        switch (size) {
+            case '1/4': return '25%';
+            case '1/3': return '33.33%';
+            case '1/2': return '50%';
+            case '2/3': return '66.67%';
+            default: return '50%';
+        }
+    }
 });
+
+/**
+ * Updates the getCurrentLayoutAsJSON function in flatplan.js to include fractional ads
+ * This function should be added to or replace the existing one in flatplan.js
+ * @returns {Array} Array of page objects with properties
+ */
+function getCurrentLayoutAsJSON() {
+    const boxes = document.querySelectorAll('.spread-container .box');
+    const layout = [];
+
+    boxes.forEach(box => {
+        const id = box.id;
+        if (id === "page-0") return; // skip placeholder
+
+        const name = box.querySelector('.name')?.textContent.trim() || '';
+        const section = box.querySelector('.section')?.textContent.trim() || '';
+
+        // Get fractional ads data if available
+        let fractionalAds = [];
+        if (box.classList.contains('mixed')) {
+            const fractionalAdsData = box.getAttribute('data-fractional-ads');
+            if (fractionalAdsData) {
+                try {
+                    fractionalAds = JSON.parse(fractionalAdsData);
+                } catch (e) {
+                    console.error('Error parsing fractional ads data:', e);
+                }
+            }
+        }
+
+        layout.push({
+            name: name,
+            section: section,
+            page_number: parseInt(box.getAttribute('data-page-number'), 10),
+            type: box.classList.contains('edit') ? 'edit' :
+                  box.classList.contains('ad') ? 'ad' :
+                  box.classList.contains('mixed') ? 'mixed' :
+                  box.classList.contains('placeholder') ? 'placeholder' : 'unknown',
+            form_break: box.hasAttribute('data-form-break'),
+            fractional_ads: fractionalAds
+        });
+    });
+
+    return layout;
+}

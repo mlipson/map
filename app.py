@@ -1,12 +1,15 @@
 """Main application file for Flatplan with MongoDB integration."""
 
 import os
+import json
+
 from datetime import datetime, timezone
 from flask import Flask
 from flask_login import LoginManager
 from flask_mail import Mail
 
 from dotenv import load_dotenv
+from bson import ObjectId
 
 # Import modules
 from config import Config
@@ -50,6 +53,20 @@ def create_app(config_class=Config):
 
 # Create the Flask application instance
 app = create_app()
+
+
+# Add this class to handle MongoDB ObjectId serialization
+class JSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, ObjectId):
+            return str(obj)
+        return super(JSONEncoder, self).default(obj)
+
+
+# Add this after creating your Flask app
+@app.template_filter("safe_json")
+def safe_json(obj):
+    return json.dumps(obj, cls=JSONEncoder)
 
 
 # User loader for Flask-Login

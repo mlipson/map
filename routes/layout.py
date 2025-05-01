@@ -97,6 +97,8 @@ def view_layout(layout_id):
     for item in items:
         item["name"] = item.get("name", "").lower()
 
+    print(layout_doc)
+
     return render_template(
         "layout.html",
         items=layout_doc["layout"],

@@ -135,3 +135,129 @@
     background-color: #eb64eb;
     z-index: 1;
 }
+
+/* Fractional Ads CSS
+ * Add these styles to your layout.css file to properly render fractional ads
+ */
+
+/* Base styles for the page box with mixed content */
+.box.mixed {
+    position: relative;
+    border: 1px solid #ccc;
+    background-color: #FFFFFF !important;
+}
+
+/* Editorial content label for mixed pages */
+.box.mixed::before {
+    content: "Editorial";
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    font-size: 10px;
+    color: #666;
+    z-index: 5;
+}
+
+/* Styling for fractional ad elements */
+.fractional-ad {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    background-color: #FFFFA6; /* Same yellow as full ad pages */
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+/* Animation on hover for fractional ads */
+.fractional-ad:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 20;
+}
+
+/* Style for the fractional ad label/name */
+.fractional-ad div {
+    font-size: 0.65rem;
+    padding: 2px 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    font-weight: 500;
+}
+
+/* Top/Bottom ad divider line */
+.fractional-ad[data-position="top"]::after,
+.fractional-ad[data-position="bottom"]::after {
+    content: "";
+    position: absolute;
+    height: 1px;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.fractional-ad[data-position="top"]::after {
+    bottom: 0;
+}
+
+.fractional-ad[data-position="bottom"]::after {
+    top: 0;
+}
+
+/* Left/Right ad divider line */
+.fractional-ad[data-position="left"]::after,
+.fractional-ad[data-position="right"]::after {
+    content: "";
+    position: absolute;
+    width: 1px;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.fractional-ad[data-position="left"]::after {
+    right: 0;
+}
+
+.fractional-ad[data-position="right"]::after {
+    left: 0;
+}
+
+/* Special styling for the page editor modal fractional ads section */
+#fractional-ads-container {
+    border-color: #e5e7eb;
+}
+
+#fractional-ads-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.fractional-ad-form {
+    transition: background-color 0.2s ease;
+}
+
+.fractional-ad-form:hover {
+    background-color: #f9fafb;
+}
+
+/* Fractional ad sizes background colors (optional - for visual clarity) */
+.fractional-ad[data-size="1/4"] {
+    background-color: #ffffc1;
+}
+
+.fractional-ad[data-size="1/3"] {
+    background-color: #ffffb5;
+}
+
+.fractional-ad[data-size="1/2"] {
+    background-color: #ffffa6;
+}
+
+.fractional-ad[data-size="2/3"] {
+    background-color: #ffff97;
+}
