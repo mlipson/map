@@ -117,8 +117,21 @@
         transform: scale(1.1);
     }
 
-/* Form break styling */
+/* Form break styling - top border only with padding */
 .form-break {
-    border: 3px solid #ff00ff !important; /* Magenta border with !important to override other border styles */
-    box-shadow: 0 0 0 1px #fff; /* White outline to make it stand out */
+    position: relative; /* Make sure positioning works */
+    border-top: 3px solid #eb64eb !important; /* Magenta border on top only */
+    padding-top: 3px; /* Add padding between the border and content */
+}
+
+/* If the page boxes have rounded corners, we can add this to ensure proper styling */
+.form-break::before {
+    content: '';
+    position: absolute;
+    top: -5px; /* Same as the border thickness */
+    left: 0;
+    right: 0;
+    height: 5px; /* Same as the border thickness */
+    background-color: #eb64eb;
+    z-index: 1;
 }
