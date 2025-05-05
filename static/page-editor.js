@@ -132,6 +132,79 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+
+// Add this to your existing page-editor.js, near where other event listeners are set up
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up event delegation for dynamically created forms
+    document.addEventListener('change', function(e) {
+        // Check if the changed element is a fractional ad size dropdown
+        if (e.target.name === 'fractional_ad_size') {
+            const sizeValue = e.target.value;
+            // Find the position dropdown in the same form
+            const form = e.target.closest('.fractional-ad-form');
+            const positionDropdown = form.querySelector('[name="fractional_ad_position"]');
+
+            // Update position options based on size
+            updatePositionOptions(positionDropdown, sizeValue);
+        }
+    });
+});
+
+/**
+ * Updates position dropdown options based on the selected size
+ * @param {HTMLElement} positionDropdown - The position dropdown element
+ * @param {string} size - The selected size value
+ */
+function updatePositionOptions(positionDropdown, size) {
+    // Save current selection if possible
+    const currentPosition = positionDropdown.value;
+
+    // Clear existing options
+    positionDropdown.innerHTML = '';
+
+    // Add appropriate options based on size
+    if (size === '1/4') {
+        // For 1/4 page, we need corner positions
+        const cornerOptions = [
+            { value: 'top-left', label: 'Top Left' },
+            { value: 'top-right', label: 'Top Right' },
+            { value: 'bottom-left', label: 'Bottom Left' },
+            { value: 'bottom-right', label: 'Bottom Right' }
+        ];
+
+        cornerOptions.forEach(option => {
+            const optionEl = document.createElement('option');
+            optionEl.value = option.value;
+            optionEl.textContent = option.label;
+            positionDropdown.appendChild(optionEl);
+        });
+    } else {
+        // For other sizes, use the standard edge positions
+        const edgeOptions = [
+            { value: 'top', label: 'Top' },
+            { value: 'bottom', label: 'Bottom' },
+            { value: 'left', label: 'Left' },
+            { value: 'right', label: 'Right' }
+        ];
+
+        edgeOptions.forEach(option => {
+            const optionEl = document.createElement('option');
+            optionEl.value = option.value;
+            optionEl.textContent = option.label;
+            positionDropdown.appendChild(optionEl);
+        });
+    }
+
+    // Try to restore previous selection if it exists in new options
+    const matchingOption = positionDropdown.querySelector(`option[value="${currentPosition}"]`);
+    if (matchingOption) {
+        matchingOption.selected = true;
+    }
+}
+
+
+
+
     // Make pages clickable to edit
     document.querySelectorAll('.spread-container .box').forEach(box => {
         if (box.id === 'page-0') return; // skip placeholder
@@ -259,6 +332,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         position: el.getAttribute('data-position')
                     });
                 });
+            }
+
+            // Handle fractional ads container visibility and population
+            if (fractionalAdsContainer) {
+                if (pageType === 'mixed') {
+                    fractionalAdsContainer.classList.remove('hidden');
+                    populateFractionalAds(fractionalAds);
+
+                    // After populating fractional ads, check each form and update position options if needed
+                    document.querySelectorAll('#fractional-ads-list .fractional-ad-form').forEach(form => {
+                        const sizeDropdown = form.querySelector('[name="fractional_ad_size"]');
+                        const positionDropdown = form.querySelector('[name="fractional_ad_position"]');
+
+                        if (sizeDropdown && positionDropdown) {
+                            // Make sure the position dropdown matches the size dropdown
+                            updatePositionOptions(positionDropdown, sizeDropdown.value);
+                        }
+                    });
+                } else {
+                    fractionalAdsContainer.classList.add('hidden');
+                    clearFractionalAds();
+                }
             }
         }
 
@@ -412,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const bgColors = {
                 'edit': '#B1FCFE',
                 'ad': '#FFFFA6',
-                'mixed': '#FFFFFF', // White background for mixed content
+                'mixed': '#B1FCFE', // White background for mixed content?
                 'placeholder': '#F3F4F6',
                 'unknown': '#EEEEEE'
             };
@@ -592,59 +687,99 @@ document.addEventListener('DOMContentLoaded', () => {
      * Adds a new fractional ad form to the UI
      * @param {Object} adData - Optional existing ad data to populate the form
      */
-    function addFractionalAdForm(adData = null) {
-        const container = document.getElementById('fractional-ads-list');
-        if (!container) return;
+function addFractionalAdForm(adData = null) {
+    const container = document.getElementById('fractional-ads-list');
+    if (!container) return;
 
-        const formId = `fractional-ad-${Date.now()}`;
+    const formId = `fractional-ad-${Date.now()}`;
 
-        const formHtml = `
-            <div class="fractional-ad-form p-3 bg-gray-50 rounded-md mb-3" id="${formId}">
-                <input type="hidden" name="fractional_ad_id" value="${adData?.id || ''}">
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-gray-700 text-xs font-medium mb-1">Ad Name</label>
-                        <input type="text" name="fractional_ad_name" value="${adData?.name || ''}"
-                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 text-xs font-medium mb-1">Section</label>
-                        <input type="text" name="fractional_ad_section" value="${adData?.section || 'paid'}"
-                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 text-xs font-medium mb-1">Size</label>
-                        <select name="fractional_ad_size"
-                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
-                            <option value="1/4" ${adData?.size === '1/4' ? 'selected' : ''}>1/4 page</option>
-                            <option value="1/3" ${adData?.size === '1/3' ? 'selected' : ''}>1/3 page</option>
-                            <option value="1/2" ${adData?.size === '1/2' ? 'selected' : ''}>1/2 page</option>
-                            <option value="2/3" ${adData?.size === '2/3' ? 'selected' : ''}>2/3 page</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 text-xs font-medium mb-1">Position</label>
-                        <select name="fractional_ad_position"
-                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
-                            <option value="top" ${adData?.position === 'top' ? 'selected' : ''}>Top</option>
-                            <option value="bottom" ${adData?.position === 'bottom' ? 'selected' : ''}>Bottom</option>
-                            <option value="left" ${adData?.position === 'left' ? 'selected' : ''}>Left</option>
-                            <option value="right" ${adData?.position === 'right' ? 'selected' : ''}>Right</option>
-                        </select>
-                    </div>
+    // Determine size - if no adData, default to '1/4'
+    const size = adData?.size || '1/4';
+
+    // Determine if we need corner positions based on size
+    const isQuarterPage = size === '1/4';
+
+    // Prepare position options based on size
+    let positionOptions = '';
+
+    if (isQuarterPage) {
+        // Corner positions for quarter page
+        positionOptions = `
+            <option value="top-left" ${adData?.position === 'top-left' ? 'selected' : ''}>Top Left</option>
+            <option value="top-right" ${adData?.position === 'top-right' ? 'selected' : ''}>Top Right</option>
+            <option value="bottom-left" ${adData?.position === 'bottom-left' ? 'selected' : ''}>Bottom Left</option>
+            <option value="bottom-right" ${adData?.position === 'bottom-right' ? 'selected' : ''}>Bottom Right</option>
+        `;
+    } else {
+        // Edge positions for other sizes
+        positionOptions = `
+            <option value="top" ${adData?.position === 'top' ? 'selected' : ''}>Top</option>
+            <option value="bottom" ${adData?.position === 'bottom' ? 'selected' : ''}>Bottom</option>
+            <option value="left" ${adData?.position === 'left' ? 'selected' : ''}>Left</option>
+            <option value="right" ${adData?.position === 'right' ? 'selected' : ''}>Right</option>
+        `;
+    }
+
+    const formHtml = `
+        <div class="fractional-ad-form p-3 bg-gray-50 rounded-md mb-3" id="${formId}">
+            <input type="hidden" name="fractional_ad_id" value="${adData?.id || ''}">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-gray-700 text-xs font-medium mb-1">Ad Name</label>
+                    <input type="text" name="fractional_ad_name" value="${adData?.name || ''}"
+                        class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
                 </div>
-                <div class="flex justify-end mt-2">
-                    <button type="button" onclick="removeFractionalAdForm('${formId}')"
-                        class="text-red-600 hover:text-red-800 text-xs">
-                        Remove
-                    </button>
+                <div>
+                    <label class="block text-gray-700 text-xs font-medium mb-1">Section</label>
+                    <input type="text" name="fractional_ad_section" value="${adData?.section || 'paid'}"
+                        class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-xs font-medium mb-1">Size</label>
+                    <select name="fractional_ad_size"
+                        class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+                        <option value="1/4" ${size === '1/4' ? 'selected' : ''}>1/4 page</option>
+                        <option value="1/3" ${size === '1/3' ? 'selected' : ''}>1/3 page</option>
+                        <option value="1/2" ${size === '1/2' ? 'selected' : ''}>1/2 page</option>
+                        <option value="2/3" ${size === '2/3' ? 'selected' : ''}>2/3 page</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-xs font-medium mb-1">Position</label>
+                    <select name="fractional_ad_position"
+                        class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+                        ${positionOptions}
+                    </select>
                 </div>
             </div>
-        `;
+            <div class="flex justify-end mt-2">
+                <button type="button" onclick="removeFractionalAdForm('${formId}')"
+                    class="text-red-600 hover:text-red-800 text-xs">
+                    Remove
+                </button>
+            </div>
+        </div>
+    `;
 
-        // Insert the new form
-        container.insertAdjacentHTML('beforeend', formHtml);
+    // Insert the new form
+    container.insertAdjacentHTML('beforeend', formHtml);
+
+    // Add change event listener to the size dropdown
+    const sizeDropdown = document.querySelector(`#${formId} [name="fractional_ad_size"]`);
+    const positionDropdown = document.querySelector(`#${formId} [name="fractional_ad_position"]`);
+
+    if (sizeDropdown && positionDropdown) {
+        sizeDropdown.addEventListener('change', function() {
+            updatePositionOptions(positionDropdown, this.value);
+        });
+
+        // Set default position if this is a new form (not loading existing data)
+        if (!adData) {
+            // Default position for 1/4 page is top-left
+            positionDropdown.value = isQuarterPage ? 'top-left' : 'top';
+        }
     }
+}
 
     /**
      * Removes a fractional ad form from the UI
@@ -702,20 +837,58 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {HTMLElement} pageBox - The page box element
      * @param {Object} adData - The fractional ad data
      */
-    function addFractionalAdToPage(pageBox, adData) {
-        // Create the fractional ad element
-        const adElement = document.createElement('div');
-        adElement.className = 'fractional-ad absolute bg-yellow-100 border border-yellow-300';
-        adElement.setAttribute('data-id', adData.id);
-        adElement.setAttribute('data-name', adData.name);
-        adElement.setAttribute('data-section', adData.section);
-        adElement.setAttribute('data-size', adData.size);
-        adElement.setAttribute('data-position', adData.position);
+function addFractionalAdToPage(pageBox, adData) {
+    // Create the fractional ad element
+    const adElement = document.createElement('div');
+    adElement.className = 'fractional-ad absolute bg-yellow-100 border border-yellow-300';
+    adElement.style.backgroundColor = '#F19E9C'; // Set the background color directly
+    adElement.style.borderColor = '#ccc'; // Set the border color directly
+    adElement.setAttribute('data-id', adData.id);
+    adElement.setAttribute('data-name', adData.name);
+    adElement.setAttribute('data-section', adData.section);
+    adElement.setAttribute('data-size', adData.size);
+    adElement.setAttribute('data-position', adData.position);
 
-        // Set size and position based on the ad data
-        const { size, position } = adData;
+    // Set size and position based on the ad data
+    const { size, position } = adData;
 
-        // Set CSS properties based on size and position
+    // Set CSS properties based on size and position
+    if (size === '1/4') {
+        // Quarter page - handle corner positions
+        switch (position) {
+            case 'top-left':
+                adElement.style.top = '0';
+                adElement.style.left = '0';
+                adElement.style.width = '50%';
+                adElement.style.height = '50%';
+                break;
+            case 'top-right':
+                adElement.style.top = '0';
+                adElement.style.right = '0';
+                adElement.style.width = '50%';
+                adElement.style.height = '50%';
+                break;
+            case 'bottom-left':
+                adElement.style.bottom = '0';
+                adElement.style.left = '0';
+                adElement.style.width = '50%';
+                adElement.style.height = '50%';
+                break;
+            case 'bottom-right':
+                adElement.style.bottom = '0';
+                adElement.style.right = '0';
+                adElement.style.width = '50%';
+                adElement.style.height = '50%';
+                break;
+            default:
+                // Fallback to top-left if position is invalid
+                adElement.style.top = '0';
+                adElement.style.left = '0';
+                adElement.style.width = '50%';
+                adElement.style.height = '50%';
+        }
+    } else {
+        // For other sizes, use the standard edge positions
         switch (position) {
             case 'top':
                 adElement.style.top = '0';
@@ -742,15 +915,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 adElement.style.width = getSizePercentage(size);
                 break;
         }
-
-        // Add content to the fractional ad
-        adElement.innerHTML = `
-            <div class="text-xs font-medium text-center p-1">${adData.name}</div>
-        `;
-
-        // Add the ad element to the page box
-        pageBox.appendChild(adElement);
     }
+
+    // Add content to the fractional ad
+    adElement.innerHTML = `
+        <div class="text-xs font-medium text-center p-1">${adData.name}</div>
+    `;
+
+    // Add the ad element to the page box
+    pageBox.appendChild(adElement);
+}
 
     /**
      * Gets the CSS percentage value for a fractional size
