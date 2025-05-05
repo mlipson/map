@@ -1,221 +1,66 @@
 /**
- * Page Editor functionality for Flatplan application
- * Handles modals for editing page properties, adding new pages, deleting pages,
- * editing layout metadata, and managing fractional advertisements
+ * Flatplan - Magazine Layout Planning Tool
+ * Page Editor Module
+ *
+ * This module handles all functionality related to editing pages in the magazine layout,
+ * including modal management, page properties, fractional advertisements, and layout metadata.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Select DOM elements
+    // ===================================================
+    // SECTION 1: DOM ELEMENT SELECTION AND INITIALIZATION
+    // ===================================================
+
+    // Modal elements
     const pageModal = document.getElementById('page-editor-modal');
     const layoutModal = document.getElementById('edit-layout-modal');
+
+    // Page editor form elements
     const editForm = document.getElementById('page-edit-form');
     const closeModalBtn = document.getElementById('close-modal-btn');
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
     const deletePageBtn = document.getElementById('delete-page-btn');
     const addPageBtn = document.getElementById('add-page-btn');
     const layoutId = document.getElementById('layout-id')?.value;
+
+    // Section and page type selectors
     const sectionSelect = document.getElementById('edit-page-section');
     const pageTypeSelect = document.getElementById('edit-page-type');
+
+    // Fractional ads elements
     const fractionalAdsContainer = document.getElementById('fractional-ads-container');
     const addFractionalAdBtn = document.getElementById('add-fractional-ad-btn');
 
-    // Set up section selection handling
+    // ===================================================
+    // SECTION 2: EVENT LISTENERS AND INITIALIZATION
+    // ===================================================
+
+    // Initialize section selection handling
     if (sectionSelect) {
-        sectionSelect.addEventListener('change', function(e) {
-            if (this.value === 'add_new_section') {
-                // Reset selection to previous value to avoid having "Add New Section" as selected value
-                this.value = document.getElementById('temp-section-value')?.value || '';
-
-                // Prompt for new section name
-                const newSection = window.prompt('Enter new section name:');
-
-                if (newSection && newSection.trim() !== '') {
-                    // Add new option to dropdown
-                    const newOption = document.createElement('option');
-                    newOption.value = newSection.trim();
-                    newOption.textContent = newSection.trim();
-
-                    // Insert before the "Add New Section" option
-                    this.insertBefore(newOption, this.lastChild);
-
-                    // Select the new option
-                    newOption.selected = true;
-                }
-            } else {
-                // Store current selection in a hidden field for reference
-                // in case user clicks "Add New Section" and then cancels
-                let tempField = document.getElementById('temp-section-value');
-                if (!tempField) {
-                    tempField = document.createElement('input');
-                    tempField.type = 'hidden';
-                    tempField.id = 'temp-section-value';
-                    document.getElementById('page-edit-form').appendChild(tempField);
-                }
-                tempField.value = this.value;
-            }
-        });
+        sectionSelect.addEventListener('change', handleSectionChange);
     }
 
     // Page type change handler to show/hide fractional ads section
     if (pageTypeSelect) {
-        pageTypeSelect.addEventListener('change', function() {
-            if (this.value === 'mixed') {
-                if (fractionalAdsContainer) {
-                    fractionalAdsContainer.classList.remove('hidden');
-                    // Add an empty fractional ad form if there are none
-                    const adsList = document.getElementById('fractional-ads-list');
-                    if (adsList && adsList.children.length === 0) {
-                        addFractionalAdForm();
-                    }
-                }
-            } else {
-                if (fractionalAdsContainer) {
-                    fractionalAdsContainer.classList.add('hidden');
-                }
-            }
-        });
+        pageTypeSelect.addEventListener('change', handlePageTypeChange);
     }
 
     // Add button for adding new fractional ad forms
     if (addFractionalAdBtn) {
-        addFractionalAdBtn.addEventListener('click', function() {
-            addFractionalAdForm();
-        });
+        addFractionalAdBtn.addEventListener('click', () => addFractionalAdForm());
     }
 
-    // ===== Layout Metadata Edit Functions =====
+    // Initialize layout edit buttons
+    initializeLayoutEditButtons();
 
-    // Initialize layout edit buttons with direct event listener attachment
-    const layoutEditButtons = document.querySelectorAll('[data-action="edit-layout"]');
-    console.log('Found layout edit buttons:', layoutEditButtons.length);
+    // Set global event handler for dynamically added elements
+    document.addEventListener('click', handleGlobalClick);
 
-    layoutEditButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Edit layout button clicked');
-
-            const layoutId = this.getAttribute('data-layout-id');
-            const publicationName = this.getAttribute('data-publication-name');
-            const issueName = this.getAttribute('data-issue-name');
-            const publicationDate = this.getAttribute('data-publication-date') || '';
-            const returnTo = this.getAttribute('data-return-to');
-
-            console.log('Opening modal with data:', {
-                layoutId,
-                publicationName,
-                issueName,
-                publicationDate,
-                returnTo
-            });
-
-            openLayoutEditModal(layoutId, publicationName, issueName, publicationDate, returnTo);
-        });
-    });
-
-    // Add a global click handler as a fallback for dynamically added elements
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('[data-action="edit-layout"]')) {
-            const button = e.target.closest('[data-action="edit-layout"]');
-            e.preventDefault();
-
-            const layoutId = button.getAttribute('data-layout-id');
-            const publicationName = button.getAttribute('data-publication-name');
-            const issueName = button.getAttribute('data-issue-name');
-            const publicationDate = button.getAttribute('data-publication-date') || '';
-            const returnTo = button.getAttribute('data-return-to');
-
-            openLayoutEditModal(layoutId, publicationName, issueName, publicationDate, returnTo);
-        }
-
-        if (e.target.closest('[data-action="close-layout-modal"]')) {
-            closeLayoutEditModal();
-        }
-    });
-
-
-// Add this to your existing page-editor.js, near where other event listeners are set up
-document.addEventListener('DOMContentLoaded', function() {
-    // Set up event delegation for dynamically created forms
-    document.addEventListener('change', function(e) {
-        // Check if the changed element is a fractional ad size dropdown
-        if (e.target.name === 'fractional_ad_size') {
-            const sizeValue = e.target.value;
-            // Find the position dropdown in the same form
-            const form = e.target.closest('.fractional-ad-form');
-            const positionDropdown = form.querySelector('[name="fractional_ad_position"]');
-
-            // Update position options based on size
-            updatePositionOptions(positionDropdown, sizeValue);
-        }
-    });
-});
-
-/**
- * Updates position dropdown options based on the selected size
- * @param {HTMLElement} positionDropdown - The position dropdown element
- * @param {string} size - The selected size value
- */
-function updatePositionOptions(positionDropdown, size) {
-    // Save current selection if possible
-    const currentPosition = positionDropdown.value;
-
-    // Clear existing options
-    positionDropdown.innerHTML = '';
-
-    // Add appropriate options based on size
-    if (size === '1/4') {
-        // For 1/4 page, we need corner positions
-        const cornerOptions = [
-            { value: 'top-left', label: 'Top Left' },
-            { value: 'top-right', label: 'Top Right' },
-            { value: 'bottom-left', label: 'Bottom Left' },
-            { value: 'bottom-right', label: 'Bottom Right' }
-        ];
-
-        cornerOptions.forEach(option => {
-            const optionEl = document.createElement('option');
-            optionEl.value = option.value;
-            optionEl.textContent = option.label;
-            positionDropdown.appendChild(optionEl);
-        });
-    } else {
-        // For other sizes, use the standard edge positions
-        const edgeOptions = [
-            { value: 'top', label: 'Top' },
-            { value: 'bottom', label: 'Bottom' },
-            { value: 'left', label: 'Left' },
-            { value: 'right', label: 'Right' }
-        ];
-
-        edgeOptions.forEach(option => {
-            const optionEl = document.createElement('option');
-            optionEl.value = option.value;
-            optionEl.textContent = option.label;
-            positionDropdown.appendChild(optionEl);
-        });
-    }
-
-    // Try to restore previous selection if it exists in new options
-    const matchingOption = positionDropdown.querySelector(`option[value="${currentPosition}"]`);
-    if (matchingOption) {
-        matchingOption.selected = true;
-    }
-}
-
-
-
+    // Set up event delegation for fractional ad forms
+    document.addEventListener('change', handleFractionalAdFormChanges);
 
     // Make pages clickable to edit
-    document.querySelectorAll('.spread-container .box').forEach(box => {
-        if (box.id === 'page-0') return; // skip placeholder
-
-        box.addEventListener('click', (e) => {
-            // Only open editor when clicking the box itself (not during drag operations)
-            if (e.currentTarget === box) {
-                openEditModal(box);
-            }
-        });
-    });
+    initializePageBoxes();
 
     // Close modal handlers
     if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
@@ -240,7 +85,7 @@ function updatePositionOptions(positionDropdown, size) {
     }
 
     // Close modal if clicking outside of it
-    window.addEventListener('click', function(event) {
+    window.addEventListener('click', (event) => {
         if (layoutModal && event.target === layoutModal) {
             closeLayoutEditModal();
         }
@@ -248,6 +93,116 @@ function updatePositionOptions(positionDropdown, size) {
             closeModal();
         }
     });
+
+    // ===================================================
+    // SECTION 3: SECTION AND PAGE TYPE HANDLING FUNCTIONS
+    // ===================================================
+
+    /**
+     * Handles changes to the section dropdown
+     * Allows adding new sections dynamically
+     */
+    function handleSectionChange() {
+        if (this.value === 'add_new_section') {
+            // Reset selection to previous value to avoid having "Add New Section" as selected value
+            this.value = document.getElementById('temp-section-value')?.value || '';
+
+            // Prompt for new section name
+            const newSection = window.prompt('Enter new section name:');
+
+            if (newSection && newSection.trim() !== '') {
+                // Add new option to dropdown
+                const newOption = document.createElement('option');
+                newOption.value = newSection.trim();
+                newOption.textContent = newSection.trim();
+
+                // Insert before the "Add New Section" option
+                this.insertBefore(newOption, this.lastChild);
+
+                // Select the new option
+                newOption.selected = true;
+            }
+        } else {
+            // Store current selection in a hidden field for reference
+            let tempField = document.getElementById('temp-section-value');
+            if (!tempField) {
+                tempField = document.createElement('input');
+                tempField.type = 'hidden';
+                tempField.id = 'temp-section-value';
+                document.getElementById('page-edit-form').appendChild(tempField);
+            }
+            tempField.value = this.value;
+        }
+    }
+
+    /**
+     * Handles changes to the page type dropdown
+     * Shows/hides fractional ads container based on selected type
+     */
+    function handlePageTypeChange() {
+        if (fractionalAdsContainer) {
+            if (this.value === 'mixed') {
+                fractionalAdsContainer.classList.remove('hidden');
+                // Add an empty fractional ad form if there are none
+                const adsList = document.getElementById('fractional-ads-list');
+                if (adsList && adsList.children.length === 0) {
+                    addFractionalAdForm();
+                }
+            } else {
+                fractionalAdsContainer.classList.add('hidden');
+            }
+        }
+    }
+
+    // ===================================================
+    // SECTION 4: LAYOUT MODAL FUNCTIONS
+    // ===================================================
+
+    /**
+     * Initializes layout edit buttons with event listeners
+     */
+    function initializeLayoutEditButtons() {
+        const layoutEditButtons = document.querySelectorAll('[data-action="edit-layout"]');
+
+        layoutEditButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const layoutId = this.getAttribute('data-layout-id');
+                const publicationName = this.getAttribute('data-publication-name');
+                const issueName = this.getAttribute('data-issue-name');
+                const publicationDate = this.getAttribute('data-publication-date') || '';
+                const returnTo = this.getAttribute('data-return-to');
+
+                openLayoutEditModal(layoutId, publicationName, issueName, publicationDate, returnTo);
+            });
+        });
+    }
+
+    /**
+     * Handles global click events for dynamically added elements
+     * @param {Event} e - Click event
+     */
+    function handleGlobalClick(e) {
+        // Handle layout edit button clicks
+        if (e.target.closest('[data-action="edit-layout"]')) {
+            const button = e.target.closest('[data-action="edit-layout"]');
+            e.preventDefault();
+
+            const layoutId = button.getAttribute('data-layout-id');
+            const publicationName = button.getAttribute('data-publication-name');
+            const issueName = button.getAttribute('data-issue-name');
+            const publicationDate = button.getAttribute('data-publication-date') || '';
+            const returnTo = button.getAttribute('data-return-to');
+
+            openLayoutEditModal(layoutId, publicationName, issueName, publicationDate, returnTo);
+        }
+
+        // Handle layout modal close button clicks
+        if (e.target.closest('[data-action="close-layout-modal"]')) {
+            closeLayoutEditModal();
+        }
+    }
 
     /**
      * Opens the layout edit modal with metadata
@@ -258,10 +213,6 @@ function updatePositionOptions(positionDropdown, size) {
      * @param {string} returnTo - Where to return after editing ('layout' or 'account')
      */
     window.openLayoutEditModal = function(layoutId, publicationName, issueName, publicationDate, returnTo) {
-        console.log('openLayoutEditModal called with:', {
-            layoutId, publicationName, issueName, publicationDate, returnTo
-        });
-
         if (!layoutModal) {
             console.error('Layout modal element not found!');
             return;
@@ -276,7 +227,6 @@ function updatePositionOptions(positionDropdown, size) {
 
         // Show modal
         layoutModal.classList.remove('hidden');
-        console.log('Modal should now be visible');
     };
 
     /**
@@ -288,8 +238,28 @@ function updatePositionOptions(positionDropdown, size) {
         }
     };
 
+    // ===================================================
+    // SECTION 5: PAGE EDITING FUNCTIONS
+    // ===================================================
+
     /**
-     * Opens the edit modal with page data, including support for fractional ads
+     * Initializes page boxes to be clickable for editing
+     */
+    function initializePageBoxes() {
+        document.querySelectorAll('.spread-container .box').forEach(box => {
+            if (box.id === 'page-0') return; // skip placeholder
+
+            box.addEventListener('click', (e) => {
+                // Only open editor when clicking the box itself (not during drag operations)
+                if (e.currentTarget === box) {
+                    openEditModal(box);
+                }
+            });
+        });
+    }
+
+    /**
+     * Opens the edit modal with page data
      * @param {HTMLElement} pageBox - The page box element
      */
     function openEditModal(pageBox) {
@@ -300,7 +270,7 @@ function updatePositionOptions(positionDropdown, size) {
         const pageNumber = pageBox.getAttribute('data-page-number');
         const formBreak = pageBox.hasAttribute('data-form-break');
 
-        // Determine page type, now including "mixed" type
+        // Determine page type
         let pageType = 'unknown';
         if (pageBox.classList.contains('edit')) pageType = 'edit';
         else if (pageBox.classList.contains('ad')) pageType = 'ad';
@@ -310,51 +280,7 @@ function updatePositionOptions(positionDropdown, size) {
         // Get fractional ads data if present
         let fractionalAds = [];
         if (pageType === 'mixed') {
-            // Try to get fractional ads from data attribute first
-            const fractionalAdsData = pageBox.getAttribute('data-fractional-ads');
-            if (fractionalAdsData) {
-                try {
-                    fractionalAds = JSON.parse(fractionalAdsData);
-                } catch (e) {
-                    console.error('Error parsing fractional ads data:', e);
-                }
-            }
-
-            // If no data attribute or parsing failed, try to get from DOM elements
-            if (fractionalAds.length === 0) {
-                const fractionalElements = pageBox.querySelectorAll('.fractional-ad');
-                fractionalElements.forEach(el => {
-                    fractionalAds.push({
-                        id: el.getAttribute('data-id'),
-                        name: el.getAttribute('data-name'),
-                        section: el.getAttribute('data-section'),
-                        size: el.getAttribute('data-size'),
-                        position: el.getAttribute('data-position')
-                    });
-                });
-            }
-
-            // Handle fractional ads container visibility and population
-            if (fractionalAdsContainer) {
-                if (pageType === 'mixed') {
-                    fractionalAdsContainer.classList.remove('hidden');
-                    populateFractionalAds(fractionalAds);
-
-                    // After populating fractional ads, check each form and update position options if needed
-                    document.querySelectorAll('#fractional-ads-list .fractional-ad-form').forEach(form => {
-                        const sizeDropdown = form.querySelector('[name="fractional_ad_size"]');
-                        const positionDropdown = form.querySelector('[name="fractional_ad_position"]');
-
-                        if (sizeDropdown && positionDropdown) {
-                            // Make sure the position dropdown matches the size dropdown
-                            updatePositionOptions(positionDropdown, sizeDropdown.value);
-                        }
-                    });
-                } else {
-                    fractionalAdsContainer.classList.add('hidden');
-                    clearFractionalAds();
-                }
-            }
+            fractionalAds = getFractionalAdsFromPage(pageBox);
         }
 
         // Fill the form
@@ -369,77 +295,17 @@ function updatePositionOptions(positionDropdown, size) {
             document.getElementById('edit-page-form-break').checked = formBreak;
         }
 
-        // Build section dropdown options dynamically
-        const sectionSelect = document.getElementById('edit-page-section');
-        if (sectionSelect) {
-            sectionSelect.innerHTML = ''; // Clear existing options
-
-            // Standard sections that always appear (common in magazine layouts)
-            const defaultSections = [
-                { value: 'FOB', label: 'Front of Book' },
-                { value: 'Feature', label: 'Feature' },
-                { value: 'BOB', label: 'Back of Book' },
-                { value: 'Cover', label: 'Cover' },
-                { value: 'paid', label: 'Paid Advertisement' },
-                { value: 'house', label: 'House Advertisement' }
-            ];
-
-            // Get unique sections from current layout
-            const existingSections = new Set();
-            document.querySelectorAll('.spread-container .box').forEach(box => {
-                const section = box.querySelector('.section')?.textContent;
-                if (section && !defaultSections.some(s => s.value === section)) {
-                    existingSections.add(section);
-                }
-            });
-
-            // Add default sections first
-            defaultSections.forEach(section => {
-                const option = document.createElement('option');
-                option.value = section.value;
-                option.textContent = section.label;
-                sectionSelect.appendChild(option);
-            });
-
-            // Add section divider if we have custom sections
-            if (existingSections.size > 0) {
-                const divider = document.createElement('option');
-                divider.disabled = true;
-                divider.textContent = '──────────────';
-                sectionSelect.appendChild(divider);
-
-                // Add existing custom sections
-                Array.from(existingSections).sort().forEach(section => {
-                    const option = document.createElement('option');
-                    option.value = section;
-                    option.textContent = section;
-                    sectionSelect.appendChild(option);
-                });
-            }
-
-            // Add "Add New Section" option
-            const addNewOption = document.createElement('option');
-            addNewOption.value = 'add_new_section';
-            addNewOption.textContent = '+ Add New Section';
-            sectionSelect.appendChild(addNewOption);
-
-            // Set the current section
-            if (pageSection) {
-                // Try to find and select the current section
-                for (let i = 0; i < sectionSelect.options.length; i++) {
-                    if (sectionSelect.options[i].value === pageSection) {
-                        sectionSelect.selectedIndex = i;
-                        break;
-                    }
-                }
-            }
-        }
+        // Build section dropdown options
+        populateSectionDropdown(pageSection);
 
         // Handle fractional ads container visibility and population
         if (fractionalAdsContainer) {
             if (pageType === 'mixed') {
                 fractionalAdsContainer.classList.remove('hidden');
                 populateFractionalAds(fractionalAds);
+
+                // Update position options for each form
+                updateAllPositionOptions();
             } else {
                 fractionalAdsContainer.classList.add('hidden');
                 clearFractionalAds();
@@ -451,7 +317,154 @@ function updatePositionOptions(positionDropdown, size) {
     }
 
     /**
-     * Closes the modal
+     * Gets fractional ads data from a page element
+     * @param {HTMLElement} pageBox - The page box element
+     * @returns {Array} Array of fractional ad objects
+     */
+    function getFractionalAdsFromPage(pageBox) {
+        let fractionalAds = [];
+
+        // Try to get fractional ads from data attribute first
+        const fractionalAdsData = pageBox.getAttribute('data-fractional-ads');
+        if (fractionalAdsData) {
+            try {
+                fractionalAds = JSON.parse(fractionalAdsData);
+            } catch (e) {
+                console.error('Error parsing fractional ads data:', e);
+            }
+        }
+
+        // If no data attribute or parsing failed, try to get from DOM elements
+        if (fractionalAds.length === 0) {
+            const fractionalElements = pageBox.querySelectorAll('.fractional-ad');
+            fractionalElements.forEach(el => {
+                fractionalAds.push({
+                    id: el.getAttribute('data-id'),
+                    name: el.getAttribute('data-name'),
+                    section: el.getAttribute('data-section'),
+                    size: el.getAttribute('data-size'),
+                    position: el.getAttribute('data-position')
+                });
+            });
+        }
+
+        return fractionalAds;
+    }
+
+    /**
+     * Updates position dropdown options for all fractional ad forms
+     */
+    function updateAllPositionOptions() {
+        document.querySelectorAll('#fractional-ads-list .fractional-ad-form').forEach(form => {
+            const sizeDropdown = form.querySelector('[name="fractional_ad_size"]');
+            const positionDropdown = form.querySelector('[name="fractional_ad_position"]');
+
+            if (sizeDropdown && positionDropdown) {
+                updatePositionOptions(positionDropdown, sizeDropdown.value);
+            }
+        });
+    }
+
+    /**
+     * Populates the section dropdown with options
+     * @param {string} currentSection - The current section to select
+     */
+    function populateSectionDropdown(currentSection) {
+        const sectionSelect = document.getElementById('edit-page-section');
+        if (!sectionSelect) return;
+
+        sectionSelect.innerHTML = ''; // Clear existing options
+
+        // Standard sections that always appear
+        const defaultSections = [
+            { value: 'FOB', label: 'Front of Book' },
+            { value: 'Feature', label: 'Feature' },
+            { value: 'BOB', label: 'Back of Book' },
+            { value: 'Cover', label: 'Cover' },
+            { value: 'paid', label: 'Paid Advertisement' },
+            { value: 'house', label: 'House Advertisement' }
+        ];
+
+        // Get unique sections from current layout
+        const existingSections = getExistingSections(defaultSections);
+
+        // Add default sections first
+        defaultSections.forEach(section => {
+            const option = document.createElement('option');
+            option.value = section.value;
+            option.textContent = section.label;
+            sectionSelect.appendChild(option);
+        });
+
+        // Add section divider if we have custom sections
+        if (existingSections.size > 0) {
+            addSectionDivider(sectionSelect, existingSections);
+        }
+
+        // Add "Add New Section" option
+        const addNewOption = document.createElement('option');
+        addNewOption.value = 'add_new_section';
+        addNewOption.textContent = '+ Add New Section';
+        sectionSelect.appendChild(addNewOption);
+
+        // Set the current section
+        if (currentSection) {
+            selectSection(sectionSelect, currentSection);
+        }
+    }
+
+    /**
+     * Gets existing sections from the layout
+     * @param {Array} defaultSections - Array of default section objects
+     * @returns {Set} Set of existing section names
+     */
+    function getExistingSections(defaultSections) {
+        const existingSections = new Set();
+        document.querySelectorAll('.spread-container .box').forEach(box => {
+            const section = box.querySelector('.section')?.textContent;
+            if (section && !defaultSections.some(s => s.value === section)) {
+                existingSections.add(section);
+            }
+        });
+        return existingSections;
+    }
+
+    /**
+     * Adds a divider and custom sections to the section dropdown
+     * @param {HTMLElement} sectionSelect - The section select element
+     * @param {Set} existingSections - Set of existing section names
+     */
+    function addSectionDivider(sectionSelect, existingSections) {
+        const divider = document.createElement('option');
+        divider.disabled = true;
+        divider.textContent = '──────────────';
+        sectionSelect.appendChild(divider);
+
+        // Add existing custom sections
+        Array.from(existingSections).sort().forEach(section => {
+            const option = document.createElement('option');
+            option.value = section;
+            option.textContent = section;
+            sectionSelect.appendChild(option);
+        });
+    }
+
+    /**
+     * Selects a section in the dropdown
+     * @param {HTMLElement} sectionSelect - The section select element
+     * @param {string} sectionValue - The section value to select
+     */
+    function selectSection(sectionSelect, sectionValue) {
+        for (let i = 0; i < sectionSelect.options.length; i++) {
+            if (sectionSelect.options[i].value === sectionValue) {
+                sectionSelect.selectedIndex = i;
+                break;
+            }
+        }
+    }
+
+    /**
+     * Closes the page edit modal
      */
     function closeModal() {
         pageModal.classList.add('hidden');
@@ -462,9 +475,9 @@ function updatePositionOptions(positionDropdown, size) {
      */
     function savePageEdits() {
         const pageId = document.getElementById('edit-page-id').value;
-        const pageName = document.getElementById('edit-page-name').value.trim(); // Add trim() here
+        const pageName = document.getElementById('edit-page-name').value.trim();
         const pageType = document.getElementById('edit-page-type').value;
-        const pageSection = document.getElementById('edit-page-section').value.trim(); // Also trim section
+        const pageSection = document.getElementById('edit-page-section').value.trim();
         const formBreak = document.getElementById('edit-page-form-break').checked;
 
         // Collect fractional ads data if page type is "mixed"
@@ -475,21 +488,39 @@ function updatePositionOptions(positionDropdown, size) {
         if (!pageBox) return;
 
         // Update the page element
+        updatePageBasicInfo(pageBox, pageName, pageSection);
+        updatePageType(pageBox, pageType, pageSection);
+        updateFormBreak(pageBox, formBreak);
+        updateFractionalAds(pageBox, pageType, fractionalAds);
+
+        // Close the modal
+        closeModal();
+
+        // Show notification
+        showNotification('Page updated', 'success');
+    }
+
+    /**
+     * Updates basic page information in the UI
+     * @param {HTMLElement} pageBox - The page box element
+     * @param {string} pageName - The page name
+     * @param {string} pageSection - The page section
+     */
+    function updatePageBasicInfo(pageBox, pageName, pageSection) {
         pageBox.querySelector('.name').textContent = pageName;
         pageBox.querySelector('.section').textContent = pageSection;
+    }
 
+    /**
+     * Updates the page type and styling
+     * @param {HTMLElement} pageBox - The page box element
+     * @param {string} pageType - The page type
+     * @param {string} pageSection - The page section
+     */
+    function updatePageType(pageBox, pageType, pageSection) {
         // Update the page type (class)
         pageBox.classList.remove('edit', 'ad', 'mixed', 'placeholder', 'unknown', 'bonus', 'promo');
         pageBox.classList.add(pageType);
-
-        // Handle form break (add or remove as needed)
-        if (formBreak) {
-            pageBox.setAttribute('data-form-break', 'true');
-            pageBox.classList.add('form-break');
-        } else {
-            pageBox.removeAttribute('data-form-break');
-            pageBox.classList.remove('form-break');
-        }
 
         // Determine background color based on type and special sections
         let bgColor;
@@ -507,7 +538,7 @@ function updatePositionOptions(positionDropdown, size) {
             const bgColors = {
                 'edit': '#B1FCFE',
                 'ad': '#FFFFA6',
-                'mixed': '#B1FCFE', // White background for mixed content?
+                'mixed': '#B1FCFE',
                 'placeholder': '#F3F4F6',
                 'unknown': '#EEEEEE'
             };
@@ -516,13 +547,35 @@ function updatePositionOptions(positionDropdown, size) {
 
         // Apply the background color
         pageBox.style.backgroundColor = bgColor;
+    }
 
-        // Handle fractional ads for mixed content pages
+    /**
+     * Updates form break status for the page
+     * @param {HTMLElement} pageBox - The page box element
+     * @param {boolean} formBreak - Whether the page has a form break
+     */
+    function updateFormBreak(pageBox, formBreak) {
+        if (formBreak) {
+            pageBox.setAttribute('data-form-break', 'true');
+            pageBox.classList.add('form-break');
+        } else {
+            pageBox.removeAttribute('data-form-break');
+            pageBox.classList.remove('form-break');
+        }
+    }
+
+    /**
+     * Updates fractional ads for a page
+     * @param {HTMLElement} pageBox - The page box element
+     * @param {string} pageType - The page type
+     * @param {Array} fractionalAds - Array of fractional ad objects
+     */
+    function updateFractionalAds(pageBox, pageType, fractionalAds) {
+        // Clear existing fractional ads
+        const existingFractionalAds = pageBox.querySelectorAll('.fractional-ad');
+        existingFractionalAds.forEach(el => el.remove());
+
         if (pageType === 'mixed') {
-            // Clear existing fractional ads
-            const existingFractionalAds = pageBox.querySelectorAll('.fractional-ad');
-            existingFractionalAds.forEach(el => el.remove());
-
             // Add the new fractional ads
             fractionalAds.forEach(ad => {
                 addFractionalAdToPage(pageBox, ad);
@@ -531,19 +584,9 @@ function updatePositionOptions(positionDropdown, size) {
             // Store fractional ads data in a data attribute for later retrieval
             pageBox.setAttribute('data-fractional-ads', JSON.stringify(fractionalAds));
         } else {
-            // Remove any existing fractional ads
-            const existingFractionalAds = pageBox.querySelectorAll('.fractional-ad');
-            existingFractionalAds.forEach(el => el.remove());
-
             // Remove the data attribute
             pageBox.removeAttribute('data-fractional-ads');
         }
-
-        // Close the modal
-        closeModal();
-
-        // Show notification
-        showNotification('Page updated', 'success');
     }
 
     /**
@@ -569,6 +612,10 @@ function updatePositionOptions(positionDropdown, size) {
     function addNewPage() {
         // Get the spread container
         const spreadContainer = document.querySelector('.spread-container');
+        if (!spreadContainer) {
+            console.error('Spread container not found');
+            return;
+        }
 
         // Create a new page element
         const boxes = document.querySelectorAll('.spread-container .box');
@@ -577,7 +624,7 @@ function updatePositionOptions(positionDropdown, size) {
 
         const newPage = document.createElement('div');
         newPage.id = newPageId;
-        // Updated class with w-32 instead of w-36 to match new sizing
+        // Using w-32 for consistent sizing with existing pages
         newPage.className = 'box placeholder rounded border relative p-3 aspect-[3/4] w-32 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm';
 
         newPage.innerHTML = `
@@ -656,10 +703,85 @@ function updatePositionOptions(positionDropdown, size) {
         }, 3000);
     }
 
+    // ===================================================
+    // SECTION 6: FRACTIONAL ADS FUNCTIONS
+    // ===================================================
+
     /**
-     * Fractional Ads Functions
-     * These functions manage the creation, editing, and display of fractional advertisements
+     * Handles fractional ad form changes
+     * @param {Event} e - Change event
      */
+    function handleFractionalAdFormChanges(e) {
+        // Check if the changed element is a fractional ad size dropdown
+        if (e.target.name === 'fractional_ad_size') {
+            const sizeValue = e.target.value;
+            // Find the position dropdown in the same form
+            const form = e.target.closest('.fractional-ad-form');
+            const positionDropdown = form.querySelector('[name="fractional_ad_position"]');
+
+            // Update position options based on size
+            updatePositionOptions(positionDropdown, sizeValue);
+        }
+    }
+
+    /**
+     * Updates position dropdown options based on the selected size
+     * @param {HTMLElement} positionDropdown - The position dropdown element
+     * @param {string} size - The selected size value
+     */
+    function updatePositionOptions(positionDropdown, size) {
+        if (!positionDropdown) return;
+
+        // Save current selection if possible
+        const currentPosition = positionDropdown.value;
+
+        // Clear existing options
+        positionDropdown.innerHTML = '';
+
+        // Add appropriate options based on size
+        const options = size === '1/4'
+            ? getCornerOptions()
+            : getEdgeOptions();
+
+        options.forEach(option => {
+            const optionEl = document.createElement('option');
+            optionEl.value = option.value;
+            optionEl.textContent = option.label;
+            positionDropdown.appendChild(optionEl);
+        });
+
+        // Try to restore previous selection if it exists in new options
+        const matchingOption = positionDropdown.querySelector(`option[value="${currentPosition}"]`);
+        if (matchingOption) {
+            matchingOption.selected = true;
+        }
+    }
+
+    /**
+     * Gets corner position options for quarter-page ads
+     * @returns {Array} Array of position option objects
+     */
+    function getCornerOptions() {
+        return [
+            { value: 'top-left', label: 'Top Left' },
+            { value: 'top-right', label: 'Top Right' },
+            { value: 'bottom-left', label: 'Bottom Left' },
+            { value: 'bottom-right', label: 'Bottom Right' }
+        ];
+    }
+
+    /**
+     * Gets edge position options for non-quarter-page ads
+     * @returns {Array} Array of position option objects
+     */
+    function getEdgeOptions() {
+        return [
+            { value: 'top', label: 'Top' },
+            { value: 'bottom', label: 'Bottom' },
+            { value: 'left', label: 'Left' },
+            { value: 'right', label: 'Right' }
+        ];
+    }
 
     /**
      * Populates the fractional ads UI with existing fractional ads
@@ -687,99 +809,93 @@ function updatePositionOptions(positionDropdown, size) {
      * Adds a new fractional ad form to the UI
      * @param {Object} adData - Optional existing ad data to populate the form
      */
-function addFractionalAdForm(adData = null) {
-    const container = document.getElementById('fractional-ads-list');
-    if (!container) return;
+    function addFractionalAdForm(adData = null) {
+        const container = document.getElementById('fractional-ads-list');
+        if (!container) return;
 
-    const formId = `fractional-ad-${Date.now()}`;
+        const formId = `fractional-ad-${Date.now()}`;
 
-    // Determine size - if no adData, default to '1/4'
-    const size = adData?.size || '1/4';
+        // Determine size - if no adData, default to '1/4'
+        const size = adData?.size || '1/4';
 
-    // Determine if we need corner positions based on size
-    const isQuarterPage = size === '1/4';
+        // Determine if we need corner positions based on size
+        const isQuarterPage = size === '1/4';
 
-    // Prepare position options based on size
-    let positionOptions = '';
+        // Prepare position options based on size
+        let positionOptions = '';
 
-    if (isQuarterPage) {
-        // Corner positions for quarter page
-        positionOptions = `
-            <option value="top-left" ${adData?.position === 'top-left' ? 'selected' : ''}>Top Left</option>
-            <option value="top-right" ${adData?.position === 'top-right' ? 'selected' : ''}>Top Right</option>
-            <option value="bottom-left" ${adData?.position === 'bottom-left' ? 'selected' : ''}>Bottom Left</option>
-            <option value="bottom-right" ${adData?.position === 'bottom-right' ? 'selected' : ''}>Bottom Right</option>
-        `;
-    } else {
-        // Edge positions for other sizes
-        positionOptions = `
-            <option value="top" ${adData?.position === 'top' ? 'selected' : ''}>Top</option>
-            <option value="bottom" ${adData?.position === 'bottom' ? 'selected' : ''}>Bottom</option>
-            <option value="left" ${adData?.position === 'left' ? 'selected' : ''}>Left</option>
-            <option value="right" ${adData?.position === 'right' ? 'selected' : ''}>Right</option>
-        `;
-    }
+        if (isQuarterPage) {
+            // Corner positions for quarter page
+            positionOptions = getCornerOptions().map(option =>
+                `<option value="${option.value}" ${adData?.position === option.value ? 'selected' : ''}>${option.label}</option>`
+            ).join('');
+        } else {
+            // Edge positions for other sizes
+            positionOptions = getEdgeOptions().map(option =>
+                `<option value="${option.value}" ${adData?.position === option.value ? 'selected' : ''}>${option.label}</option>`
+            ).join('');
+        }
 
-    const formHtml = `
-        <div class="fractional-ad-form p-3 bg-gray-50 rounded-md mb-3" id="${formId}">
-            <input type="hidden" name="fractional_ad_id" value="${adData?.id || ''}">
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-gray-700 text-xs font-medium mb-1">Ad Name</label>
-                    <input type="text" name="fractional_ad_name" value="${adData?.name || ''}"
-                        class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+        const formHtml = `
+            <div class="fractional-ad-form p-3 bg-gray-50 rounded-md mb-3" id="${formId}">
+                <input type="hidden" name="fractional_ad_id" value="${adData?.id || ''}">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-gray-700 text-xs font-medium mb-1">Ad Name</label>
+                        <input type="text" name="fractional_ad_name" value="${adData?.name || ''}"
+                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-xs font-medium mb-1">Section</label>
+                        <input type="text" name="fractional_ad_section" value="${adData?.section || 'paid'}"
+                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-xs font-medium mb-1">Size</label>
+                        <select name="fractional_ad_size"
+                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+                            <option value="1/4" ${size === '1/4' ? 'selected' : ''}>1/4 page</option>
+                            <option value="1/3" ${size === '1/3' ? 'selected' : ''}>1/3 page</option>
+                            <option value="1/2" ${size === '1/2' ? 'selected' : ''}>1/2 page</option>
+                            <option value="2/3" ${size === '2/3' ? 'selected' : ''}>2/3 page</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-xs font-medium mb-1">Position</label>
+                        <select name="fractional_ad_position"
+                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
+                            ${positionOptions}
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-gray-700 text-xs font-medium mb-1">Section</label>
-                    <input type="text" name="fractional_ad_section" value="${adData?.section || 'paid'}"
-                        class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
-                </div>
-                <div>
-                    <label class="block text-gray-700 text-xs font-medium mb-1">Size</label>
-                    <select name="fractional_ad_size"
-                        class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
-                        <option value="1/4" ${size === '1/4' ? 'selected' : ''}>1/4 page</option>
-                        <option value="1/3" ${size === '1/3' ? 'selected' : ''}>1/3 page</option>
-                        <option value="1/2" ${size === '1/2' ? 'selected' : ''}>1/2 page</option>
-                        <option value="2/3" ${size === '2/3' ? 'selected' : ''}>2/3 page</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-gray-700 text-xs font-medium mb-1">Position</label>
-                    <select name="fractional_ad_position"
-                        class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
-                        ${positionOptions}
-                    </select>
+                <div class="flex justify-end mt-2">
+                    <button type="button" onclick="removeFractionalAdForm('${formId}')"
+                        class="text-red-600 hover:text-red-800 text-xs">
+                        Remove
+                    </button>
                 </div>
             </div>
-            <div class="flex justify-end mt-2">
-                <button type="button" onclick="removeFractionalAdForm('${formId}')"
-                    class="text-red-600 hover:text-red-800 text-xs">
-                    Remove
-                </button>
-            </div>
-        </div>
-    `;
+        `;
 
-    // Insert the new form
-    container.insertAdjacentHTML('beforeend', formHtml);
+        // Insert the new form
+        container.insertAdjacentHTML('beforeend', formHtml);
 
-    // Add change event listener to the size dropdown
-    const sizeDropdown = document.querySelector(`#${formId} [name="fractional_ad_size"]`);
-    const positionDropdown = document.querySelector(`#${formId} [name="fractional_ad_position"]`);
+        // Add change event listener to the size dropdown
+        const sizeDropdown = document.querySelector(`#${formId} [name="fractional_ad_size"]`);
+        const positionDropdown = document.querySelector(`#${formId} [name="fractional_ad_position"]`);
 
-    if (sizeDropdown && positionDropdown) {
-        sizeDropdown.addEventListener('change', function() {
-            updatePositionOptions(positionDropdown, this.value);
-        });
+        if (sizeDropdown && positionDropdown) {
+            sizeDropdown.addEventListener('change', function() {
+                updatePositionOptions(positionDropdown, this.value);
+            });
 
-        // Set default position if this is a new form (not loading existing data)
-        if (!adData) {
-            // Default position for 1/4 page is top-left
-            positionDropdown.value = isQuarterPage ? 'top-left' : 'top';
+            // Set default position if this is a new form (not loading existing data)
+            if (!adData) {
+                // Default position for 1/4 page is top-left
+                positionDropdown.value = isQuarterPage ? 'top-left' : 'top';
+            }
         }
     }
-}
 
     /**
      * Removes a fractional ad form from the UI
@@ -837,94 +953,103 @@ function addFractionalAdForm(adData = null) {
      * @param {HTMLElement} pageBox - The page box element
      * @param {Object} adData - The fractional ad data
      */
-function addFractionalAdToPage(pageBox, adData) {
-    // Create the fractional ad element
-    const adElement = document.createElement('div');
-    adElement.className = 'fractional-ad absolute bg-yellow-100 border border-yellow-300';
-    adElement.style.backgroundColor = '#F19E9C'; // Set the background color directly
-    adElement.style.borderColor = '#ccc'; // Set the border color directly
-    adElement.setAttribute('data-id', adData.id);
-    adElement.setAttribute('data-name', adData.name);
-    adElement.setAttribute('data-section', adData.section);
-    adElement.setAttribute('data-size', adData.size);
-    adElement.setAttribute('data-position', adData.position);
+    function addFractionalAdToPage(pageBox, adData) {
+        // Create the fractional ad element
+        const adElement = document.createElement('div');
+        adElement.className = 'fractional-ad absolute bg-yellow-100 border border-yellow-300';
+        adElement.style.backgroundColor = '#F19E9C'; // Set the background color directly
+        adElement.style.borderColor = '#ccc'; // Set the border color directly
 
-    // Set size and position based on the ad data
-    const { size, position } = adData;
+        // Set data attributes for later retrieval
+        adElement.setAttribute('data-id', adData.id);
+        adElement.setAttribute('data-name', adData.name);
+        adElement.setAttribute('data-section', adData.section);
+        adElement.setAttribute('data-size', adData.size);
+        adElement.setAttribute('data-position', adData.position);
 
-    // Set CSS properties based on size and position
-    if (size === '1/4') {
-        // Quarter page - handle corner positions
-        switch (position) {
-            case 'top-left':
-                adElement.style.top = '0';
-                adElement.style.left = '0';
-                adElement.style.width = '50%';
-                adElement.style.height = '50%';
-                break;
-            case 'top-right':
-                adElement.style.top = '0';
-                adElement.style.right = '0';
-                adElement.style.width = '50%';
-                adElement.style.height = '50%';
-                break;
-            case 'bottom-left':
-                adElement.style.bottom = '0';
-                adElement.style.left = '0';
-                adElement.style.width = '50%';
-                adElement.style.height = '50%';
-                break;
-            case 'bottom-right':
-                adElement.style.bottom = '0';
-                adElement.style.right = '0';
-                adElement.style.width = '50%';
-                adElement.style.height = '50%';
-                break;
-            default:
-                // Fallback to top-left if position is invalid
-                adElement.style.top = '0';
-                adElement.style.left = '0';
-                adElement.style.width = '50%';
-                adElement.style.height = '50%';
-        }
-    } else {
-        // For other sizes, use the standard edge positions
-        switch (position) {
-            case 'top':
-                adElement.style.top = '0';
-                adElement.style.left = '0';
-                adElement.style.right = '0';
-                adElement.style.height = getSizePercentage(size);
-                break;
-            case 'bottom':
-                adElement.style.bottom = '0';
-                adElement.style.left = '0';
-                adElement.style.right = '0';
-                adElement.style.height = getSizePercentage(size);
-                break;
-            case 'left':
-                adElement.style.top = '0';
-                adElement.style.left = '0';
-                adElement.style.bottom = '0';
-                adElement.style.width = getSizePercentage(size);
-                break;
-            case 'right':
-                adElement.style.top = '0';
-                adElement.style.right = '0';
-                adElement.style.bottom = '0';
-                adElement.style.width = getSizePercentage(size);
-                break;
-        }
+        // Position the ad based on size and position
+        positionFractionalAd(adElement, adData.size, adData.position);
+
+        // Add content to the fractional ad
+        adElement.innerHTML = `
+            <div class="text-xs font-medium text-center p-1">${adData.name}</div>
+        `;
+
+        // Add the ad element to the page box
+        pageBox.appendChild(adElement);
     }
 
-    // Add content to the fractional ad
-    adElement.innerHTML = `
-        <div class="text-xs font-medium text-center p-1">${adData.name}</div>
-    `;
-
-    // Add the ad element to the page box
-    pageBox.appendChild(adElement);
-}
+    /**
+     * Positions a fractional ad based on size and position
+     * @param {HTMLElement} adElement - The ad element
+     * @param {string} size - The ad size
+     * @param {string} position - The ad position
+     */
+    function positionFractionalAd(adElement, size, position) {
+        if (size === '1/4') {
+            // Quarter page - handle corner positions
+            switch (position) {
+                case 'top-left':
+                    adElement.style.top = '0';
+                    adElement.style.left = '0';
+                    adElement.style.width = '50%';
+                    adElement.style.height = '50%';
+                    break;
+                case 'top-right':
+                    adElement.style.top = '0';
+                    adElement.style.right = '0';
+                    adElement.style.width = '50%';
+                    adElement.style.height = '50%';
+                    break;
+                case 'bottom-left':
+                    adElement.style.bottom = '0';
+                    adElement.style.left = '0';
+                    adElement.style.width = '50%';
+                    adElement.style.height = '50%';
+                    break;
+                case 'bottom-right':
+                    adElement.style.bottom = '0';
+                    adElement.style.right = '0';
+                    adElement.style.width = '50%';
+                    adElement.style.height = '50%';
+                    break;
+                default:
+                    // Fallback to top-left if position is invalid
+                    adElement.style.top = '0';
+                    adElement.style.left = '0';
+                    adElement.style.width = '50%';
+                    adElement.style.height = '50%';
+            }
+        } else {
+            // For other sizes, use the standard edge positions
+            switch (position) {
+                case 'top':
+                    adElement.style.top = '0';
+                    adElement.style.left = '0';
+                    adElement.style.right = '0';
+                    adElement.style.height = getSizePercentage(size);
+                    break;
+                case 'bottom':
+                    adElement.style.bottom = '0';
+                    adElement.style.left = '0';
+                    adElement.style.right = '0';
+                    adElement.style.height = getSizePercentage(size);
+                    break;
+                case 'left':
+                    adElement.style.top = '0';
+                    adElement.style.left = '0';
+                    adElement.style.bottom = '0';
+                    adElement.style.width = getSizePercentage(size);
+                    break;
+                case 'right':
+                    adElement.style.top = '0';
+                    adElement.style.right = '0';
+                    adElement.style.bottom = '0';
+                    adElement.style.width = getSizePercentage(size);
+                    break;
+            }
+        }
+    }
 
     /**
      * Gets the CSS percentage value for a fractional size
@@ -943,11 +1068,11 @@ function addFractionalAdToPage(pageBox, adData) {
 });
 
 /**
- * Updates the getCurrentLayoutAsJSON function in flatplan.js to include fractional ads
- * This function should be added to or replace the existing one in flatplan.js
+ * Gets the current layout as a JSON object
+ * This function is used by the save layout functionality
  * @returns {Array} Array of page objects with properties
  */
-function getCurrentLayoutAsJSON() {
+window.getCurrentLayoutAsJSON = function() {
     const boxes = document.querySelectorAll('.spread-container .box');
     const layout = [];
 
@@ -985,4 +1110,4 @@ function getCurrentLayoutAsJSON() {
     });
 
     return layout;
-}
+};
