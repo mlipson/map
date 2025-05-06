@@ -1,0 +1,109 @@
+<!-- Page properties editor modal -->
+<div id="page-editor-modal"
+    class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all max-w-lg w-full">
+        <div class="bg-indigo-600 py-4 px-6 flex justify-between items-center">
+            <h3 class="text-white text-lg font-bold" id="modal-title">Edit Page Properties</h3>
+            <button type="button" id="close-modal-btn" class="text-white hover:text-gray-200">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form id="page-edit-form" class="p-6">
+            <input type="hidden" id="edit-page-id" name="page_id">
+            <input type="hidden" id="temp-section-value" name="temp_section_value">
+
+            <div class="space-y-4">
+                <div>
+                    <label for="edit-page-name" class="block text-gray-700 text-sm font-medium mb-2">Page Name</label>
+                    <input type="text" id="edit-page-name" name="name"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <!-- First, update the page type dropdown to include the "mixed" option -->
+                <div>
+                    <label for="edit-page-type" class="block text-gray-700 text-sm font-medium mb-2">Page Type</label>
+                    <select id="edit-page-type" name="type"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="edit">Editorial</option>
+                        <option value="ad">Advertisement</option>
+                        <option value="mixed">Mixed (Editorial + Ads)</option>
+                        <option value="placeholder">Placeholder</option>
+                    </select>
+                </div>
+
+                <!-- Add the fractional ads container section -->
+                <div id="fractional-ads-container" class="mt-4 border-t pt-4 hidden">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-gray-700 text-sm font-medium">Fractional Advertisements</h4>
+                        <button type="button" id="add-fractional-ad-btn"
+                            class="bg-indigo-600 text-white py-1 px-2 rounded-md text-xs hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            + Add Advertisement
+                        </button>
+                    </div>
+
+                    <div class="text-xs text-gray-500 mb-3">
+                        Add one or more fractional advertisements to this page. The remaining space will be editorial
+                        content.
+                    </div>
+
+                    <div id="fractional-ads-list" class="space-y-2">
+                        <!-- Fractional ad forms will be added here dynamically -->
+                    </div>
+                </div>
+
+                <div>
+                    <label for="edit-page-section" class="block text-gray-700 text-sm font-medium mb-2">Section</label>
+                    <select id="edit-page-section" name="section"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="FOB">Front of Book</option>
+                        <option value="Feature">Feature</option>
+                        <option value="BOB">Back of Book</option>
+                        <option value="Cover">Cover</option>
+                        <option value="paid">Paid Advertisement</option>
+                        <option value="house">House Advertisement</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="edit-page-form-break" name="form_break"
+                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="edit-page-form-break" class="ml-2 block text-gray-700 text-sm font-medium">Form
+                            Break</label>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Mark this page as the end of a printing form</p>
+                </div>
+
+                <div>
+                    <label for="edit-page-number" class="block text-gray-700 text-sm font-medium mb-2">Page
+                        Number</label>
+                    <input type="number" id="edit-page-number" name="page_number"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        readonly>
+                    <p class="text-xs text-gray-500 mt-1">Page numbers are managed automatically through page order</p>
+                </div>
+
+                <div class="flex items-center justify-between pt-4">
+                    <button type="button" id="delete-page-btn"
+                        class="text-red-600 hover:text-red-800 text-sm font-medium">
+                        Delete Page
+                    </button>
+                    <div class="space-x-2">
+                        <button type="button" id="cancel-edit-btn"
+                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Cancel
+                        </button>
+                        <button type="submit" id="save-edit-btn"
+                            class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm font-medium">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

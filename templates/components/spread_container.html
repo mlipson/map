@@ -1,0 +1,25 @@
+<!-- Always create spread-container, even if empty -->
+<div class="spread-container">
+    {% if items %}
+    {% for item in fixed_items %}
+    <div id="page-{{ item['page_number'] }}"
+        class="box rounded border {{ 'mixed' if item['type'] == 'mixed' else item['type'] if item['type'] in ['edit', 'ad', 'placeholder'] else 'unknown' }} {{ 'bonus' if item['type'] == 'ad' and item['section'] == 'Bonus' else 'promo' if item['type'] == 'ad' and item['section'] == 'Promo' else '' }} {{ 'form-break' if item.get('form_break') else '' }} relative p-3 aspect-[3/4] w-32 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm"
+        data-page-number="{{ item['page_number'] }}" {% if item.get('form_break') %}data-form-break="true" {% endif %}
+        {% if item.get('fractional_ads') %}data-fractional-ads="{{ item.get('fractional_ads')|safe_json|e }}" {% endif
+        %}>
+
+        <div class="section font-semibold text-xs text-gray-700 mb-0.5">{{ item['section'] }}</div>
+        <div class="name-wrapper flex-1 flex items-center justify-center">
+            <div class="name font-medium text-sm truncate-long max-w-[90%] text-center text-gray-800">{{
+                item['name'] }}
+            </div>
+        </div>
+
+        <div class="page-number {{ 'even' if item['page_number'] % 2 == 0 else 'odd' }} text-gray-500 text-xs">
+            {{
+            item['page_number'] }}</div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+<!-- End of spread-container -->

@@ -12,128 +12,8 @@
 {% block content %}
 <div class="max-w-7xl mx-auto">
     <div class="bg-white shadow-md rounded-lg overflow-hidden mb-6 relative">
-        <!-- Integrated toolbar with consistent styling -->
-        <div class="bg-indigo-600 py-4 px-6">
-            <!-- Title Section -->
-            <div class="flex justify-between items-center">
-                <div class="flex items-center">
-                    <div>
-                        <h2 class="text-white text-xl font-bold">{{ layout_doc.publication_name }}</h2>
-                        <p class="text-indigo-100 text-sm">{{ layout_doc.issue_name }}</p>
-                    </div>
-                    <!-- Edit title button -->
-                    <button data-action="edit-layout" data-layout-id="{{ layout_id }}"
-                        data-publication-name="{{ layout_doc.publication_name }}"
-                        data-issue-name="{{ layout_doc.issue_name }}"
-                        data-publication-date="{{ layout_doc.publication_date if layout_doc.publication_date else '' }}"
-                        data-return-to="layout"
-                        class="ml-3 p-1.5 rounded-full bg-indigo-500 text-white hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 transition-all"
-                        title="Edit layout details">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Standardized Toolbar (with Close button) -->
-                <div class="flex items-center space-x-2">
-                    <!-- Save Layout Button -->
-                    <button id="save-layout-btn"
-                        class="p-2 rounded-full bg-white text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 transition-all"
-                        title="Save Layout">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                        </svg>
-                    </button>
-
-                    <!-- Import JSON Button -->
-                    <button id="upload-json-btn"
-                        class="p-2 rounded-full bg-white text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 transition-all"
-                        title="Import JSON" onclick="document.getElementById('file-upload').click();">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
-                    </button>
-                    <!-- Hidden file input -->
-                    <form id="json-upload-form" action="{{ url_for('layout.view_layout', layout_id=layout_id) }}"
-                        method="post" enctype="multipart/form-data" class="hidden">
-                        <input id="file-upload" name="file" type="file" accept=".json" class="hidden"
-                            onchange="document.getElementById('json-upload-form').submit()">
-                    </form>
-
-                    <!-- Export JSON Button -->
-                    <button id="download-json-btn"
-                        class="p-2 rounded-full bg-white text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 transition-all"
-                        title="Export JSON">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                    </button>
-
-                    <!-- Export PDF Button -->
-                    <button id="download-pdf-btn"
-                        class="p-2 rounded-full bg-white text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 transition-all"
-                        title="Export PDF">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                    </button>
-
-                    <!-- Export JPEG Button -->
-                    <button id="download-jpeg-btn"
-                        class="p-2 rounded-full bg-white text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 transition-all"
-                        title="Export JPEG">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </button>
-
-                    <!-- Share Layout Button -->
-                    <button id="share-btn"
-                        class="p-2 rounded-full bg-white text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 transition-all"
-                        title="Share Layout">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                        </svg>
-                    </button>
-                    <!-- Share Layout Modal (hidden by default) -->
-                    <button data-action="show-analytics" data-layout-id="{{ layout_id }}"
-                        class="p-2 rounded-full bg-white text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 transition-all toolbar-button"
-                        title="Layout Analytics">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                    </button>
-
-                    <!-- Close Layout Button (integrated into toolbar) -->
-                    <a href="{{ url_for('main.account') }}" id="close-layout-btn"
-                        class="p-2 rounded-full bg-white text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 transition-all"
-                        title="Close Layout">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </div>
+        <!-- Include the toolbar component -->
+        {% include 'components/layout_toolbar.html' %}
 
         <div class="p-6">
             <!-- Hidden form for uploads (kept for compatibility) -->
@@ -143,36 +23,8 @@
                 <input type="hidden" id="layout-id" value="{{ layout_id }}">
             </form>
 
-            <!-- Layout key/legend -->
-            <div class="mb-6 bg-gray-50 rounded-md p-3 flex items-center justify-center space-x-8">
-                <div class="flex items-center">
-                    <div class="w-4 h-4 bg-[#B1FCFE] rounded mr-2"></div>
-                    <span class="text-sm text-gray-600">Editorial</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-4 h-4 bg-[#FFFFA6] rounded mr-2"></div>
-                    <span class="text-sm text-gray-600">Advertisement</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-4 h-4 bg-[#9999f8] rounded mr-2"></div>
-                    <span class="text-sm text-gray-600">Bonus</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-4 h-4 bg-[#b1fca3] rounded mr-2"></div>
-                    <span class="text-sm text-gray-600">Promo</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-4 h-4 bg-[#F19E9C] rounded mr-2"></div>
-                    <span class="text-sm text-gray-600">Fractional Ad</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-4 h-4 bg-[#F3F4F6] rounded mr-2"></div>
-                    <span class="text-sm text-gray-600">Placeholder</span>
-                </div>
-                <div class="text-sm text-gray-500">
-                    <span>➡️ Click a page to edit | Drag to reorder</span>
-                </div>
-            </div>
+            <!-- Include the layout legend component -->
+            {% include 'components/layout_legend.html' %}
 
             {% set fixed_items=items[:] %}
             {% if (fixed_items|length - 1) % 2 !=0 %}
@@ -180,36 +32,12 @@
             %}
             {% endif %}
 
+            <!-- Include the spread container component -->
+            {% include 'components/spread_container.html' %}
 
-            {% if items %}
-            <div class="spread-container">
-                {% for item in fixed_items %}
-                <div id="page-{{ item['page_number'] }}"
-                    class="box rounded border {{ 'mixed' if item['type'] == 'mixed' else item['type'] if item['type'] in ['edit', 'ad', 'placeholder'] else 'unknown' }} {{ 'bonus' if item['type'] == 'ad' and item['section'] == 'Bonus' else 'promo' if item['type'] == 'ad' and item['section'] == 'Promo' else '' }} {{ 'form-break' if item.get('form_break') else '' }} relative p-3 aspect-[3/4] w-32 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm"
-                    data-page-number="{{ item['page_number'] }}" {% if item.get('form_break') %}data-form-break="true"
-                    {% endif %} {% if item.get('fractional_ads')
-                    %}data-fractional-ads="{{ item.get('fractional_ads')|safe_json|e }}" {% endif %}>
-
-                    <div class="section font-semibold text-xs text-gray-700 mb-0.5">{{ item['section'] }}</div>
-                    <div class="name-wrapper flex-1 flex items-center justify-center">
-                        <div class="name font-medium text-sm truncate-long max-w-[90%] text-center text-gray-800">{{
-                            item['name'] }}
-                        </div>
-                    </div>
-
-
-                    <div
-                        class="page-number {{ 'even' if item['page_number'] % 2 == 0 else 'odd' }} text-gray-500 text-xs">
-                        {{
-                        item['page_number'] }}</div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="text-center py-12 bg-gray-50 rounded-lg">
-                <p class="text-gray-500">No pages in this layout yet.</p>
-                <p class="text-sm text-gray-400 mt-2">Click the + button to add your first page.</p>
-            </div>
+            <!-- Include the empty state component if needed -->
+            {% if not items %}
+            {% include 'components/empty_state.html' %}
             {% endif %}
 
             <div class="mt-4 text-xs text-gray-400">
@@ -217,7 +45,7 @@
             </div>
         </div>
 
-        <!-- Floating Add Page Button (kept as is) -->
+        <!-- Floating Add Page Button -->
         <div class="relative">
             <button id="add-page-btn"
                 class="absolute bottom-6 right-6 bg-indigo-600 text-white rounded-full p-3 shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -230,246 +58,10 @@
     </div>
 </div>
 
-<!-- Page properties editor modal -->
-<div id="page-editor-modal"
-    class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all max-w-lg w-full">
-        <div class="bg-indigo-600 py-4 px-6 flex justify-between items-center">
-            <h3 class="text-white text-lg font-bold" id="modal-title">Edit Page Properties</h3>
-            <button type="button" id="close-modal-btn" class="text-white hover:text-gray-200">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-
-        <form id="page-edit-form" class="p-6">
-            <input type="hidden" id="edit-page-id" name="page_id">
-            <input type="hidden" id="temp-section-value" name="temp_section_value">
-
-            <div class="space-y-4">
-                <div>
-                    <label for="edit-page-name" class="block text-gray-700 text-sm font-medium mb-2">Page Name</label>
-                    <input type="text" id="edit-page-name" name="name"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <!-- First, update the page type dropdown to include the "mixed" option -->
-                <div>
-                    <label for="edit-page-type" class="block text-gray-700 text-sm font-medium mb-2">Page Type</label>
-                    <select id="edit-page-type" name="type"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="edit">Editorial</option>
-                        <option value="ad">Advertisement</option>
-                        <option value="mixed">Mixed (Editorial + Ads)</option>
-                        <option value="placeholder">Placeholder</option>
-                    </select>
-                </div>
-
-                <!-- Add the fractional ads container section -->
-                <div id="fractional-ads-container" class="mt-4 border-t pt-4 hidden">
-                    <div class="flex justify-between items-center mb-2">
-                        <h4 class="text-gray-700 text-sm font-medium">Fractional Advertisements</h4>
-                        <button type="button" id="add-fractional-ad-btn"
-                            class="bg-indigo-600 text-white py-1 px-2 rounded-md text-xs hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                            + Add Advertisement
-                        </button>
-                    </div>
-
-                    <div class="text-xs text-gray-500 mb-3">
-                        Add one or more fractional advertisements to this page. The remaining space will be editorial
-                        content.
-                    </div>
-
-                    <div id="fractional-ads-list" class="space-y-2">
-                        <!-- Fractional ad forms will be added here dynamically -->
-                    </div>
-                </div>
-
-                <div>
-                    <label for="edit-page-section" class="block text-gray-700 text-sm font-medium mb-2">Section</label>
-                    <select id="edit-page-section" name="section"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="FOB">Front of Book</option>
-                        <option value="Feature">Feature</option>
-                        <option value="BOB">Back of Book</option>
-                        <option value="Cover">Cover</option>
-                        <option value="paid">Paid Advertisement</option>
-                        <option value="house">House Advertisement</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-
-                <div>
-                    <div class="flex items-center">
-                        <input type="checkbox" id="edit-page-form-break" name="form_break"
-                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                        <label for="edit-page-form-break" class="ml-2 block text-gray-700 text-sm font-medium">Form
-                            Break</label>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Mark this page as the end of a printing form</p>
-                </div>
-
-                <div>
-                    <label for="edit-page-number" class="block text-gray-700 text-sm font-medium mb-2">Page
-                        Number</label>
-                    <input type="number" id="edit-page-number" name="page_number"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        readonly>
-                    <p class="text-xs text-gray-500 mt-1">Page numbers are managed automatically through page order</p>
-                </div>
-
-                <div class="flex items-center justify-between pt-4">
-                    <button type="button" id="delete-page-btn"
-                        class="text-red-600 hover:text-red-800 text-sm font-medium">
-                        Delete Page
-                    </button>
-                    <div class="space-x-2">
-                        <button type="button" id="cancel-edit-btn"
-                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            Cancel
-                        </button>
-                        <button type="submit" id="save-edit-btn"
-                            class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm font-medium">
-                            Save Changes
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Edit Layout Metadata Modal -->
-<div id="edit-layout-modal"
-    class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all max-w-lg w-full">
-        <div class="bg-indigo-600 py-4 px-6 flex justify-between items-center">
-            <h3 class="text-white text-lg font-bold">Edit Layout Details</h3>
-            <button type="button" data-action="close-layout-modal" class="text-white hover:text-gray-200">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-
-        <form id="edit-layout-form" action="{{ url_for('layout.edit_layout_metadata') }}" method="post" class="p-6">
-            <input type="hidden" id="edit-layout-id" name="layout_id" value="{{ layout_id }}">
-            <input type="hidden" id="edit-return-to" name="return_to" value="layout">
-
-            <div class="space-y-4">
-                <div>
-                    <label for="edit-publication-name" class="block text-gray-700 text-sm font-medium mb-2">Publication
-                        Name</label>
-                    <input type="text" id="edit-publication-name" name="publication_name" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <div>
-                    <label for="edit-issue-name" class="block text-gray-700 text-sm font-medium mb-2">Issue Name</label>
-                    <input type="text" id="edit-issue-name" name="issue_name" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <div>
-                    <label for="edit-publication-date" class="block text-gray-700 text-sm font-medium mb-2">Publication
-                        Date (Optional)</label>
-                    <input type="date" id="edit-publication-date" name="publication_date"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <div class="flex items-center justify-end pt-4 space-x-2">
-                    <button type="button" data-action="close-layout-modal"
-                        class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Cancel
-                    </button>
-                    <button type="submit"
-                        class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm font-medium">
-                        Save Changes
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Analytics Modal -->
-<div id="analytics-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all max-w-lg w-full">
-        <div class="bg-indigo-600 py-4 px-6 flex justify-between items-center">
-            <h3 class="text-white text-lg font-bold">Layout Analytics</h3>
-            <button type="button" data-action="close-analytics-modal" class="text-white hover:text-gray-200">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-
-        <div id="analytics-content" class="p-6">
-            <div class="text-center mb-4">
-                <h2 id="analytics-publication-name" class="text-xl font-bold text-gray-800"></h2>
-                <h3 id="analytics-issue-name" class="text-gray-600 text-md"></h3>
-            </div>
-
-            <div class="bg-gray-50 border rounded-md p-4">
-                <p class="font-medium mb-3 text-lg">
-                    <span class="text-gray-700">Total Pages:</span>
-                    <span id="analytics-total-pages" class="font-bold"></span>
-                </p>
-
-                <!-- Editorial Pages Section -->
-                <div class="mb-4">
-                    <p class="font-medium flex justify-between border-b pb-1 mb-2">
-                        <span class="text-gray-700">Editorial Pages:</span>
-                        <span id="analytics-edit-pages" class="font-bold"></span>
-                    </p>
-                    <ul id="analytics-edit-sections" class="pl-4 space-y-1 text-sm">
-                        <!-- Section details will be inserted here -->
-                    </ul>
-                </div>
-
-                <!-- Advertisement Pages Section -->
-                <div class="mb-4">
-                    <p class="font-medium flex justify-between border-b pb-1 mb-2">
-                        <span class="text-gray-700">Advertisement Pages:</span>
-                        <span id="analytics-ad-pages" class="font-bold"></span>
-                    </p>
-                    <ul id="analytics-ad-sections" class="pl-4 space-y-1 text-sm">
-                        <!-- Section details will be inserted here -->
-                    </ul>
-                </div>
-
-                <!-- Fractional Ad Sizes Section for Analytics -->
-                <div class="mb-4">
-                    <p class="font-medium flex justify-between border-b pb-1 mb-2">
-                        <span class="text-gray-700">Fractional Ad Sizes:</span>
-                    </p>
-                    <ul id="analytics-fractional-sizes" class="pl-4 space-y-1 text-sm">
-                        <!-- Fractional ad size details will be inserted here -->
-                    </ul>
-                </div>
-
-                <!-- Placeholder Pages Section -->
-                <div>
-                    <p class="font-medium flex justify-between border-b pb-1 mb-2">
-                        <span class="text-gray-700">Placeholder Pages:</span>
-                        <span id="analytics-placeholder-pages" class="font-bold"></span>
-                    </p>
-                    <ul id="analytics-placeholder-sections" class="pl-4 space-y-1 text-sm">
-                        <!-- Section details will be inserted here -->
-                    </ul>
-                </div>
-            </div>
-
-            <div class="flex justify-end mt-6">
-                <button type="button" data-action="close-analytics-modal"
-                    class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm font-medium">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Include modal components -->
+{% include 'components/layout_modals/page_editor.html' %}
+{% include 'components/layout_modals/layout_editor.html' %}
+{% include 'components/layout_modals/analytics.html' %}
 
 {% endblock %}
 

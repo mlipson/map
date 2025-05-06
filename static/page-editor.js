@@ -606,54 +606,63 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Adds a new page
-     */
-    function addNewPage() {
-        // Get the spread container
-        const spreadContainer = document.querySelector('.spread-container');
-        if (!spreadContainer) {
-            console.error('Spread container not found');
-            return;
-        }
+/**
+ * Adds a new page to an empty or populated layout
+ */
+function addNewPage() {
+    // Get the spread container
+    let spreadContainer = document.querySelector('.spread-container');
 
-        // Create a new page element
-        const boxes = document.querySelectorAll('.spread-container .box');
-        const newPageNumber = boxes.length; // Next number after existing boxes
-        const newPageId = `page-${Date.now()}`; // Unique ID using timestamp
-
-        const newPage = document.createElement('div');
-        newPage.id = newPageId;
-        // Using w-32 for consistent sizing with existing pages
-        newPage.className = 'box placeholder rounded border relative p-3 aspect-[3/4] w-32 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm';
-
-        newPage.innerHTML = `
-            <div class="section font-semibold text-xs text-gray-700 mb-0.5">New</div>
-            <div class="name-wrapper flex-1 flex items-center justify-center">
-                <div class="name font-medium text-sm max-w-[90%] break-words text-center text-gray-800">New Page</div>
-            </div>
-            <div class="page-number odd text-gray-500 text-xs">${newPageNumber}</div>
-        `;
-
-        // Add the new page to the end of the spread container
-        spreadContainer.appendChild(newPage);
-
-        // Update page numbers
-        updatePageNumbers();
-
-        // Make the new page clickable
-        newPage.addEventListener('click', (e) => {
-            if (e.currentTarget === newPage) {
-                openEditModal(newPage);
-            }
-        });
-
-        // Open the edit modal for the new page
-        openEditModal(newPage);
-
-        // Show notification
-        showNotification('New page added', 'success');
+    if (!spreadContainer) {
+        console.error('Spread container not found');
+        return;
     }
+
+    // Get existing boxes (if any)
+    const boxes = document.querySelectorAll('.spread-container .box');
+
+    // Set the appropriate page number based on existing pages
+    const newPageNumber = boxes.length > 0 ? boxes.length : 1; // Start at 1 if no pages exist
+    const newPageId = `page-${Date.now()}`; // Unique ID using timestamp
+
+    // Create a new page element
+    const newPage = document.createElement('div');
+    newPage.id = newPageId;
+    newPage.className = 'box placeholder rounded border relative p-3 aspect-[3/4] w-32 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm';
+
+    newPage.innerHTML = `
+        <div class="section font-semibold text-xs text-gray-700 mb-0.5">New</div>
+        <div class="name-wrapper flex-1 flex items-center justify-center">
+            <div class="name font-medium text-sm max-w-[90%] break-words text-center text-gray-800">New Page</div>
+        </div>
+        <div class="page-number odd text-gray-500 text-xs">${newPageNumber}</div>
+    `;
+
+    // Add the new page to the end of the spread container
+    spreadContainer.appendChild(newPage);
+
+    // Remove the empty state message if it exists
+    const emptyStateMessage = document.querySelector('.text-center.py-12.bg-gray-50.rounded-lg');
+    if (emptyStateMessage) {
+        emptyStateMessage.classList.add('hidden');
+    }
+
+    // Update page numbers
+    updatePageNumbers();
+
+    // Make the new page clickable
+    newPage.addEventListener('click', (e) => {
+        if (e.currentTarget === newPage) {
+            openEditModal(newPage);
+        }
+    });
+
+    // Open the edit modal for the new page
+    openEditModal(newPage);
+
+    // Show notification
+    showNotification('New page added', 'success');
+}
 
     /**
      * Updates page numbers for all pages

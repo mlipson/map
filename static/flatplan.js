@@ -457,6 +457,7 @@ function initializeShareFunction() {
 
 /**
  * Initializes Sortable.js for drag-and-drop functionality
+ * Also ensures the spread-container is ready for interactions
  */
 function initializeSortable() {
   // Find the sortable container
@@ -481,6 +482,8 @@ function initializeSortable() {
 
     // Initial page numbering
     updatePageNumbers();
+  } else {
+    console.error('Spread container not found - layout may not function properly');
   }
 }
 
@@ -494,12 +497,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeExportOptions();
   initializeShareFunction();
 
-  // Initialize Sortable here if you want it to be dependent on DOM content
-  // otherwise the call below the event listener will run first
-  // initializeSortable();
+  // Initialize Sortable here to ensure the DOM is fully loaded
+  initializeSortable();
 });
 
-// Initialize Sortable outside DOMContentLoaded
-// This ensures it's available when the DOM is ready and doesn't get delayed
-// by other event handlers
-initializeSortable();
+// Remove the duplicate initialization outside DOMContentLoaded
+// since we're now properly initializing it inside the event handler

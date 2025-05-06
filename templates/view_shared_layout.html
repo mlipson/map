@@ -26,33 +26,8 @@
         </div>
 
         <div class="p-6">
-            <!-- Layout key/legend -->
-            <div class="mb-6 bg-gray-50 rounded-md p-3 flex items-center justify-center space-x-8">
-                <div class="flex items-center">
-                    <div class="w-4 h-4 bg-[#B1FCFE] rounded mr-2"></div>
-                    <span class="text-sm text-gray-600">Editorial</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-4 h-4 bg-[#FFFFA6] rounded mr-2"></div>
-                    <span class="text-sm text-gray-600">Advertisement</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-4 h-4 bg-[#9999f8] rounded mr-2"></div>
-                    <span class="text-sm text-gray-600">Bonus</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-4 h-4 bg-[#b1fca3] rounded mr-2"></div>
-                    <span class="text-sm text-gray-600">Promo</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-4 h-4 bg-[#F19E9C] rounded mr-2"></div>
-                    <span class="text-sm text-gray-600">Fractional Ad</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-4 h-4 bg-[#F3F4F6] rounded mr-2"></div>
-                    <span class="text-sm text-gray-600">Placeholder</span>
-                </div>
-            </div>
+
+            {% include 'components/layout_legend.html' %}
 
             {% set fixed_items=items[:] %}
             {% if (fixed_items|length - 1) % 2 !=0 %}
