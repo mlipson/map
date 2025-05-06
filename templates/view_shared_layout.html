@@ -37,6 +37,18 @@
                     <span class="text-sm text-gray-600">Advertisement</span>
                 </div>
                 <div class="flex items-center">
+                    <div class="w-4 h-4 bg-[#9999f8] rounded mr-2"></div>
+                    <span class="text-sm text-gray-600">Bonus</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-[#b1fca3] rounded mr-2"></div>
+                    <span class="text-sm text-gray-600">Promo</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-[#F19E9C] rounded mr-2"></div>
+                    <span class="text-sm text-gray-600">Fractional Ad</span>
+                </div>
+                <div class="flex items-center">
                     <div class="w-4 h-4 bg-[#F3F4F6] rounded mr-2"></div>
                     <span class="text-sm text-gray-600">Placeholder</span>
                 </div>
@@ -52,19 +64,78 @@
             <div class="spread-container">
                 {% for item in fixed_items %}
                 <div id="page-{{ item['page_number'] }}"
-                    class="box rounded border {{ item['type'] if item['type'] in ['edit', 'ad', 'placeholder'] else 'unknown' }} {{ 'bonus' if item['type'] == 'ad' and item['section'] == 'Bonus' else 'promo' if item['type'] == 'ad' and item['section'] == 'Promo' else '' }} relative p-3 aspect-[3/4] w-36 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm"
-                    style="background-color: {% if item['type'] == 'ad' and item['section'] == 'Bonus' %}#9999f8{% elif item['type'] == 'ad' and item['section'] == 'Promo' %}#b1fca3{% elif item['type'] == 'edit' %}#B1FCFE{% elif item['type'] == 'ad' %}#FFFFA6{% elif item['type'] == 'placeholder' %}#F3F4F6{% else %}#EEEEEE{% endif %};"
+                    class="box rounded border {{ 'mixed' if item['type'] == 'mixed' else item['type'] if item['type'] in ['edit', 'ad', 'placeholder'] else 'unknown' }} {{ 'bonus' if item['type'] == 'ad' and item['section'] == 'Bonus' else 'promo' if item['type'] == 'ad' and item['section'] == 'Promo' else '' }} {{ 'form-break' if item.get('form_break') else '' }} relative p-3 aspect-[3/4] w-32 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm"
+                    style="background-color: {% if item['type'] == 'ad' and item['section'] == 'Bonus' %}#9999f8{% elif item['type'] == 'ad' and item['section'] == 'Promo' %}#b1fca3{% elif item['type'] == 'edit' %}#B1FCFE{% elif item['type'] == 'mixed' %}#B1FCFE{% elif item['type'] == 'ad' %}#FFFFA6{% elif item['type'] == 'placeholder' %}#F3F4F6{% else %}#EEEEEE{% endif %};"
                     data-page-number="{{ item['page_number'] }}">
 
                     <div class="section font-semibold text-xs text-gray-700 mb-0.5">{{ item['section'] }}</div>
                     <div class="name-wrapper flex-1 flex items-center justify-center">
-                        <div class="name font-medium max-w-[80%] break-words text-center text-gray-800">{{ item['name']
-                            }}</div>
+                        <div class="name font-medium text-sm max-w-[90%] break-words text-center text-gray-800">{{
+                            item['name'] }}</div>
                     </div>
                     <div
                         class="page-number {{ 'even' if item['page_number'] % 2 == 0 else 'odd' }} text-gray-500 text-xs">
                         {{ item['page_number'] }}
                     </div>
+
+                    <!-- Render fractional ads if this is a mixed page -->
+                    {% if item['type'] == 'mixed' and item.get('fractional_ads') %}
+                    {% for ad in item.get('fractional_ads') %}
+                    <div class="fractional-ad absolute bg-yellow-100 border border-yellow-300" data-id="{{ ad.id }}"
+                        data-name="{{ ad.name }}" data-section="{{ ad.section }}" data-size="{{ ad.size }}"
+                        data-position="{{ ad.position }}" style="
+                                    background-color: #F19E9C;
+                                    border-color: #ccc;
+                                    {% if ad.size == '1/4' %}
+                                        {% if ad.position == 'top-left' %}
+                                            top: 0;
+                                            left: 0;
+                                            width: 50%;
+                                            height: 50%;
+                                        {% elif ad.position == 'top-right' %}
+                                            top: 0;
+                                            right: 0;
+                                            width: 50%;
+                                            height: 50%;
+                                        {% elif ad.position == 'bottom-left' %}
+                                            bottom: 0;
+                                            left: 0;
+                                            width: 50%;
+                                            height: 50%;
+                                        {% elif ad.position == 'bottom-right' %}
+                                            bottom: 0;
+                                            right: 0;
+                                            width: 50%;
+                                            height: 50%;
+                                        {% endif %}
+                                    {% else %}
+                                        {% if ad.position == 'top' %}
+                                            top: 0;
+                                            left: 0;
+                                            right: 0;
+                                            height: {% if ad.size == '1/2' %}50%{% elif ad.size == '1/3' %}33.33%{% elif ad.size == '2/3' %}66.67%{% else %}50%{% endif %};
+                                        {% elif ad.position == 'bottom' %}
+                                            bottom: 0;
+                                            left: 0;
+                                            right: 0;
+                                            height: {% if ad.size == '1/2' %}50%{% elif ad.size == '1/3' %}33.33%{% elif ad.size == '2/3' %}66.67%{% else %}50%{% endif %};
+                                        {% elif ad.position == 'left' %}
+                                            top: 0;
+                                            left: 0;
+                                            bottom: 0;
+                                            width: {% if ad.size == '1/2' %}50%{% elif ad.size == '1/3' %}33.33%{% elif ad.size == '2/3' %}66.67%{% else %}50%{% endif %};
+                                        {% elif ad.position == 'right' %}
+                                            top: 0;
+                                            right: 0;
+                                            bottom: 0;
+                                            width: {% if ad.size == '1/2' %}50%{% elif ad.size == '1/3' %}33.33%{% elif ad.size == '2/3' %}66.67%{% else %}50%{% endif %};
+                                        {% endif %}
+                                    {% endif %}
+                                ">
+                        <div class="text-xs font-medium text-center p-1">{{ ad.name }}</div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
