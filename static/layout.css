@@ -15,11 +15,13 @@
     margin-right: 40px;
 }
 
-/* Page number placement within box */
+/* Page number positioning for all page types */
 .page-number {
     position: absolute;
     bottom: 10px;
     font-size: 0.85em;
+    color: #555;
+    z-index: 10; /* Ensure page numbers are always on top */
 }
 
 .page-number.even {
@@ -29,6 +31,7 @@
 .page-number.odd {
     right: 10px;
 }
+
 
 /* Visual feedback during drag */
 .drag-ghost {
@@ -306,15 +309,22 @@
     margin-bottom: 0.25rem;
 }
 
-/* Page number and section label for mixed pages - keep on top */
-.box.mixed .page-number,
-.box.mixed .section {
-    position: relative;
-    z-index: 3;
+/* Make sure page numbers stay visible in mixed pages */
+.box.mixed .page-number {
+    position: absolute; /* Reinforce absolute positioning */
+    z-index: 10; /* Higher z-index to stay above fractional areas */
+    padding: 1px 3px;
+    border-radius: 2px;
+    bottom: 10px; /* Maintain consistent positioning with other page types */
 }
 
-/* Add a tiny bit of opacity to all content in mixed pages for better visual distinction */
-.box.mixed .fractional-ad,
-.box.mixed .editorial-area {
-    opacity: 0.95;
+/* Maintain left/right positioning for mixed pages */
+.box.mixed .page-number.even {
+    left: 10px;
+    right: auto; /* Ensure right isn't set */
+}
+
+.box.mixed .page-number.odd {
+    right: 10px;
+    left: auto; /* Ensure left isn't set */
 }
