@@ -149,7 +149,6 @@
 
 /* Editorial content label for mixed pages */
 .box.mixed::before {
-    content: "Editorial";
     position: absolute;
     bottom: 8px;
     left: 8px;
@@ -260,4 +259,62 @@
 
 .fractional-ad[data-size="2/3"] {
     background-color: #F19E9C;
+}
+
+/* Updated styles for mixed content pages */
+
+/* Base styling for mixed pages - use a neutral background */
+.box.mixed {
+    position: relative;
+    background-color: #F3F4F6 !important; /* Light gray background like placeholder */
+    overflow: hidden;
+}
+
+/* The fractional ad styling */
+.fractional-ad {
+    position: absolute;
+    background-color: #F19E9C !important; /* Ad color */
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.65rem;
+}
+
+/* Editorial content area - automatically takes the remaining space */
+.editorial-area {
+    position: absolute;
+    background-color: #B1FCFE; /* Editorial blue color */
+    z-index: 1;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.75rem;
+    text-align: center;
+    padding: 0.25rem;
+}
+
+/* Label for editorial area */
+.editorial-area::before {
+    font-size: 0.6rem;
+    opacity: 0.7;
+    margin-bottom: 0.25rem;
+}
+
+/* Page number and section label for mixed pages - keep on top */
+.box.mixed .page-number,
+.box.mixed .section {
+    position: relative;
+    z-index: 3;
+}
+
+/* Add a tiny bit of opacity to all content in mixed pages for better visual distinction */
+.box.mixed .fractional-ad,
+.box.mixed .editorial-area {
+    opacity: 0.95;
 }
