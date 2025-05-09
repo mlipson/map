@@ -328,3 +328,55 @@
     right: 10px;
     left: auto; /* Ensure left isn't set */
 }
+
+/* Ensure section element is always visible at top of page box for all page types */
+.box .section {
+    position: relative;
+    z-index: 20; /* Higher than other elements */
+    margin-bottom: 0.5em;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #444;
+    background-color: transparent !important;
+    border-radius: 2px;
+    padding: 2px 4px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Set section text to an absolute overlay */
+.box.mixed .section {
+    position: absolute !important; /* Use absolute instead of relative */
+    top: 10px !important; /* Position from top edge of box */
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 5; /* Above page elements, below modals */
+    background-color: transparent !important; /* No background */
+    display: block !important;
+    pointer-events: none !important; /* Allow interaction with elements beneath */
+    text-align: center !important; /* Center the text */
+}
+
+/* Force all fractional elements to start at true top */
+.box.mixed .fractional-ad[data-position="top"],
+.box.mixed .fractional-ad[data-position="top-left"],
+.box.mixed .fractional-ad[data-position="top-right"],
+.box.mixed .editorial-area {
+    top: 0 !important; /* Ensure no pushdown */
+}
+
+/* Nullify any previous attempts to fix this issue */
+.box.mixed .fractional-ad[data-position^="top"] {
+    margin-top: 0 !important; /* Reset any margins */
+    padding-top: 0 !important; /* Reset any padding */
+}
+
+.box.mixed .editorial-area[style*="top"] {
+    top: 0 !important; /* Override any inline style */
+}
+
+/* Modal z-index for context */
+.modal, #page-editor-modal, #edit-layout-modal {
+    z-index: 1000 !important; /* High z-index for modals */
+}

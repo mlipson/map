@@ -507,8 +507,36 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} pageSection - The page section
      */
     function updatePageBasicInfo(pageBox, pageName, pageSection) {
-        pageBox.querySelector('.name').textContent = pageName;
-        pageBox.querySelector('.section').textContent = pageSection;
+        // Get or create section element
+        let sectionEl = pageBox.querySelector('.section');
+        if (!sectionEl) {
+            sectionEl = document.createElement('div');
+            sectionEl.className = 'section';
+            pageBox.prepend(sectionEl); // Add at the beginning of the page box
+        }
+
+        // Update section text
+        sectionEl.textContent = pageSection;
+
+        // Get or create name element
+        let nameEl = pageBox.querySelector('.name');
+        if (!nameEl) {
+            const nameWrapper = document.createElement('div');
+            nameWrapper.className = 'name-wrapper';
+            nameEl = document.createElement('div');
+            nameEl.className = 'name';
+            nameWrapper.appendChild(nameEl);
+
+            // Insert after section if it exists, otherwise at the beginning
+            if (sectionEl.nextSibling) {
+                pageBox.insertBefore(nameWrapper, sectionEl.nextSibling);
+            } else {
+                pageBox.appendChild(nameWrapper);
+            }
+        }
+
+        // Update name text
+        nameEl.textContent = pageName;
     }
 
     /**
@@ -571,11 +599,23 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {Array} fractionalAds - Array of fractional ad objects
      */
     function updateFractionalAds(pageBox, pageType, fractionalAds) {
-        // Clear existing fractional ads
+        // Don't remove section element
+        const sectionEl = pageBox.querySelector('.section');
+
+        // Clear existing fractional ads and editorial areas
         const existingFractionalAds = pageBox.querySelectorAll('.fractional-ad');
         existingFractionalAds.forEach(el => el.remove());
 
+        const existingEditAreas = pageBox.querySelectorAll('.editorial-area');
+        existingEditAreas.forEach(el => el.remove());
+
         if (pageType === 'mixed') {
+            // Make sure section is at the top and visible
+            if (sectionEl && sectionEl.parentNode === pageBox) {
+                pageBox.removeChild(sectionEl);
+                pageBox.prepend(sectionEl);
+            }
+
             // Add the new fractional ads
             fractionalAds.forEach(ad => {
                 addFractionalAdToPage(pageBox, ad);
@@ -1241,3 +1281,43 @@ window.getCurrentLayoutAsJSON = function() {
 
     return layout;
 };
+
+
+// Modify the editorial area creation to account for section
+function createEditorialAreaFromLoad(pageBox) {
+    // Remove any existing editorial area
+    const existingEditArea = pageBox.querySelector('.editorial-area');
+    if (existingEditArea) {
+        existingEditArea.remove();
+    }
+
+    // Get all ads to determine their positions
+    const ads = Array.from(pageBox.querySelectorAll('.fractional-ad'));
+
+    // If no ads, don't create an editorial area
+    if (ads.length === 0) return;
+
+    // Determine the available space
+    const pageName = pageBox.querySelector('.name')?.textContent?.trim() || 'Editorial';
+    const editArea = document.createElement('div');
+    editArea.className = 'editorial-area';
+
+    // Calculate editorial position based on ad positions
+    const positions = calculateEditorialAreaFromLoad(ads);
+
+    // Add more top space to avoid covering the section
+    if (positions.top === '0') {
+        positions.top = '1.5rem'; // Add space for section text
+    }
+
+    // Apply the calculated position
+    Object.keys(positions).forEach(prop => {
+        editArea.style[prop] = positions[prop];
+    });
+
+    // Add content
+    editArea.innerHTML = `<div class="font-medium">${pageName}</div>`;
+
+    // Add to page
+    pageBox.appendChild(editArea);
+}
