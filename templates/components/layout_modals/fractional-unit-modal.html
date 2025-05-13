@@ -1,0 +1,69 @@
+<!-- Fractional Unit Editor Modal -->
+<div id="fractional-unit-modal"
+    class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all max-w-lg w-full">
+        <div class="bg-indigo-600 py-4 px-6 flex justify-between items-center">
+            <h3 class="text-white text-lg font-bold" id="fractional-unit-modal-title">Edit Fractional Unit</h3>
+            <button type="button" id="close-fractional-unit-modal-btn" class="text-white hover:text-gray-200">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form id="fractional-unit-edit-form" class="p-6">
+            <input type="hidden" id="edit-fractional-unit-id" name="unit_id">
+            <input type="hidden" id="edit-fractional-unit-position" name="unit_position">
+            <input type="hidden" id="edit-fractional-unit-size" name="unit_size">
+
+            <div class="space-y-4">
+                <div>
+                    <label for="edit-fractional-unit-name"
+                        class="block text-gray-700 text-sm font-medium mb-2">Name</label>
+                    <input type="text" id="edit-fractional-unit-name" name="unit_name"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label for="edit-fractional-unit-type" class="block text-gray-700 text-sm font-medium mb-2">Content
+                        Type</label>
+                    <select id="edit-fractional-unit-type" name="unit_type"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="edit">Editorial</option>
+                        <option value="ad">Advertisement</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="edit-fractional-unit-section"
+                        class="block text-gray-700 text-sm font-medium mb-2">Section</label>
+                    <select id="edit-fractional-unit-section" name="unit_section"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="FOB">Front of Book</option>
+                        <option value="Feature">Feature</option>
+                        <option value="BOB">Back of Book</option>
+                        <option value="Cover">Cover</option>
+                        <option value="paid">Paid Advertisement</option>
+                        <option value="house">House Advertisement</option>
+                        <option value="add_new_section">+ Add New Section</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center justify-end pt-4">
+                    <div class="space-x-2">
+                        <button type="button" id="cancel-fractional-unit-edit-btn"
+                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Cancel
+                        </button>
+                        <button type="submit" id="save-fractional-unit-edit-btn"
+                            class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm font-medium">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- End of Fractional Unit Editor Modal -->
+<!-- Fractional Unit List -->

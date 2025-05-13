@@ -63,11 +63,21 @@
 {% include 'components/layout_modals/layout_editor.html' %}
 {% include 'components/layout_modals/analytics.html' %}
 
+<!-- Include the fractional unit editor modal -->
+{% include 'components/layout_modals/fractional-unit-modal.html' %}
+
 {% endblock %}
 
 {% block scripts %}
+<!-- Original scripts -->
 <script src="{{ url_for('static', filename='flatplan.js') }}"></script>
 <script src="{{ url_for('static', filename='fractional-ads.js') }}"></script>
 <script src="{{ url_for('static', filename='page-editor.js') }}"></script>
 <script src="{{ url_for('static', filename='layout-analytics.js') }}"></script>
+
+<!-- New mixed page system scripts -->
+<script src="{{ url_for('static', filename='mixed-page-selector.js') }}"></script>
+<script src="{{ url_for('static', filename='fractional-unit-editor.js') }}"></script>
+<script src="{{ url_for('static', filename='mixed-page-renderer.js') }}"></script>
+<script src="{{ url_for('static', filename='mixed-page-integration.js') }}"></script>
 {% endblock %}

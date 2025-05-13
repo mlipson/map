@@ -34,24 +34,49 @@
                     </select>
                 </div>
 
-                <!-- Add the fractional ads container section -->
+                <!-- Add this in place of the original fractional-ads-container section -->
                 <div id="fractional-ads-container" class="mt-4 border-t pt-4 hidden">
                     <div class="flex justify-between items-center mb-2">
-                        <h4 class="text-gray-700 text-sm font-medium">Fractional Advertisements</h4>
-                        <button type="button" id="add-fractional-ad-btn"
-                            class="bg-indigo-600 text-white py-1 px-2 rounded-md text-xs hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                            + Add Advertisement
-                        </button>
+                        <h4 class="text-gray-700 text-sm font-medium">Page Layout Selection</h4>
                     </div>
 
                     <div class="text-xs text-gray-500 mb-3">
-                        Add one or more fractional advertisements to this page. The remaining space will be editorial
-                        content.
+                        Choose a layout template for this mixed content page. You will be able to define each section
+                        after saving.
                     </div>
 
                     <div id="fractional-ads-list" class="space-y-2">
-                        <!-- Fractional ad forms will be added here dynamically -->
+                        <!-- Mixed page template selector will replace this content dynamically -->
+                        <div class="p-3 bg-gray-50 rounded-md text-sm flex items-center justify-center">
+                            <span class="text-gray-500">Loading layout templates...</span>
+                        </div>
                     </div>
+                </div>
+
+                <!-- This is the container for the layout templates grid that will be inserted dynamically -->
+                <div id="layout-templates-container" class="mt-4 border-t pt-4 hidden">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-gray-700 text-sm font-medium">Select Page Layout</h4>
+                    </div>
+
+                    <div class="text-xs text-gray-500 mb-3">
+                        Choose a layout template for this mixed content page. You will be able to define content for
+                        each section after
+                        selection.
+                    </div>
+
+                    <div id="layout-templates-grid" class="grid grid-cols-3 gap-3">
+                        <!-- Layout templates will be inserted here -->
+                        <div class="flex justify-center items-center p-4 h-24 bg-gray-100 rounded-md">
+                            <span class="text-gray-400 text-sm">Loading templates...</span>
+                        </div>
+                    </div>
+
+                    <div id="layout-templates-info" class="mt-3 text-xs text-gray-500 hidden">
+                        Selected layout: <span id="selected-layout-name" class="font-medium"></span>
+                    </div>
+
+                    <input type="hidden" id="mixed-page-template-id" name="mixed_page_template_id" value="">
                 </div>
 
                 <div>
