@@ -45,13 +45,15 @@ This is **Flatplan**, a Flask web application for magazine layout planning with 
 
 **Layout System (`routes/layout.py`, `routes/api.py`)**:
 - Drag-and-drop magazine layout editor
-- Page types: editorial, advertisement, placeholder
+- Page types: editorial, advertisement, placeholder, mixed
+- Mixed pages use template-based layout system with 9 predefined layouts
 - Section organization and analytics
 - Layout sharing with access controls
 
 **Frontend Architecture**:
 - Vanilla JavaScript with module pattern
 - Key files: `flatplan.js`, `page-editor.js`, `layout-analytics.js`
+- Mixed page system: `mixed-page-selector.js`, `mixed-page-renderer.js`, `fractional-unit-editor.js`, `mixed-page-integration.js`
 - Bootstrap-based responsive UI
 
 ### Data Models
@@ -69,8 +71,10 @@ This is **Flatplan**, a Flask web application for magazine layout planning with 
     {
       "page_number": Number,
       "name": String,
-      "type": String,  // "edit", "ad", "placeholder"
-      "section": String
+      "type": String,  // "edit", "ad", "placeholder", "mixed"
+      "section": String,
+      "fractional_units": Array,  // For mixed pages - contains unit definitions
+      "mixed_page_template_id": String  // Template ID for mixed pages
     }
   ]
 }

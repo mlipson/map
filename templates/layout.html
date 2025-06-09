@@ -69,13 +69,12 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Original scripts -->
+<!-- Core scripts -->
 <script src="{{ url_for('static', filename='flatplan.js') }}"></script>
-<script src="{{ url_for('static', filename='fractional-ads.js') }}"></script>
 <script src="{{ url_for('static', filename='page-editor.js') }}"></script>
 <script src="{{ url_for('static', filename='layout-analytics.js') }}"></script>
 
-<!-- New mixed page system scripts -->
+<!-- Mixed page system scripts -->
 <script src="{{ url_for('static', filename='mixed-page-selector.js') }}"></script>
 <script src="{{ url_for('static', filename='fractional-unit-editor.js') }}"></script>
 <script src="{{ url_for('static', filename='mixed-page-renderer.js') }}"></script>

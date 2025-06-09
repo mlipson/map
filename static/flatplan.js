@@ -44,23 +44,38 @@ function updatePageNumbers() {
  * @returns {Array} Array of page objects with properties
  */
 function getCurrentLayoutAsJSON() {
+  console.log('getCurrentLayoutAsJSON() called');
   const boxes = document.querySelectorAll('.spread-container .box');
   const layout = [];
+  
+  console.log(`Found ${boxes.length} page boxes to process`);
 
   boxes.forEach(box => {
     const id = box.id;
     if (id === "page-0") return; // skip placeholder
 
-    // Get fractional ads data if available
-    let fractionalAds = [];
+    // Get fractional units data from mixed pages (new template system)
+    let fractionalUnits = [];
     if (box.classList.contains('mixed')) {
       const fractionalAdsData = box.getAttribute('data-fractional-ads');
+      const templateId = box.getAttribute('data-mixed-page-layout-id');
+      
+      console.log(`Processing mixed page ${id}:`, {
+        hasFractionalData: !!fractionalAdsData,
+        hasTemplateId: !!templateId,
+        fractionalAdsData: fractionalAdsData,
+        templateId: templateId
+      });
+      
       if (fractionalAdsData) {
         try {
-          fractionalAds = JSON.parse(fractionalAdsData);
+          fractionalUnits = JSON.parse(fractionalAdsData);
+          console.log('Parsed fractional units:', fractionalUnits);
         } catch (e) {
-          console.error('Error parsing fractional ads data:', e);
+          console.error('Error parsing fractional units data:', e);
         }
+      } else {
+        console.warn('No fractional-ads data found on mixed page element');
       }
     }
 
@@ -76,14 +91,22 @@ function getCurrentLayoutAsJSON() {
     else if (box.classList.contains('placeholder')) pageType = 'placeholder';
 
     // Create the page object
-    layout.push({
+    const pageData = {
       name: name,
       section: section,
       page_number: parseInt(box.getAttribute('data-page-number'), 10) || 0,
       type: pageType,
       form_break: box.hasAttribute('data-form-break'),
-      fractional_ads: fractionalAds
-    });
+      fractional_units: fractionalUnits,
+      mixed_page_template_id: box.getAttribute('data-mixed-page-layout-id') || null
+    };
+    
+    // Debug mixed pages
+    if (pageType === 'mixed') {
+      console.log('Exporting mixed page data:', pageData);
+    }
+    
+    layout.push(pageData);
   });
 
   return layout;

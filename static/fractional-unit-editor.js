@@ -129,6 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const fractionalUnit = e.target.closest('.fractional-unit');
         if (!fractionalUnit) return;
 
+        // Stop the event from bubbling up to the page box
+        e.stopPropagation();
+        e.preventDefault();
+
         // Don't process if we're in drag mode
         if (document.querySelector('.drag-ghost')) return;
 

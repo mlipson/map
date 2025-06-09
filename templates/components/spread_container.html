@@ -5,8 +5,8 @@
     <div id="page-{{ item['page_number'] }}"
         class="box rounded border {{ 'mixed' if item['type'] == 'mixed' else item['type'] if item['type'] in ['edit', 'ad', 'placeholder'] else 'unknown' }} {{ 'bonus' if item['type'] == 'ad' and item['section'] == 'Bonus' else 'promo' if item['type'] == 'ad' and item['section'] == 'Promo' else '' }} {{ 'form-break' if item.get('form_break') else '' }} relative p-3 aspect-[3/4] w-32 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm"
         data-page-number="{{ item['page_number'] }}" {% if item.get('form_break') %}data-form-break="true" {% endif %}
-        {% if item.get('fractional_ads') %}data-fractional-ads="{{ item.get('fractional_ads')|safe_json|e }}" {% endif
-        %}>
+        {% if item.get('fractional_units') %}data-fractional-ads="{{ item.get('fractional_units')|safe_json|e }}" {% endif %}
+        {% if item.get('mixed_page_template_id') %}data-mixed-page-layout-id="{{ item.get('mixed_page_template_id') }}" {% endif %}>
 
         <div class="section font-semibold text-xs text-gray-700 mb-0.5">{{ item['section'] }}</div>
         <div class="name-wrapper flex-1 flex items-center justify-center">

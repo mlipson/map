@@ -234,6 +234,8 @@ def view_layout(layout_id):
         # Handle JSON content (AJAX request)
         if request.is_json:
             layout_data = request.json
+
+            print(f"Received layout data: {layout_data}")
             if layout_data:
                 success, error = update_layout_content(layout_id, user_id, layout_data)
                 if success:

@@ -279,7 +279,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const templateId = templateElement.getAttribute('data-template-id');
         const templateName = templateElement.getAttribute('data-template-name');
 
-        // Update the hidden input with the selected template ID
+        // Store the template selection immediately in the form
+        let templateIdInput = document.getElementById('mixed-page-template-id');
+        if (!templateIdInput) {
+            templateIdInput = document.createElement('input');
+            templateIdInput.type = 'hidden';
+            templateIdInput.id = 'mixed-page-template-id';
+            templateIdInput.name = 'mixed_page_template_id';
+            
+            // Add to the page edit form
+            const form = document.getElementById('page-edit-form');
+            if (form) {
+                form.appendChild(templateIdInput);
+            }
+        }
+        templateIdInput.value = templateId;
+
+        // Update the hidden input with the selected template ID (legacy)
         const selectedLayoutIdInput = document.getElementById('selected-layout-id');
         if (selectedLayoutIdInput) {
             selectedLayoutIdInput.value = templateId;
@@ -305,6 +321,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Replace the fractional ads container with a message
         showSelectedTemplateMessage(templateId, templateName);
+        
+        console.log(`Template selected: ${templateName} (ID: ${templateId})`);
     }
 
     /**
@@ -317,14 +335,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const fractionalAdsContainer = document.getElementById('fractional-ads-container');
         if (!fractionalAdsContainer) return;
 
-        // Create a hidden input to store the template ID
+        // Create a hidden input to store the template ID - add it to the form instead of container
         let templateIdInput = document.getElementById('mixed-page-template-id');
         if (!templateIdInput) {
             templateIdInput = document.createElement('input');
             templateIdInput.type = 'hidden';
             templateIdInput.id = 'mixed-page-template-id';
             templateIdInput.name = 'mixed_page_template_id';
-            fractionalAdsContainer.appendChild(templateIdInput);
+            
+            // Add to the page edit form instead of the container
+            const form = document.getElementById('page-edit-form');
+            if (form) {
+                form.appendChild(templateIdInput);
+            } else {
+                // Fallback to fractional ads container
+                fractionalAdsContainer.appendChild(templateIdInput);
+            }
         }
         templateIdInput.value = templateId;
 

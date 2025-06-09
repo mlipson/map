@@ -20,11 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
      * Initialize the module
      */
     function initialize() {
+        console.log('Mixed page renderer initializing...');
+        
         // Render any mixed pages on initial page load
         renderAllMixedPages();
 
         // Add mutation observer to detect when new mixed pages are added
         setupMutationObserver();
+        
+        console.log('Mixed page renderer initialization complete');
     }
 
     /**
@@ -66,16 +70,33 @@ document.addEventListener('DOMContentLoaded', () => {
      * Renders all mixed pages on the page
      */
     function renderAllMixedPages() {
-        document.querySelectorAll('.box.mixed').forEach(pageBox => {
+        const mixedPages = document.querySelectorAll('.box.mixed');
+        console.log(`Found ${mixedPages.length} mixed pages to render`);
+        
+        mixedPages.forEach(pageBox => {
+            const pageId = pageBox.id;
+            const isRendered = pageBox.hasAttribute('data-mixed-page-rendered');
+            const layoutId = pageBox.getAttribute('data-mixed-page-layout-id');
+            const fractionalData = pageBox.getAttribute('data-fractional-ads');
+            
+            console.log(`Processing mixed page ${pageId}:`, {
+                isRendered,
+                layoutId,
+                hasFractionalData: !!fractionalData
+            });
+            
             // Check if this page has already been processed
-            if (pageBox.hasAttribute('data-mixed-page-rendered')) {
+            if (isRendered) {
+                console.log(`Skipping ${pageId} - already rendered`);
                 return;
             }
 
             // Get the layout template ID
-            const layoutId = pageBox.getAttribute('data-mixed-page-layout-id');
             if (layoutId) {
+                console.log(`Rendering mixed page ${pageId} with template ${layoutId}`);
                 renderMixedPage(pageBox, layoutId);
+            } else {
+                console.warn(`Mixed page ${pageId} has no template ID`);
             }
         });
     }
@@ -90,12 +111,16 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} layoutId - The layout template ID
      */
     function renderMixedPage(pageBox, layoutId) {
+        console.log(`renderMixedPage called with layoutId: ${layoutId}, pageBox:`, pageBox);
+        
         // Get the layout template definition
         const template = getLayoutTemplate(layoutId);
         if (!template) {
             console.error(`Layout template with ID ${layoutId} not found`);
             return;
         }
+        
+        console.log(`Found template:`, template);
 
         // Get or create fractional units data
         let fractionalUnits = [];
@@ -117,11 +142,17 @@ document.addEventListener('DOMContentLoaded', () => {
         clearExistingFractionalUnits(pageBox);
 
         // Create and add new fractional units based on template
+        console.log('Creating fractional units:', matchedUnits);
         createFractionalUnits(pageBox, matchedUnits);
+
+        // Add edit page button for mixed pages
+        addEditPageButton(pageBox);
 
         // Mark the page as rendered
         pageBox.setAttribute('data-mixed-page-rendered', 'true');
         pageBox.setAttribute('data-mixed-page-layout-id', layoutId);
+        
+        console.log('Mixed page rendering completed');
     }
 
     /**
@@ -225,6 +256,11 @@ document.addEventListener('DOMContentLoaded', () => {
      * @returns {Array} Matched fractional units data
      */
     function matchFractionalUnitsToTemplate(existingUnits, template) {
+        console.log('Matching fractional units:', {
+            existingUnits,
+            templateUnits: template.fractional_units
+        });
+        
         const result = [];
 
         // Process each template unit
@@ -283,7 +319,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Update the page's data attribute with the units data
-        pageBox.setAttribute('data-fractional-ads', JSON.stringify(units));
+        const unitsJson = JSON.stringify(units);
+        pageBox.setAttribute('data-fractional-ads', unitsJson);
+        
+        console.log('Stored fractional units data on page:', unitsJson);
+        console.log('Page element after storing data:', pageBox);
     }
 
     /**
@@ -307,12 +347,41 @@ document.addEventListener('DOMContentLoaded', () => {
         // Position the unit based on size and position
         positionFractionalUnit(unitElement, unitData.size, unitData.position);
 
-        // Set the background color based on type
-        unitElement.style.backgroundColor = unitData.type === 'edit' ? '#B1FCFE' : '#F19E9C';
+        // Set the background color and interactive styles
+        const baseColor = unitData.type === 'edit' ? '#B1FCFE' : '#F19E9C';
+        const hoverColor = unitData.type === 'edit' ? '#9CFAFC' : '#F18B89';
+        
+        unitElement.style.backgroundColor = baseColor;
+        unitElement.style.cursor = 'pointer';
+        unitElement.style.transition = 'all 0.2s ease';
+        unitElement.style.border = '2px solid transparent';
+        unitElement.style.borderRadius = '4px';
+        
+        // Add hover effects using event listeners (more reliable than CSS hover on dynamic elements)
+        unitElement.addEventListener('mouseenter', () => {
+            unitElement.style.backgroundColor = hoverColor;
+            unitElement.style.borderColor = '#4F46E5';
+            unitElement.style.transform = 'scale(1.02)';
+            unitElement.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+        });
+        
+        unitElement.addEventListener('mouseleave', () => {
+            unitElement.style.backgroundColor = baseColor;
+            unitElement.style.borderColor = 'transparent';
+            unitElement.style.transform = 'scale(1)';
+            unitElement.style.boxShadow = 'none';
+        });
 
-        // Add content
+        // Add content with edit icon hint
         unitElement.innerHTML = `
-            <div class="text-xs font-medium text-center">${unitData.name}</div>
+            <div class="text-xs font-medium text-center flex flex-col items-center justify-center h-full">
+                <div class="mb-1">
+                    <svg class="w-3 h-3 mx-auto opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
+                <div>${unitData.name}</div>
+            </div>
         `;
 
         // Add to page
@@ -400,54 +469,99 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    /**
+     * Adds an "Edit Page" button to mixed pages
+     * @param {HTMLElement} pageBox - The page box element
+     */
+    function addEditPageButton(pageBox) {
+        // Remove existing edit page button if it exists
+        const existingButton = pageBox.querySelector('.edit-page-button');
+        if (existingButton) {
+            existingButton.remove();
+        }
+
+        // Create the edit page button
+        const editButton = document.createElement('button');
+        editButton.className = 'edit-page-button';
+        editButton.innerHTML = `
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        `;
+        
+        // Style the button
+        editButton.style.position = 'absolute';
+        editButton.style.top = '4px';
+        editButton.style.right = '4px';
+        editButton.style.width = '24px';
+        editButton.style.height = '24px';
+        editButton.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+        editButton.style.border = '1px solid #D1D5DB';
+        editButton.style.borderRadius = '4px';
+        editButton.style.display = 'flex';
+        editButton.style.alignItems = 'center';
+        editButton.style.justifyContent = 'center';
+        editButton.style.cursor = 'pointer';
+        editButton.style.color = '#6B7280';
+        editButton.style.transition = 'all 0.2s ease';
+        editButton.style.opacity = '0.7';
+        editButton.style.zIndex = '10';
+        
+        // Add hover effects
+        editButton.addEventListener('mouseenter', () => {
+            editButton.style.backgroundColor = '#F3F4F6';
+            editButton.style.borderColor = '#9CA3AF';
+            editButton.style.color = '#374151';
+            editButton.style.opacity = '1';
+            editButton.style.transform = 'scale(1.1)';
+        });
+        
+        editButton.addEventListener('mouseleave', () => {
+            editButton.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+            editButton.style.borderColor = '#D1D5DB';
+            editButton.style.color = '#6B7280';
+            editButton.style.opacity = '0.7';
+            editButton.style.transform = 'scale(1)';
+        });
+
+        // Add click handler to open page editor modal
+        editButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            // Access the page editor functionality
+            // The page-editor.js should expose its openEditModal function or we trigger it manually
+            if (typeof window.openEditModal === 'function') {
+                window.openEditModal(pageBox);
+            } else {
+                // Fallback: manually trigger the page editor modal
+                // We'll create a custom event that page-editor.js can listen for
+                const editPageEvent = new CustomEvent('editPage', {
+                    detail: { pageBox: pageBox },
+                    bubbles: false
+                });
+                document.dispatchEvent(editPageEvent);
+            }
+        });
+
+        // Add tooltip
+        editButton.title = 'Edit Page Properties';
+        
+        // Add to page box
+        pageBox.appendChild(editButton);
+    }
+
     // ===================================================
-    // SECTION 3: UPDATES TO PAGE-EDITOR.JS FUNCTIONS
+    // SECTION 3: PUBLIC API
     // ===================================================
 
     /**
-     * Add this functionality to page-editor.js to update mixed page handling
-     * - Make the savePageEdits function check for mixed-page-template-id
-     * - Update the savePageEdits function to store the selected template ID
-     * - Remove the old fractional ads processing
-     *
-     * Alternatively, monkey-patch the needed functions here:
+     * Public API for other modules to interact with the mixed page renderer
      */
-
-    // Only add these monkey patches if we detect the original functions
-    if (typeof window.savePageEdits === 'function') {
-        // Store the original function
-        const originalSavePageEdits = window.savePageEdits;
-
-        // Override with our version that handles mixed pages
-        window.savePageEdits = function() {
-            const pageId = document.getElementById('edit-page-id').value;
-            const pageType = document.getElementById('edit-page-type').value;
-
-            // If this is a mixed page, handle the template ID
-            if (pageType === 'mixed') {
-                const templateIdInput = document.getElementById('mixed-page-template-id');
-                if (templateIdInput && templateIdInput.value) {
-                    const templateId = templateIdInput.value;
-                    const pageBox = document.getElementById(pageId);
-
-                    if (pageBox) {
-                        // Store the template ID
-                        pageBox.setAttribute('data-mixed-page-layout-id', templateId);
-
-                        // Clear any existing fractional units data
-                        pageBox.removeAttribute('data-fractional-ads');
-                        pageBox.removeAttribute('data-mixed-page-rendered');
-
-                        // Remove any existing fractional units
-                        pageBox.querySelectorAll('.fractional-unit, .fractional-ad').forEach(el => {
-                            el.remove();
-                        });
-                    }
-                }
-            }
-
-            // Call the original function
-            return originalSavePageEdits.apply(this, arguments);
-        };
-    }
+    window.mixedPageRenderer = {
+        renderMixedPage,
+        getLayoutTemplate,
+        renderAllMixedPages
+    };
 });

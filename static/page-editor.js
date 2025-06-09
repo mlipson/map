@@ -3,7 +3,7 @@
  * Page Editor Module
  *
  * This module handles all functionality related to editing pages in the magazine layout,
- * including modal management, page properties, fractional advertisements, and layout metadata.
+ * including modal management, page properties, and layout metadata.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -27,9 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sectionSelect = document.getElementById('edit-page-section');
     const pageTypeSelect = document.getElementById('edit-page-type');
 
-    // Fractional ads elements
-    const fractionalAdsContainer = document.getElementById('fractional-ads-container');
-    const addFractionalAdBtn = document.getElementById('add-fractional-ad-btn');
 
     // ===================================================
     // SECTION 2: EVENT LISTENERS AND INITIALIZATION
@@ -40,15 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
         sectionSelect.addEventListener('change', handleSectionChange);
     }
 
-    // Page type change handler to show/hide fractional ads section
+    // Page type change handler
     if (pageTypeSelect) {
         pageTypeSelect.addEventListener('change', handlePageTypeChange);
     }
 
-    // Add button for adding new fractional ad forms
-    if (addFractionalAdBtn) {
-        addFractionalAdBtn.addEventListener('click', () => addFractionalAdForm());
-    }
 
     // Initialize layout edit buttons
     initializeLayoutEditButtons();
@@ -56,8 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set global event handler for dynamically added elements
     document.addEventListener('click', handleGlobalClick);
 
-    // Set up event delegation for fractional ad forms
-    document.addEventListener('change', handleFractionalAdFormChanges);
 
     // Make pages clickable to edit
     initializePageBoxes();
@@ -137,21 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Handles changes to the page type dropdown
-     * Shows/hides fractional ads container based on selected type
+     * Mixed pages are now handled by the template system
      */
     function handlePageTypeChange() {
-        if (fractionalAdsContainer) {
-            if (this.value === 'mixed') {
-                fractionalAdsContainer.classList.remove('hidden');
-                // Add an empty fractional ad form if there are none
-                const adsList = document.getElementById('fractional-ads-list');
-                if (adsList && adsList.children.length === 0) {
-                    addFractionalAdForm();
-                }
-            } else {
-                fractionalAdsContainer.classList.add('hidden');
-            }
-        }
+        // Mixed pages are now handled by the template system
+        // No additional logic needed here
     }
 
     // ===================================================
@@ -250,6 +231,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (box.id === 'page-0') return; // skip placeholder
 
             box.addEventListener('click', (e) => {
+                // For mixed pages, only allow editing through the edit button
+                // to avoid conflicts with fractional unit editing
+                if (box.classList.contains('mixed')) {
+                    // Check if the click came from the edit button
+                    if (!e.target.closest('.edit-page-button')) {
+                        return; // Don't open page editor for mixed pages unless edit button is clicked
+                    }
+                }
+                
                 // Only open editor when clicking the box itself (not during drag operations)
                 if (e.currentTarget === box) {
                     openEditModal(box);
@@ -277,11 +267,8 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (pageBox.classList.contains('mixed')) pageType = 'mixed';
         else if (pageBox.classList.contains('placeholder')) pageType = 'placeholder';
 
-        // Get fractional ads data if present
-        let fractionalAds = [];
-        if (pageType === 'mixed') {
-            fractionalAds = getFractionalAdsFromPage(pageBox);
-        }
+        // Mixed pages are now handled by the template system
+        // No need to load old fractional ads data
 
         // Fill the form
         document.getElementById('edit-page-id').value = pageId;
@@ -298,72 +285,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Build section dropdown options
         populateSectionDropdown(pageSection);
 
-        // Handle fractional ads container visibility and population
-        if (fractionalAdsContainer) {
-            if (pageType === 'mixed') {
-                fractionalAdsContainer.classList.remove('hidden');
-                populateFractionalAds(fractionalAds);
-
-                // Update position options for each form
-                updateAllPositionOptions();
-            } else {
-                fractionalAdsContainer.classList.add('hidden');
-                clearFractionalAds();
-            }
-        }
+        // Mixed pages are handled by the template system
 
         // Show the modal
         pageModal.classList.remove('hidden');
     }
 
-    /**
-     * Gets fractional ads data from a page element
-     * @param {HTMLElement} pageBox - The page box element
-     * @returns {Array} Array of fractional ad objects
-     */
-    function getFractionalAdsFromPage(pageBox) {
-        let fractionalAds = [];
 
-        // Try to get fractional ads from data attribute first
-        const fractionalAdsData = pageBox.getAttribute('data-fractional-ads');
-        if (fractionalAdsData) {
-            try {
-                fractionalAds = JSON.parse(fractionalAdsData);
-            } catch (e) {
-                console.error('Error parsing fractional ads data:', e);
-            }
-        }
-
-        // If no data attribute or parsing failed, try to get from DOM elements
-        if (fractionalAds.length === 0) {
-            const fractionalElements = pageBox.querySelectorAll('.fractional-ad');
-            fractionalElements.forEach(el => {
-                fractionalAds.push({
-                    id: el.getAttribute('data-id'),
-                    name: el.getAttribute('data-name'),
-                    section: el.getAttribute('data-section'),
-                    size: el.getAttribute('data-size'),
-                    position: el.getAttribute('data-position')
-                });
-            });
-        }
-
-        return fractionalAds;
-    }
-
-    /**
-     * Updates position dropdown options for all fractional ad forms
-     */
-    function updateAllPositionOptions() {
-        document.querySelectorAll('#fractional-ads-list .fractional-ad-form').forEach(form => {
-            const sizeDropdown = form.querySelector('[name="fractional_ad_size"]');
-            const positionDropdown = form.querySelector('[name="fractional_ad_position"]');
-
-            if (sizeDropdown && positionDropdown) {
-                updatePositionOptions(positionDropdown, sizeDropdown.value);
-            }
-        });
-    }
 
     /**
      * Populates the section dropdown with options
@@ -480,24 +408,67 @@ document.addEventListener('DOMContentLoaded', () => {
         const pageSection = document.getElementById('edit-page-section').value.trim();
         const formBreak = document.getElementById('edit-page-form-break').checked;
 
-        // Collect fractional ads data if page type is "mixed"
-        const fractionalAds = pageType === 'mixed' ? collectFractionalAdsData() : [];
-
         // Get the page element
         const pageBox = document.getElementById(pageId);
         if (!pageBox) return;
+
+        // Handle mixed page template selection
+        if (pageType === 'mixed') {
+            handleMixedPageSave(pageBox);
+        }
 
         // Update the page element
         updatePageBasicInfo(pageBox, pageName, pageSection);
         updatePageType(pageBox, pageType, pageSection);
         updateFormBreak(pageBox, formBreak);
-        updateFractionalAds(pageBox, pageType, fractionalAds);
 
         // Close the modal
         closeModal();
 
         // Show notification
         showNotification('Page updated', 'success');
+    }
+
+    /**
+     * Handles saving mixed pages with template data
+     * @param {HTMLElement} pageBox - The page box element
+     */
+    function handleMixedPageSave(pageBox) {
+        const templateIdInput = document.getElementById('mixed-page-template-id');
+        
+        if (templateIdInput && templateIdInput.value) {
+            const templateId = templateIdInput.value;
+            
+            // Store the template ID on the page element
+            pageBox.setAttribute('data-mixed-page-layout-id', templateId);
+            
+            // Clear any old fractional data that might exist
+            pageBox.removeAttribute('data-fractional-ads');
+            pageBox.removeAttribute('data-mixed-page-rendered');
+            
+            // Remove any existing fractional elements (they'll be re-rendered)
+            pageBox.querySelectorAll('.fractional-unit, .fractional-ad, .editorial-area').forEach(el => {
+                el.remove();
+            });
+            
+            console.log(`Mixed page saved with template ID: ${templateId}`);
+            
+            // Trigger the renderer to create the fractional units
+            // Use a small timeout to ensure the page type is updated first
+            setTimeout(() => {
+                if (window.mixedPageRenderer && window.mixedPageRenderer.renderMixedPage) {
+                    console.log('Calling mixed page renderer...');
+                    window.mixedPageRenderer.renderMixedPage(pageBox, templateId);
+                } else {
+                    console.error('Mixed page renderer not available:', {
+                        mixedPageRenderer: !!window.mixedPageRenderer,
+                        renderMixedPage: !!(window.mixedPageRenderer && window.mixedPageRenderer.renderMixedPage)
+                    });
+                }
+            }, 100);
+        } else {
+            console.warn('No template selected for mixed page');
+        }
     }
 
     /**
@@ -592,42 +563,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Updates fractional ads for a page
-     * @param {HTMLElement} pageBox - The page box element
-     * @param {string} pageType - The page type
-     * @param {Array} fractionalAds - Array of fractional ad objects
-     */
-    function updateFractionalAds(pageBox, pageType, fractionalAds) {
-        // Don't remove section element
-        const sectionEl = pageBox.querySelector('.section');
-
-        // Clear existing fractional ads and editorial areas
-        const existingFractionalAds = pageBox.querySelectorAll('.fractional-ad');
-        existingFractionalAds.forEach(el => el.remove());
-
-        const existingEditAreas = pageBox.querySelectorAll('.editorial-area');
-        existingEditAreas.forEach(el => el.remove());
-
-        if (pageType === 'mixed') {
-            // Make sure section is at the top and visible
-            if (sectionEl && sectionEl.parentNode === pageBox) {
-                pageBox.removeChild(sectionEl);
-                pageBox.prepend(sectionEl);
-            }
-
-            // Add the new fractional ads
-            fractionalAds.forEach(ad => {
-                addFractionalAdToPage(pageBox, ad);
-            });
-
-            // Store fractional ads data in a data attribute for later retrieval
-            pageBox.setAttribute('data-fractional-ads', JSON.stringify(fractionalAds));
-        } else {
-            // Remove the data attribute
-            pageBox.removeAttribute('data-fractional-ads');
-        }
-    }
 
     /**
      * Deletes a page
@@ -752,489 +687,11 @@ function addNewPage() {
         }, 3000);
     }
 
-    // ===================================================
-    // SECTION 6: FRACTIONAL ADS FUNCTIONS
-    // ===================================================
 
-    /**
-     * Handles fractional ad form changes
-     * @param {Event} e - Change event
-     */
-    function handleFractionalAdFormChanges(e) {
-        // Check if the changed element is a fractional ad size dropdown
-        if (e.target.name === 'fractional_ad_size') {
-            const sizeValue = e.target.value;
-            // Find the position dropdown in the same form
-            const form = e.target.closest('.fractional-ad-form');
-            const positionDropdown = form.querySelector('[name="fractional_ad_position"]');
 
-            // Update position options based on size
-            updatePositionOptions(positionDropdown, sizeValue);
-        }
-    }
 
-    /**
-     * Updates position dropdown options based on the selected size
-     * @param {HTMLElement} positionDropdown - The position dropdown element
-     * @param {string} size - The selected size value
-     */
-    function updatePositionOptions(positionDropdown, size) {
-        if (!positionDropdown) return;
 
-        // Save current selection if possible
-        const currentPosition = positionDropdown.value;
 
-        // Clear existing options
-        positionDropdown.innerHTML = '';
-
-        // Add appropriate options based on size
-        const options = size === '1/4'
-            ? getCornerOptions()
-            : getEdgeOptions();
-
-        options.forEach(option => {
-            const optionEl = document.createElement('option');
-            optionEl.value = option.value;
-            optionEl.textContent = option.label;
-            positionDropdown.appendChild(optionEl);
-        });
-
-        // Try to restore previous selection if it exists in new options
-        const matchingOption = positionDropdown.querySelector(`option[value="${currentPosition}"]`);
-        if (matchingOption) {
-            matchingOption.selected = true;
-        }
-    }
-
-    /**
-     * Gets corner position options for quarter-page ads
-     * @returns {Array} Array of position option objects
-     */
-    function getCornerOptions() {
-        return [
-            { value: 'top-left', label: 'Top Left' },
-            { value: 'top-right', label: 'Top Right' },
-            { value: 'bottom-left', label: 'Bottom Left' },
-            { value: 'bottom-right', label: 'Bottom Right' }
-        ];
-    }
-
-    /**
-     * Gets edge position options for non-quarter-page ads
-     * @returns {Array} Array of position option objects
-     */
-    function getEdgeOptions() {
-        return [
-            { value: 'top', label: 'Top' },
-            { value: 'bottom', label: 'Bottom' },
-            { value: 'left', label: 'Left' },
-            { value: 'right', label: 'Right' }
-        ];
-    }
-
-    /**
-     * Populates the fractional ads UI with existing fractional ads
-     * @param {Array} fractionalAds - Array of fractional ad objects
-     */
-    function populateFractionalAds(fractionalAds) {
-        const container = document.getElementById('fractional-ads-list');
-        if (!container) return;
-
-        container.innerHTML = '';
-
-        if (fractionalAds.length === 0) {
-            // Add one empty form by default
-            addFractionalAdForm();
-            return;
-        }
-
-        // Add a form for each existing fractional ad
-        fractionalAds.forEach(ad => {
-            addFractionalAdForm(ad);
-        });
-    }
-
-    /**
-     * Adds a new fractional ad form to the UI
-     * @param {Object} adData - Optional existing ad data to populate the form
-     */
-    function addFractionalAdForm(adData = null) {
-        const container = document.getElementById('fractional-ads-list');
-        if (!container) return;
-
-        const formId = `fractional-ad-${Date.now()}`;
-
-        // Determine size - if no adData, default to '1/4'
-        const size = adData?.size || '1/4';
-
-        // Determine if we need corner positions based on size
-        const isQuarterPage = size === '1/4';
-
-        // Prepare position options based on size
-        let positionOptions = '';
-
-        if (isQuarterPage) {
-            // Corner positions for quarter page
-            positionOptions = getCornerOptions().map(option =>
-                `<option value="${option.value}" ${adData?.position === option.value ? 'selected' : ''}>${option.label}</option>`
-            ).join('');
-        } else {
-            // Edge positions for other sizes
-            positionOptions = getEdgeOptions().map(option =>
-                `<option value="${option.value}" ${adData?.position === option.value ? 'selected' : ''}>${option.label}</option>`
-            ).join('');
-        }
-
-        const formHtml = `
-            <div class="fractional-ad-form p-3 bg-gray-50 rounded-md mb-3" id="${formId}">
-                <input type="hidden" name="fractional_ad_id" value="${adData?.id || ''}">
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-gray-700 text-xs font-medium mb-1">Ad Name</label>
-                        <input type="text" name="fractional_ad_name" value="${adData?.name || ''}"
-                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 text-xs font-medium mb-1">Section</label>
-                        <input type="text" name="fractional_ad_section" value="${adData?.section || 'paid'}"
-                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 text-xs font-medium mb-1">Size</label>
-                        <select name="fractional_ad_size"
-                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
-                            <option value="1/4" ${size === '1/4' ? 'selected' : ''}>1/4 page</option>
-                            <option value="1/3" ${size === '1/3' ? 'selected' : ''}>1/3 page</option>
-                            <option value="1/2" ${size === '1/2' ? 'selected' : ''}>1/2 page</option>
-                            <option value="2/3" ${size === '2/3' ? 'selected' : ''}>2/3 page</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 text-xs font-medium mb-1">Position</label>
-                        <select name="fractional_ad_position"
-                            class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md">
-                            ${positionOptions}
-                        </select>
-                    </div>
-                </div>
-                <div class="flex justify-end mt-2">
-                    <button type="button" onclick="removeFractionalAdForm('${formId}')"
-                        class="text-red-600 hover:text-red-800 text-xs">
-                        Remove
-                    </button>
-                </div>
-            </div>
-        `;
-
-        // Insert the new form
-        container.insertAdjacentHTML('beforeend', formHtml);
-
-        // Add change event listener to the size dropdown
-        const sizeDropdown = document.querySelector(`#${formId} [name="fractional_ad_size"]`);
-        const positionDropdown = document.querySelector(`#${formId} [name="fractional_ad_position"]`);
-
-        if (sizeDropdown && positionDropdown) {
-            sizeDropdown.addEventListener('change', function() {
-                updatePositionOptions(positionDropdown, this.value);
-            });
-
-            // Set default position if this is a new form (not loading existing data)
-            if (!adData) {
-                // Default position for 1/4 page is top-left
-                positionDropdown.value = isQuarterPage ? 'top-left' : 'top';
-            }
-        }
-    }
-
-    /**
-     * Removes a fractional ad form from the UI
-     * @param {string} formId - The ID of the form to remove
-     */
-    window.removeFractionalAdForm = function(formId) {
-        const form = document.getElementById(formId);
-        if (form) {
-            form.remove();
-
-            // If no forms left, add an empty one
-            const container = document.getElementById('fractional-ads-list');
-            if (container && container.children.length === 0) {
-                addFractionalAdForm();
-            }
-        }
-    };
-
-    /**
-     * Clears all fractional ad forms
-     */
-    function clearFractionalAds() {
-        const container = document.getElementById('fractional-ads-list');
-        if (container) {
-            container.innerHTML = '';
-        }
-    }
-
-    /**
-     * Collects fractional ad data from the form
-     * @returns {Array} Array of fractional ad objects
-     */
-    function collectFractionalAdsData() {
-        const forms = document.querySelectorAll('.fractional-ad-form');
-        const fractionalAds = [];
-
-        forms.forEach(form => {
-            const id = form.querySelector('input[name="fractional_ad_id"]').value || `frac-${Date.now()}-${fractionalAds.length}`;
-            const name = form.querySelector('input[name="fractional_ad_name"]').value;
-            const section = form.querySelector('input[name="fractional_ad_section"]').value;
-            const size = form.querySelector('select[name="fractional_ad_size"]').value;
-            const position = form.querySelector('select[name="fractional_ad_position"]').value;
-
-            // Only add if it has a name
-            if (name.trim()) {
-                fractionalAds.push({ id, name, section, size, position });
-            }
-        });
-
-        return fractionalAds;
-    }
-
-/**
- * Adds a fractional ad to the page box
- * @param {HTMLElement} pageBox - The page box element
- * @param {Object} adData - The fractional ad data
- */
-function addFractionalAdToPage(pageBox, adData) {
-    // Create the fractional ad element
-    const adElement = document.createElement('div');
-    adElement.className = 'fractional-ad';
-
-    // Set data attributes for later retrieval
-    adElement.setAttribute('data-id', adData.id);
-    adElement.setAttribute('data-name', adData.name);
-    adElement.setAttribute('data-section', adData.section);
-    adElement.setAttribute('data-size', adData.size);
-    adElement.setAttribute('data-position', adData.position);
-
-    // Position the ad based on size and position
-    positionFractionalAd(adElement, adData.size, adData.position);
-
-    // Add content to the fractional ad
-    adElement.innerHTML = `
-        <div class="text-xs font-medium text-center">${adData.name}</div>
-    `;
-
-    // Add the ad element to the page box
-    pageBox.appendChild(adElement);
-
-    // Now create or update the editorial area
-    updateEditorialArea(pageBox);
-}
-
-/**
- * Updates the editorial area to fill the remaining space not occupied by ads
- * @param {HTMLElement} pageBox - The page box element
- */
-function updateEditorialArea(pageBox) {
-    // Remove any existing editorial area
-    const existingEditArea = pageBox.querySelector('.editorial-area');
-    if (existingEditArea) {
-        existingEditArea.remove();
-    }
-
-    // Get all ads to determine their positions
-    const ads = Array.from(pageBox.querySelectorAll('.fractional-ad'));
-
-    // If no ads, don't create an editorial area
-    if (ads.length === 0) return;
-
-    // Determine the available space
-    const pageName = pageBox.querySelector('.name')?.textContent?.trim() || 'Editorial';
-    const editArea = document.createElement('div');
-    editArea.className = 'editorial-area';
-
-    // Calculate editorial position based on ad positions
-    const positions = calculateEditorialArea(ads);
-
-    // Apply the calculated position
-    Object.keys(positions).forEach(prop => {
-        editArea.style[prop] = positions[prop];
-    });
-
-    // Add content
-    editArea.innerHTML = `<div class="font-medium">${pageName}</div>`;
-
-    // Add to page
-    pageBox.appendChild(editArea);
-}
-
-/**
- * Calculates the position and size of the editorial area
- * @param {Array} ads - Array of ad elements
- * @returns {Object} CSS positioning properties
- */
-function calculateEditorialArea(ads) {
-    // Default is full page
-    const area = {
-        top: '0',
-        right: '0',
-        bottom: '0',
-        left: '0'
-    };
-
-    // Check if we have ads in certain positions
-    ads.forEach(ad => {
-        const position = ad.getAttribute('data-position');
-        const size = ad.getAttribute('data-size');
-
-        switch(position) {
-            case 'top':
-                area.top = getSizePercentage(size);
-                break;
-            case 'bottom':
-                area.bottom = getSizePercentage(size);
-                break;
-            case 'left':
-                area.left = getSizePercentage(size);
-                break;
-            case 'right':
-                area.right = getSizePercentage(size);
-                break;
-            case 'top-left':
-                // For quarter-page ads, we need to check if we already have adjustments
-                if (area.top === '0') area.top = '50%';
-                if (area.left === '0') area.left = '50%';
-                break;
-            case 'top-right':
-                if (area.top === '0') area.top = '50%';
-                if (area.right === '0') area.right = '50%';
-                break;
-            case 'bottom-left':
-                if (area.bottom === '0') area.bottom = '50%';
-                if (area.left === '0') area.left = '50%';
-                break;
-            case 'bottom-right':
-                if (area.bottom === '0') area.bottom = '50%';
-                if (area.right === '0') area.right = '50%';
-                break;
-        }
-    });
-
-    return area;
-}
-
-/**
- * Updates fractional ads for a page
- * @param {HTMLElement} pageBox - The page box element
- * @param {string} pageType - The page type
- * @param {Array} fractionalAds - Array of fractional ad objects
- */
-function updateFractionalAds(pageBox, pageType, fractionalAds) {
-    // Clear existing fractional ads and editorial areas
-    const existingFractionalAds = pageBox.querySelectorAll('.fractional-ad');
-    existingFractionalAds.forEach(el => el.remove());
-
-    const existingEditAreas = pageBox.querySelectorAll('.editorial-area');
-    existingEditAreas.forEach(el => el.remove());
-
-    if (pageType === 'mixed') {
-        // Add the new fractional ads
-        fractionalAds.forEach(ad => {
-            addFractionalAdToPage(pageBox, ad);
-        });
-
-        // Store fractional ads data in a data attribute for later retrieval
-        pageBox.setAttribute('data-fractional-ads', JSON.stringify(fractionalAds));
-    } else {
-        // Remove the data attribute
-        pageBox.removeAttribute('data-fractional-ads');
-    }
-}
-
-    /**
-     * Positions a fractional ad based on size and position
-     * @param {HTMLElement} adElement - The ad element
-     * @param {string} size - The ad size
-     * @param {string} position - The ad position
-     */
-    function positionFractionalAd(adElement, size, position) {
-        if (size === '1/4') {
-            // Quarter page - handle corner positions
-            switch (position) {
-                case 'top-left':
-                    adElement.style.top = '0';
-                    adElement.style.left = '0';
-                    adElement.style.width = '50%';
-                    adElement.style.height = '50%';
-                    break;
-                case 'top-right':
-                    adElement.style.top = '0';
-                    adElement.style.right = '0';
-                    adElement.style.width = '50%';
-                    adElement.style.height = '50%';
-                    break;
-                case 'bottom-left':
-                    adElement.style.bottom = '0';
-                    adElement.style.left = '0';
-                    adElement.style.width = '50%';
-                    adElement.style.height = '50%';
-                    break;
-                case 'bottom-right':
-                    adElement.style.bottom = '0';
-                    adElement.style.right = '0';
-                    adElement.style.width = '50%';
-                    adElement.style.height = '50%';
-                    break;
-                default:
-                    // Fallback to top-left if position is invalid
-                    adElement.style.top = '0';
-                    adElement.style.left = '0';
-                    adElement.style.width = '50%';
-                    adElement.style.height = '50%';
-            }
-        } else {
-            // For other sizes, use the standard edge positions
-            switch (position) {
-                case 'top':
-                    adElement.style.top = '0';
-                    adElement.style.left = '0';
-                    adElement.style.right = '0';
-                    adElement.style.height = getSizePercentage(size);
-                    break;
-                case 'bottom':
-                    adElement.style.bottom = '0';
-                    adElement.style.left = '0';
-                    adElement.style.right = '0';
-                    adElement.style.height = getSizePercentage(size);
-                    break;
-                case 'left':
-                    adElement.style.top = '0';
-                    adElement.style.left = '0';
-                    adElement.style.bottom = '0';
-                    adElement.style.width = getSizePercentage(size);
-                    break;
-                case 'right':
-                    adElement.style.top = '0';
-                    adElement.style.right = '0';
-                    adElement.style.bottom = '0';
-                    adElement.style.width = getSizePercentage(size);
-                    break;
-            }
-        }
-    }
-
-    /**
-     * Gets the CSS percentage value for a fractional size
-     * @param {string} size - The fractional size (1/4, 1/3, 1/2, 2/3)
-     * @returns {string} CSS percentage value
-     */
-    function getSizePercentage(size) {
-        switch (size) {
-            case '1/4': return '25%';
-            case '1/3': return '33.33%';
-            case '1/2': return '50%';
-            case '2/3': return '66.67%';
-            default: return '50%';
-        }
-    }
 });
 
 /**
@@ -1253,71 +710,106 @@ window.getCurrentLayoutAsJSON = function() {
         const name = box.querySelector('.name')?.textContent.trim() || '';
         const section = box.querySelector('.section')?.textContent.trim() || '';
 
-        // Get fractional ads data if available
-        let fractionalAds = [];
-        if (box.classList.contains('mixed')) {
+        // Get page type
+        let pageType = 'unknown';
+        if (box.classList.contains('edit')) pageType = 'edit';
+        else if (box.classList.contains('ad')) pageType = 'ad';
+        else if (box.classList.contains('mixed')) pageType = 'mixed';
+        else if (box.classList.contains('placeholder')) pageType = 'placeholder';
+
+        // Get fractional units data for mixed pages
+        let fractionalUnits = [];
+        let mixedPageTemplateId = null;
+        
+        if (pageType === 'mixed') {
             const fractionalAdsData = box.getAttribute('data-fractional-ads');
+            mixedPageTemplateId = box.getAttribute('data-mixed-page-layout-id');
+            
             if (fractionalAdsData) {
                 try {
-                    fractionalAds = JSON.parse(fractionalAdsData);
+                    fractionalUnits = JSON.parse(fractionalAdsData);
                 } catch (e) {
-                    console.error('Error parsing fractional ads data:', e);
+                    console.error('Error parsing fractional units data:', e);
                 }
             }
         }
 
-        layout.push({
+        const pageData = {
             name: name,
             section: section,
             page_number: parseInt(box.getAttribute('data-page-number'), 10),
-            type: box.classList.contains('edit') ? 'edit' :
-                  box.classList.contains('ad') ? 'ad' :
-                  box.classList.contains('mixed') ? 'mixed' :
-                  box.classList.contains('placeholder') ? 'placeholder' : 'unknown',
+            type: pageType,
             form_break: box.hasAttribute('data-form-break'),
-            fractional_ads: fractionalAds
-        });
+            fractional_units: fractionalUnits,
+            mixed_page_template_id: mixedPageTemplateId
+        };
+
+        // Debug mixed pages
+        if (pageType === 'mixed') {
+            console.log('Exporting mixed page data:', pageData);
+        }
+
+        layout.push(pageData);
     });
 
     return layout;
 };
 
+// Expose openEditModal globally for other modules to use
+window.openEditModal = function(pageBox) {
+    // Find the openEditModal function in the local scope
+    // Since it's defined inside the DOMContentLoaded, we need to find it
+    const pageModal = document.getElementById('page-editor-modal');
+    if (!pageModal) return;
+    
+    // Get page data
+    const pageId = pageBox.id;
+    const pageName = pageBox.querySelector('.name')?.textContent || '';
+    const pageSection = pageBox.querySelector('.section')?.textContent || '';
+    const pageNumber = pageBox.getAttribute('data-page-number');
+    const formBreak = pageBox.hasAttribute('data-form-break');
 
-// Modify the editorial area creation to account for section
-function createEditorialAreaFromLoad(pageBox) {
-    // Remove any existing editorial area
-    const existingEditArea = pageBox.querySelector('.editorial-area');
-    if (existingEditArea) {
-        existingEditArea.remove();
+    // Determine page type
+    let pageType = 'unknown';
+    if (pageBox.classList.contains('edit')) pageType = 'edit';
+    else if (pageBox.classList.contains('ad')) pageType = 'ad';
+    else if (pageBox.classList.contains('mixed')) pageType = 'mixed';
+    else if (pageBox.classList.contains('placeholder')) pageType = 'placeholder';
+
+    // Fill the form
+    document.getElementById('edit-page-id').value = pageId;
+    document.getElementById('edit-page-name').value = pageName;
+    document.getElementById('edit-page-type').value = pageType;
+    document.getElementById('edit-page-number').value = pageNumber;
+    document.getElementById('modal-title').textContent = `Edit Page ${pageNumber}`;
+
+    // Set form break checkbox
+    if (document.getElementById('edit-page-form-break')) {
+        document.getElementById('edit-page-form-break').checked = formBreak;
     }
 
-    // Get all ads to determine their positions
-    const ads = Array.from(pageBox.querySelectorAll('.fractional-ad'));
-
-    // If no ads, don't create an editorial area
-    if (ads.length === 0) return;
-
-    // Determine the available space
-    const pageName = pageBox.querySelector('.name')?.textContent?.trim() || 'Editorial';
-    const editArea = document.createElement('div');
-    editArea.className = 'editorial-area';
-
-    // Calculate editorial position based on ad positions
-    const positions = calculateEditorialAreaFromLoad(ads);
-
-    // Add more top space to avoid covering the section
-    if (positions.top === '0') {
-        positions.top = '1.5rem'; // Add space for section text
+    // Build section dropdown (simplified version)
+    const sectionSelect = document.getElementById('edit-page-section');
+    if (sectionSelect) {
+        // Try to set the current section
+        sectionSelect.value = pageSection;
     }
 
-    // Apply the calculated position
-    Object.keys(positions).forEach(prop => {
-        editArea.style[prop] = positions[prop];
-    });
+    // Mixed pages are handled by the template system - always hide the old container
+    const fractionalAdsContainer = document.getElementById('fractional-ads-container');
+    if (fractionalAdsContainer) {
+        fractionalAdsContainer.classList.add('hidden');
+    }
 
-    // Add content
-    editArea.innerHTML = `<div class="font-medium">${pageName}</div>`;
+    // Show the modal
+    pageModal.classList.remove('hidden');
+};
 
-    // Add to page
-    pageBox.appendChild(editArea);
-}
+// Listen for custom edit page events
+document.addEventListener('editPage', (e) => {
+    if (e.detail && e.detail.pageBox) {
+        window.openEditModal(e.detail.pageBox);
+    }
+});
+
+
