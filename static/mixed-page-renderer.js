@@ -379,8 +379,8 @@ document.addEventListener('DOMContentLoaded', () => {
         unitElement.style.borderRadius = '6px';
         unitElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
         
-        // Add internal padding for content
-        unitElement.style.padding = '8px';
+        // Add minimal internal padding for content (we have gaps between units)
+        unitElement.style.padding = '4px';
         unitElement.style.boxSizing = 'border-box';
         
         // Add hover effects using event listeners (more reliable than CSS hover on dynamic elements)
@@ -402,10 +402,10 @@ document.addEventListener('DOMContentLoaded', () => {
             unitElement.style.zIndex = '1';
         });
 
-        // Add content - simple text like full page units
+        // Add content - simple text like full page units with optimized truncation
         unitElement.innerHTML = `
-            <div class="text-xs font-medium text-center flex items-center justify-center h-full">
-                ${unitData.name}
+            <div class="text-xs font-medium text-center flex items-center justify-center h-full leading-tight">
+                <span class="truncate w-full block px-0.5" style="max-width: calc(100% - 4px);">${unitData.name}</span>
             </div>
         `;
 
