@@ -138,6 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Match up existing fractional units with template units
         const matchedUnits = matchFractionalUnitsToTemplate(fractionalUnits, template);
 
+        // Ensure the page box is set up for absolute positioning of children
+        setupMixedPageContainer(pageBox);
+
         // Clear existing fractional units from the page
         clearExistingFractionalUnits(pageBox);
 
@@ -297,6 +300,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
+     * Sets up the mixed page container for proper positioning
+     * @param {HTMLElement} pageBox - The page box element
+     */
+    function setupMixedPageContainer(pageBox) {
+        // Ensure the page box has relative positioning to contain absolute children
+        const currentPosition = window.getComputedStyle(pageBox).position;
+        if (currentPosition === 'static') {
+            pageBox.style.position = 'relative';
+        }
+        
+        // Ensure the page box has proper overflow handling
+        pageBox.style.overflow = 'hidden';
+        
+        console.log(`Mixed page container setup - position: ${pageBox.style.position || currentPosition}`);
+    }
+
+    /**
      * Clears existing fractional units from a page
      * @param {HTMLElement} pageBox - The page box element
      */
@@ -350,37 +370,42 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set the background color and interactive styles
         const baseColor = unitData.type === 'edit' ? '#B1FCFE' : '#F19E9C';
         const hoverColor = unitData.type === 'edit' ? '#9CFAFC' : '#F18B89';
+        const borderColor = unitData.type === 'edit' ? '#0891B2' : '#DC2626'; // Darker borders
         
         unitElement.style.backgroundColor = baseColor;
         unitElement.style.cursor = 'pointer';
         unitElement.style.transition = 'all 0.2s ease';
-        unitElement.style.border = '2px solid transparent';
-        unitElement.style.borderRadius = '4px';
+        unitElement.style.border = `2px solid ${borderColor}`;
+        unitElement.style.borderRadius = '6px';
+        unitElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+        
+        // Add internal padding for content
+        unitElement.style.padding = '8px';
+        unitElement.style.boxSizing = 'border-box';
         
         // Add hover effects using event listeners (more reliable than CSS hover on dynamic elements)
         unitElement.addEventListener('mouseenter', () => {
             unitElement.style.backgroundColor = hoverColor;
             unitElement.style.borderColor = '#4F46E5';
+            unitElement.style.borderWidth = '3px';
             unitElement.style.transform = 'scale(1.02)';
-            unitElement.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+            unitElement.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+            unitElement.style.zIndex = '5';
         });
         
         unitElement.addEventListener('mouseleave', () => {
             unitElement.style.backgroundColor = baseColor;
-            unitElement.style.borderColor = 'transparent';
+            unitElement.style.borderColor = borderColor;
+            unitElement.style.borderWidth = '2px';
             unitElement.style.transform = 'scale(1)';
-            unitElement.style.boxShadow = 'none';
+            unitElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+            unitElement.style.zIndex = '1';
         });
 
-        // Add content with edit icon hint
+        // Add content - simple text like full page units
         unitElement.innerHTML = `
-            <div class="text-xs font-medium text-center flex flex-col items-center justify-center h-full">
-                <div class="mb-1">
-                    <svg class="w-3 h-3 mx-auto opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                </div>
-                <div>${unitData.name}</div>
+            <div class="text-xs font-medium text-center flex items-center justify-center h-full">
+                ${unitData.name}
             </div>
         `;
 
@@ -395,63 +420,88 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} position - The unit position
      */
     function positionFractionalUnit(unitElement, size, position) {
+        // CRITICAL: Set absolute positioning for proper layout
+        unitElement.style.position = 'absolute';
+        
+        console.log(`Positioning unit: size=${size}, position=${position}`);
+        
         if (size === '1/4') {
-            // Quarter page - handle corner positions
+            // Quarter page - handle corner positions with small gaps
+            const gap = '2px'; // Small gap between units
             switch (position) {
                 case 'top-left':
-                    unitElement.style.top = '0';
-                    unitElement.style.left = '0';
-                    unitElement.style.width = '50%';
-                    unitElement.style.height = '50%';
+                    unitElement.style.top = gap;
+                    unitElement.style.left = gap;
+                    unitElement.style.width = `calc(50% - ${gap})`;
+                    unitElement.style.height = `calc(50% - ${gap})`;
+                    console.log('Applied top-left positioning');
                     break;
                 case 'top-right':
-                    unitElement.style.top = '0';
-                    unitElement.style.right = '0';
-                    unitElement.style.width = '50%';
-                    unitElement.style.height = '50%';
+                    unitElement.style.top = gap;
+                    unitElement.style.right = gap;
+                    unitElement.style.width = `calc(50% - ${gap})`;
+                    unitElement.style.height = `calc(50% - ${gap})`;
+                    console.log('Applied top-right positioning');
                     break;
                 case 'bottom-left':
-                    unitElement.style.bottom = '0';
-                    unitElement.style.left = '0';
-                    unitElement.style.width = '50%';
-                    unitElement.style.height = '50%';
+                    unitElement.style.bottom = gap;
+                    unitElement.style.left = gap;
+                    unitElement.style.width = `calc(50% - ${gap})`;
+                    unitElement.style.height = `calc(50% - ${gap})`;
+                    console.log('Applied bottom-left positioning');
                     break;
                 case 'bottom-right':
-                    unitElement.style.bottom = '0';
-                    unitElement.style.right = '0';
-                    unitElement.style.width = '50%';
-                    unitElement.style.height = '50%';
+                    unitElement.style.bottom = gap;
+                    unitElement.style.right = gap;
+                    unitElement.style.width = `calc(50% - ${gap})`;
+                    unitElement.style.height = `calc(50% - ${gap})`;
+                    console.log('Applied bottom-right positioning');
                     break;
+                default:
+                    console.warn(`Unknown quarter-page position: ${position}`);
             }
         } else {
-            // For other sizes, use the standard edge positions
+            // For other sizes, use the standard edge positions with small gaps
+            const gap = '2px';
             switch (position) {
                 case 'top':
-                    unitElement.style.top = '0';
-                    unitElement.style.left = '0';
-                    unitElement.style.right = '0';
-                    unitElement.style.height = getSizePercentage(size);
+                    unitElement.style.top = gap;
+                    unitElement.style.left = gap;
+                    unitElement.style.right = gap;
+                    unitElement.style.height = `calc(${getSizePercentage(size)} - ${gap})`;
                     break;
                 case 'bottom':
-                    unitElement.style.bottom = '0';
-                    unitElement.style.left = '0';
-                    unitElement.style.right = '0';
-                    unitElement.style.height = getSizePercentage(size);
+                    unitElement.style.bottom = gap;
+                    unitElement.style.left = gap;
+                    unitElement.style.right = gap;
+                    unitElement.style.height = `calc(${getSizePercentage(size)} - ${gap})`;
                     break;
                 case 'left':
-                    unitElement.style.top = '0';
-                    unitElement.style.left = '0';
-                    unitElement.style.bottom = '0';
-                    unitElement.style.width = getSizePercentage(size);
+                    unitElement.style.top = gap;
+                    unitElement.style.left = gap;
+                    unitElement.style.bottom = gap;
+                    unitElement.style.width = `calc(${getSizePercentage(size)} - ${gap})`;
                     break;
                 case 'right':
-                    unitElement.style.top = '0';
-                    unitElement.style.right = '0';
-                    unitElement.style.bottom = '0';
-                    unitElement.style.width = getSizePercentage(size);
+                    unitElement.style.top = gap;
+                    unitElement.style.right = gap;
+                    unitElement.style.bottom = gap;
+                    unitElement.style.width = `calc(${getSizePercentage(size)} - ${gap})`;
                     break;
+                default:
+                    console.warn(`Unknown position: ${position}`);
             }
         }
+        
+        console.log(`Final styles for ${position}:`, {
+            position: unitElement.style.position,
+            top: unitElement.style.top,
+            right: unitElement.style.right,
+            bottom: unitElement.style.bottom,
+            left: unitElement.style.left,
+            width: unitElement.style.width,
+            height: unitElement.style.height
+        });
     }
 
     /**

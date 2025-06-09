@@ -8,7 +8,9 @@
         {% if item.get('fractional_units') %}data-fractional-ads="{{ item.get('fractional_units')|safe_json|e }}" {% endif %}
         {% if item.get('mixed_page_template_id') %}data-mixed-page-layout-id="{{ item.get('mixed_page_template_id') }}" {% endif %}>
 
+        {% if item['type'] != 'mixed' %}
         <div class="section font-semibold text-xs text-gray-700 mb-0.5">{{ item['section'] }}</div>
+        {% endif %}
         <div class="name-wrapper flex-1 flex items-center justify-center">
             <div class="name font-medium text-sm truncate-long max-w-[90%] text-center text-gray-800">{{
                 item['name'] }}
