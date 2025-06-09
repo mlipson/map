@@ -459,6 +459,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (window.mixedPageRenderer && window.mixedPageRenderer.renderMixedPage) {
                     console.log('Calling mixed page renderer...');
                     window.mixedPageRenderer.renderMixedPage(pageBox, templateId);
+                    
+                    // Also retry rendering for any other mixed pages that may have been skipped
+                    // This fixes the issue where multiple mixed pages are added in sequence
+                    console.log('Retrying rendering for all mixed pages...');
+                    window.mixedPageRenderer.retryMixedPageRendering();
                 } else {
                     console.error('Mixed page renderer not available:', {
                         mixedPageRenderer: !!window.mixedPageRenderer,

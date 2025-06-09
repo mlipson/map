@@ -68,10 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Renders all mixed pages on the page
+     * @param {boolean} forceRerender - Force re-rendering of all mixed pages, even if already rendered
      */
-    function renderAllMixedPages() {
+    function renderAllMixedPages(forceRerender = false) {
         const mixedPages = document.querySelectorAll('.box.mixed');
-        console.log(`Found ${mixedPages.length} mixed pages to render`);
+        console.log(`Found ${mixedPages.length} mixed pages to render${forceRerender ? ' (force rerender)' : ''}`);
         
         mixedPages.forEach(pageBox => {
             const pageId = pageBox.id;
@@ -82,11 +83,12 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`Processing mixed page ${pageId}:`, {
                 isRendered,
                 layoutId,
-                hasFractionalData: !!fractionalData
+                hasFractionalData: !!fractionalData,
+                forceRerender
             });
             
-            // Check if this page has already been processed
-            if (isRendered) {
+            // Check if this page has already been processed (unless forcing rerender)
+            if (isRendered && !forceRerender) {
                 console.log(`Skipping ${pageId} - already rendered`);
                 return;
             }
@@ -96,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log(`Rendering mixed page ${pageId} with template ${layoutId}`);
                 renderMixedPage(pageBox, layoutId);
             } else {
-                console.warn(`Mixed page ${pageId} has no template ID`);
+                console.warn(`Mixed page ${pageId} has no template ID - will retry later if template is set`);
             }
         });
     }
@@ -607,11 +609,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===================================================
 
     /**
+     * Forces a re-check and rendering of all mixed pages
+     * Useful when template IDs are set after initial page creation
+     */
+    function retryMixedPageRendering() {
+        console.log('Retrying mixed page rendering for pages that may have gained template IDs...');
+        renderAllMixedPages(true); // Force rerender to catch previously skipped pages
+    }
+
+    /**
      * Public API for other modules to interact with the mixed page renderer
      */
     window.mixedPageRenderer = {
         renderMixedPage,
         getLayoutTemplate,
-        renderAllMixedPages
+        renderAllMixedPages,
+        retryMixedPageRendering
     };
 });
