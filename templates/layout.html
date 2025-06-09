@@ -27,10 +27,6 @@
             {% include 'components/layout_legend.html' %}
 
             {% set fixed_items=items[:] %}
-            {% if (fixed_items|length - 1) % 2 !=0 %}
-            {% set _=fixed_items.append({'name': '—' , 'type' : 'placeholder' , 'section' : '' , 'page_number' : 9999})
-            %}
-            {% endif %}
 
             <!-- Include the spread container component -->
             {% include 'components/spread_container.html' %}

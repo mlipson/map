@@ -14,7 +14,23 @@
             <!-- Title Section -->
             <div class="flex justify-between items-center">
                 <div>
-                    <h2 class="text-white text-xl font-bold">{{ layout_doc.publication_name }}</h2>
+                    <div class="flex items-center">
+                        <h2 class="text-white text-xl font-bold">{{ layout_doc.publication_name }}</h2>
+                        <!-- Folio warning indicator -->
+                        {% set real_page_count = items|length - (1 if items and items[0].get('page_number') == 0 else 0) %}
+                        {% if real_page_count % 2 != 0 %}
+                        <div class="ml-2 group relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-300" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.19-1.458-1.516-2.625L8.485 2.495zM12 9a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0112 9zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                            </svg>
+                            <!-- Tooltip -->
+                            <div class="absolute left-1/2 transform -translate-x-1/2 top-full mt-2 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                Odd page count ({{ real_page_count }}) - not suitable for print folio
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900"></div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
                     <p class="text-indigo-100 text-sm">{{ layout_doc.issue_name }}</p>
                 </div>
 
@@ -30,10 +46,6 @@
             {% include 'components/layout_legend.html' %}
 
             {% set fixed_items=items[:] %}
-            {% if (fixed_items|length - 1) % 2 !=0 %}
-            {% set _=fixed_items.append({'name': '—' , 'type' : 'placeholder' , 'section' : '' , 'page_number' : 9999})
-            %}
-            {% endif %}
 
             {% if items %}
             <div class="spread-container">
