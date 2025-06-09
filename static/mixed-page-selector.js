@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="text-xs text-gray-500 mb-3">
                 Choose a layout template for this mixed content page. You will be able to define content for each section after selection.
             </div>
-            <div id="layout-templates-grid" class="grid grid-cols-3 gap-3">
+            <div id="layout-templates-grid" class="grid grid-cols-4 gap-2">
                 <!-- Layout templates will be inserted here -->
                 <div class="flex justify-center items-center p-4 h-24 bg-gray-100 rounded-md">
                     <span class="text-gray-400 text-sm">Loading templates...</span>

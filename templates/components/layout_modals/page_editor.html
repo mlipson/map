@@ -1,7 +1,7 @@
 <!-- Page properties editor modal -->
 <div id="page-editor-modal"
-    class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all max-w-lg w-full">
+    class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl transform transition-all max-w-lg w-full max-h-full flex flex-col">
         <div class="bg-indigo-600 py-4 px-6 flex justify-between items-center">
             <h3 class="text-white text-lg font-bold" id="modal-title">Edit Page Properties</h3>
             <button type="button" id="close-modal-btn" class="text-white hover:text-gray-200">
@@ -11,7 +11,8 @@
             </button>
         </div>
 
-        <form id="page-edit-form" class="p-6">
+        <form id="page-edit-form" class="flex-1 overflow-y-auto">
+            <div class="p-6">
             <input type="hidden" id="edit-page-id" name="page_id">
             <input type="hidden" id="temp-section-value" name="temp_section_value">
 
@@ -65,7 +66,7 @@
                         selection.
                     </div>
 
-                    <div id="layout-templates-grid" class="grid grid-cols-3 gap-3">
+                    <div id="layout-templates-grid" class="grid grid-cols-4 gap-2">
                         <!-- Layout templates will be inserted here -->
                         <div class="flex justify-center items-center p-4 h-24 bg-gray-100 rounded-md">
                             <span class="text-gray-400 text-sm">Loading templates...</span>
@@ -128,6 +129,7 @@
                         </button>
                     </div>
                 </div>
+            </div>
             </div>
         </form>
     </div>
