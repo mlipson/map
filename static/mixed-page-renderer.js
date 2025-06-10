@@ -315,7 +315,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ensure the page box has proper overflow handling
         pageBox.style.overflow = 'hidden';
         
-        console.log(`Mixed page container setup - position: ${pageBox.style.position || currentPosition}`);
+        // Hide the section element when fractional units are rendered
+        // This prevents the section from appearing at the top of mixed page thumbnails
+        const sectionElement = pageBox.querySelector('.section');
+        if (sectionElement) {
+            sectionElement.style.display = 'none !important';
+            sectionElement.style.visibility = 'hidden';
+            sectionElement.style.opacity = '0';
+            sectionElement.classList.add('mixed-page-section-hidden');
+        }
+        
+        console.log(`Mixed page container setup - position: ${pageBox.style.position || currentPosition}, section hidden: ${!!sectionElement}`);
     }
 
     /**

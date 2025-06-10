@@ -25,6 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
      * Initialize all event listeners for the mixed page selector
      */
     function initializeEventListeners() {
+        // Cleanup any existing listeners to prevent duplicates
+        if (window.mixedPageSelectorListeners) {
+            console.log('Mixed page selector already initialized');
+            return;
+        }
+        window.mixedPageSelectorListeners = true;
+
         // Listen for changes to the page type dropdown
         if (pageTypeSelect) {
             pageTypeSelect.addEventListener('change', handlePageTypeChange);
@@ -33,6 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Delegate click events for layout template selection
         document.addEventListener('click', (e) => {
             const layoutTemplate = e.target.closest('.layout-template');
+            if (layoutTemplate && !e.target.closest('#layout-templates-container')) {
+                return; // Only handle clicks within our templates container
+            }
             if (layoutTemplate) {
                 selectLayoutTemplate(layoutTemplate);
             }

@@ -79,9 +79,8 @@ function getCurrentLayoutAsJSON() {
       }
     }
 
-    // Get page name and section with defensive coding
+    // Get page name
     const name = box.querySelector('.name')?.textContent?.trim() || '';
-    const section = box.querySelector('.section')?.textContent?.trim() || '';
 
     // Determine page type using class presence
     let pageType = 'unknown';
@@ -89,6 +88,15 @@ function getCurrentLayoutAsJSON() {
     else if (box.classList.contains('ad')) pageType = 'ad';
     else if (box.classList.contains('mixed')) pageType = 'mixed';
     else if (box.classList.contains('placeholder')) pageType = 'placeholder';
+
+    // Get section - for mixed pages, always use "Mixed"
+    // For other pages, read from the DOM element
+    let section;
+    if (pageType === 'mixed') {
+      section = 'Mixed';
+    } else {
+      section = box.querySelector('.section')?.textContent?.trim() || '';
+    }
 
     // Create the page object
     const pageData = {

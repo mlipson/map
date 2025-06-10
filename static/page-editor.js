@@ -32,58 +32,98 @@ document.addEventListener('DOMContentLoaded', () => {
     // SECTION 2: EVENT LISTENERS AND INITIALIZATION
     // ===================================================
 
-    // Initialize section selection handling
-    if (sectionSelect) {
-        sectionSelect.addEventListener('change', handleSectionChange);
+    /**
+     * Cleans up existing event listeners to prevent duplicates
+     */
+    function cleanupEventListeners() {
+        // Store references to avoid memory leaks
+        if (window.pageEditorEventListeners) {
+            // Previous listeners exist, remove them if possible
+            console.log('Cleaning up previous page editor event listeners');
+        }
+        window.pageEditorEventListeners = true;
     }
 
-    // Page type change handler
-    if (pageTypeSelect) {
-        pageTypeSelect.addEventListener('change', handlePageTypeChange);
+    /**
+     * Handles form submission
+     */
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        savePageEdits();
     }
 
-
-    // Initialize layout edit buttons
-    initializeLayoutEditButtons();
-
-    // Set global event handler for dynamically added elements
-    document.addEventListener('click', handleGlobalClick);
-
-
-    // Make pages clickable to edit
-    initializePageBoxes();
-
-    // Close modal handlers
-    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-    if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeModal);
-
-    // Form submission handler
-    if (editForm) {
-        editForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            savePageEdits();
-        });
-    }
-
-    // Delete page handler
-    if (deletePageBtn) {
-        deletePageBtn.addEventListener('click', deletePage);
-    }
-
-    // Add new page handler
-    if (addPageBtn) {
-        addPageBtn.addEventListener('click', addNewPage);
-    }
-
-    // Close modal if clicking outside of it
-    window.addEventListener('click', (event) => {
+    /**
+     * Handles outside click events for modal closing
+     */
+    function handleOutsideClick(event) {
         if (layoutModal && event.target === layoutModal) {
             closeLayoutEditModal();
         }
         if (pageModal && event.target === pageModal) {
             closeModal();
         }
-    });
+    }
+
+    // Cleanup any existing event listeners to prevent duplicates
+    cleanupEventListeners();
+
+    // Initialize section selection handling
+    if (sectionSelect) {
+        sectionSelect.removeEventListener('change', handleSectionChange);
+        sectionSelect.addEventListener('change', handleSectionChange);
+    }
+
+    // Page type change handler
+    if (pageTypeSelect) {
+        pageTypeSelect.removeEventListener('change', handlePageTypeChange);
+        pageTypeSelect.addEventListener('change', handlePageTypeChange);
+    }
+
+    // Initialize layout edit buttons
+    initializeLayoutEditButtons();
+
+    // Set global event handler for dynamically added elements (only once)
+    if (!document.hasGlobalClickHandler) {
+        document.addEventListener('click', handleGlobalClick);
+        document.hasGlobalClickHandler = true;
+    }
+
+    // Make pages clickable to edit
+    initializePageBoxes();
+
+    // Close modal handlers
+    if (closeModalBtn) {
+        closeModalBtn.removeEventListener('click', closeModal);
+        closeModalBtn.addEventListener('click', closeModal);
+    }
+    if (cancelEditBtn) {
+        cancelEditBtn.removeEventListener('click', closeModal);
+        cancelEditBtn.addEventListener('click', closeModal);
+    }
+
+    // Form submission handler
+    if (editForm) {
+        editForm.removeEventListener('submit', handleFormSubmit);
+        editForm.addEventListener('submit', handleFormSubmit);
+    }
+
+    // Delete page handler
+    if (deletePageBtn) {
+        deletePageBtn.removeEventListener('click', deletePage);
+        deletePageBtn.addEventListener('click', deletePage);
+    }
+
+    // Add new page handler
+    if (addPageBtn) {
+        addPageBtn.removeEventListener('click', addNewPage);
+        addPageBtn.addEventListener('click', addNewPage);
+    }
+
+    // Close modal if clicking outside of it (only once)
+    if (!window.hasOutsideClickHandler) {
+        window.addEventListener('click', handleOutsideClick);
+        window.hasOutsideClickHandler = true;
+    }
 
     // ===================================================
     // SECTION 3: SECTION AND PAGE TYPE HANDLING FUNCTIONS
@@ -131,8 +171,45 @@ document.addEventListener('DOMContentLoaded', () => {
      * Mixed pages are now handled by the template system
      */
     function handlePageTypeChange() {
-        // Mixed pages are now handled by the template system
-        // No additional logic needed here
+        const pageType = this.value;
+        
+        // Handle section dropdown visibility and value for mixed pages
+        updateSectionDropdownForPageType(pageType);
+    }
+
+    /**
+     * Updates section dropdown based on page type
+     * @param {string} pageType - The selected page type
+     */
+    function updateSectionDropdownForPageType(pageType) {
+        const sectionSelect = document.getElementById('edit-page-section');
+        const sectionContainer = sectionSelect?.closest('div');
+        
+        if (!sectionSelect || !sectionContainer) return;
+        
+        if (pageType === 'mixed') {
+            // For mixed pages, set section to "Mixed" and make it read-only
+            sectionSelect.value = 'Mixed';
+            sectionSelect.disabled = true;
+            
+            // Add explanatory text
+            let helpText = sectionContainer.querySelector('.mixed-page-help');
+            if (!helpText) {
+                helpText = document.createElement('p');
+                helpText.className = 'text-xs text-gray-500 mt-1 mixed-page-help';
+                helpText.textContent = 'Mixed pages have "Mixed" as their page-level section. Individual content areas within the page will have their own sections.';
+                sectionContainer.appendChild(helpText);
+            }
+        } else {
+            // For non-mixed pages, enable section dropdown and remove help text
+            sectionSelect.disabled = false;
+            
+            // Remove help text if it exists
+            const helpText = sectionContainer.querySelector('.mixed-page-help');
+            if (helpText) {
+                helpText.remove();
+            }
+        }
     }
 
     // ===================================================
@@ -285,6 +362,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Build section dropdown options
         populateSectionDropdown(pageSection);
 
+        // Handle section dropdown for mixed pages
+        updateSectionDropdownForPageType(pageType);
+
         // Mixed pages are handled by the template system
 
         // Show the modal
@@ -310,7 +390,8 @@ document.addEventListener('DOMContentLoaded', () => {
             { value: 'BOB', label: 'Back of Book' },
             { value: 'Cover', label: 'Cover' },
             { value: 'paid', label: 'Paid Advertisement' },
-            { value: 'house', label: 'House Advertisement' }
+            { value: 'house', label: 'House Advertisement' },
+            { value: 'Mixed', label: 'Mixed Content Page' }
         ];
 
         // Get unique sections from current layout
@@ -392,9 +473,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
+     * Opens the page edit modal for creating a new page
+     * @param {string} newPageId - The ID for the new page
+     * @param {number} newPageNumber - The page number for the new page
+     */
+    function openNewPageModal(newPageId, newPageNumber) {
+        // Fill the form with default values for a new page
+        document.getElementById('edit-page-id').value = newPageId;
+        document.getElementById('edit-page-name').value = 'New Page';
+        document.getElementById('edit-page-type').value = 'placeholder';
+        document.getElementById('edit-page-number').value = newPageNumber;
+        document.getElementById('modal-title').textContent = `Add New Page ${newPageNumber}`;
+
+        // Set default form break checkbox
+        if (document.getElementById('edit-page-form-break')) {
+            document.getElementById('edit-page-form-break').checked = false;
+        }
+
+        // Build section dropdown with default "New" section
+        populateSectionDropdown('New');
+
+        // Handle mixed page section visibility
+        updateSectionDropdownForPageType('placeholder');
+
+        // Mark the modal as being in "new page" mode
+        pageModal.setAttribute('data-mode', 'new-page');
+
+        // Show the modal
+        pageModal.classList.remove('hidden');
+    }
+
+    /**
      * Closes the page edit modal
      */
     function closeModal() {
+        // Check if we're in "new page" mode and clean up
+        if (pageModal.getAttribute('data-mode') === 'new-page') {
+            // Reset the mode
+            pageModal.removeAttribute('data-mode');
+        }
+        
         pageModal.classList.add('hidden');
     }
 
@@ -407,17 +525,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const pageType = document.getElementById('edit-page-type').value;
         const pageSection = document.getElementById('edit-page-section').value.trim();
         const formBreak = document.getElementById('edit-page-form-break').checked;
+        const pageNumber = document.getElementById('edit-page-number').value;
 
-        // Get the page element
-        const pageBox = document.getElementById(pageId);
-        if (!pageBox) return;
+        let pageBox = document.getElementById(pageId);
+        const isNewPage = pageModal.getAttribute('data-mode') === 'new-page';
+
+        // For mixed pages, always set section to "Mixed"
+        if (pageType === 'mixed') {
+            pageSection = 'Mixed';
+        }
+
+        // If this is a new page, create it now
+        if (isNewPage) {
+            pageBox = createNewPageElement(pageId, pageName, pageSection, pageType, pageNumber, formBreak);
+            if (!pageBox) {
+                showNotification('Error creating page', 'error');
+                return;
+            }
+        }
 
         // Handle mixed page template selection
         if (pageType === 'mixed') {
             handleMixedPageSave(pageBox);
         }
 
-        // Update the page element
+        // Update the page element (for both new and existing pages)
         updatePageBasicInfo(pageBox, pageName, pageSection);
         updatePageType(pageBox, pageType, pageSection);
         updateFormBreak(pageBox, formBreak);
@@ -426,7 +558,11 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModal();
 
         // Show notification
-        showNotification('Page updated', 'success');
+        if (isNewPage) {
+            showNotification('New page added', 'success');
+        } else {
+            showNotification('Page updated', 'success');
+        }
     }
 
     /**
@@ -526,6 +662,26 @@ document.addEventListener('DOMContentLoaded', () => {
         pageBox.classList.remove('edit', 'ad', 'mixed', 'placeholder', 'unknown', 'bonus', 'promo');
         pageBox.classList.add(pageType);
 
+        // Special handling for mixed pages - hide section immediately
+        if (pageType === 'mixed') {
+            const sectionElement = pageBox.querySelector('.section');
+            if (sectionElement) {
+                sectionElement.style.display = 'none';
+                sectionElement.style.visibility = 'hidden';
+                sectionElement.style.opacity = '0';
+                sectionElement.classList.add('mixed-page-section-hidden');
+            }
+        } else {
+            // For non-mixed pages, ensure section is visible
+            const sectionElement = pageBox.querySelector('.section');
+            if (sectionElement) {
+                sectionElement.style.display = '';
+                sectionElement.style.visibility = '';
+                sectionElement.style.opacity = '';
+                sectionElement.classList.remove('mixed-page-section-hidden');
+            }
+        }
+
         // Determine background color based on type and special sections
         let bgColor;
 
@@ -568,6 +724,69 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    /**
+     * Creates a new page element and adds it to the layout
+     * @param {string} pageId - The page ID
+     * @param {string} pageName - The page name
+     * @param {string} pageSection - The page section
+     * @param {string} pageType - The page type
+     * @param {number} pageNumber - The page number
+     * @param {boolean} formBreak - Whether the page has a form break
+     * @returns {HTMLElement|null} The created page element or null if failed
+     */
+    function createNewPageElement(pageId, pageName, pageSection, pageType, pageNumber, formBreak) {
+        const spreadContainer = document.querySelector('.spread-container');
+        if (!spreadContainer) {
+            console.error('Spread container not found');
+            return null;
+        }
+
+        // Create a new page element
+        const newPage = document.createElement('div');
+        newPage.id = pageId;
+        newPage.className = `box ${pageType} rounded border relative p-3 aspect-[3/4] w-32 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm`;
+
+        newPage.innerHTML = `
+            <div class="section font-semibold text-xs text-gray-700 mb-0.5">${pageSection}</div>
+            <div class="name-wrapper flex-1 flex items-center justify-center">
+                <div class="name font-medium text-sm max-w-[90%] break-words text-center text-gray-800">${pageName}</div>
+            </div>
+            <div class="page-number ${pageNumber % 2 === 0 ? 'even' : 'odd'} text-gray-500 text-xs">${pageNumber}</div>
+        `;
+
+        // Set initial styling based on page type and section
+        updatePageType(newPage, pageType, pageSection);
+        updateFormBreak(newPage, formBreak);
+
+        // Add the new page to the end of the spread container
+        spreadContainer.appendChild(newPage);
+
+        // Remove the empty state message if it exists
+        const emptyStateMessage = document.querySelector('.text-center.py-12.bg-gray-50.rounded-lg');
+        if (emptyStateMessage) {
+            emptyStateMessage.classList.add('hidden');
+        }
+
+        // Update page numbers for all pages
+        updatePageNumbers();
+
+        // Make the new page clickable
+        newPage.addEventListener('click', (e) => {
+            // For mixed pages, only allow editing through the edit button
+            if (newPage.classList.contains('mixed')) {
+                if (!e.target.closest('.edit-page-button')) {
+                    return;
+                }
+            }
+            
+            if (e.currentTarget === newPage) {
+                openEditModal(newPage);
+            }
+        });
+
+        return newPage;
+    }
+
 
     /**
      * Deletes a page
@@ -605,43 +824,8 @@ function addNewPage() {
     const newPageNumber = boxes.length > 0 ? boxes.length : 1; // Start at 1 if no pages exist
     const newPageId = `page-${Date.now()}`; // Unique ID using timestamp
 
-    // Create a new page element
-    const newPage = document.createElement('div');
-    newPage.id = newPageId;
-    newPage.className = 'box placeholder rounded border relative p-3 aspect-[3/4] w-32 text-center flex flex-col justify-start select-none mr-2.5 shadow-sm';
-
-    newPage.innerHTML = `
-        <div class="section font-semibold text-xs text-gray-700 mb-0.5">New</div>
-        <div class="name-wrapper flex-1 flex items-center justify-center">
-            <div class="name font-medium text-sm max-w-[90%] break-words text-center text-gray-800">New Page</div>
-        </div>
-        <div class="page-number odd text-gray-500 text-xs">${newPageNumber}</div>
-    `;
-
-    // Add the new page to the end of the spread container
-    spreadContainer.appendChild(newPage);
-
-    // Remove the empty state message if it exists
-    const emptyStateMessage = document.querySelector('.text-center.py-12.bg-gray-50.rounded-lg');
-    if (emptyStateMessage) {
-        emptyStateMessage.classList.add('hidden');
-    }
-
-    // Update page numbers
-    updatePageNumbers();
-
-    // Make the new page clickable
-    newPage.addEventListener('click', (e) => {
-        if (e.currentTarget === newPage) {
-            openEditModal(newPage);
-        }
-    });
-
-    // Open the edit modal for the new page
-    openEditModal(newPage);
-
-    // Show notification
-    showNotification('New page added', 'success');
+    // Open the edit modal in "add new page" mode
+    openNewPageModal(newPageId, newPageNumber);
 }
 
     /**
@@ -713,7 +897,6 @@ window.getCurrentLayoutAsJSON = function() {
         if (id === "page-0") return; // skip placeholder
 
         const name = box.querySelector('.name')?.textContent.trim() || '';
-        const section = box.querySelector('.section')?.textContent.trim() || '';
 
         // Get page type
         let pageType = 'unknown';
@@ -721,6 +904,14 @@ window.getCurrentLayoutAsJSON = function() {
         else if (box.classList.contains('ad')) pageType = 'ad';
         else if (box.classList.contains('mixed')) pageType = 'mixed';
         else if (box.classList.contains('placeholder')) pageType = 'placeholder';
+
+        // Get section - for mixed pages, always use "Mixed"
+        let section;
+        if (pageType === 'mixed') {
+            section = 'Mixed';
+        } else {
+            section = box.querySelector('.section')?.textContent.trim() || '';
+        }
 
         // Get fractional units data for mixed pages
         let fractionalUnits = [];

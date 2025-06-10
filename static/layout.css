@@ -380,3 +380,14 @@
 .modal, #page-editor-modal, #edit-layout-modal {
     z-index: 1000 !important; /* High z-index for modals */
 }
+
+/* Hide section element in mixed pages with fractional units */
+.box.mixed .section.mixed-page-section-hidden,
+.box.mixed .section {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
