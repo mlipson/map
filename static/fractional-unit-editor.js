@@ -31,6 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Handle clicks on close and save buttons in the modal
         document.addEventListener('click', handleModalButtonClicks);
+        
+        // Add content type change handler for contextual section dropdown
+        document.addEventListener('change', handleContentTypeChange);
     }
 
     /**
@@ -85,13 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <label for="edit-fractional-unit-section" class="block text-gray-700 text-sm font-medium mb-2">Section</label>
                             <select id="edit-fractional-unit-section" name="unit_section"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="FOB">Front of Book</option>
-                                <option value="Feature">Feature</option>
-                                <option value="BOB">Back of Book</option>
-                                <option value="Cover">Cover</option>
-                                <option value="paid">Paid Advertisement</option>
-                                <option value="house">House Advertisement</option>
-                                <option value="add_new_section">+ Add New Section</option>
+                                <!-- Options will be populated dynamically based on content type -->
                             </select>
                         </div>
 
@@ -138,6 +135,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Open the editor modal for this fractional unit
         openFractionalUnitEditor(fractionalUnit);
+    }
+
+    /**
+     * Handle content type changes to update section dropdown contextually
+     * @param {Event} e - Change event
+     */
+    function handleContentTypeChange(e) {
+        // Only handle changes to the fractional unit content type dropdown
+        if (e.target.id === 'edit-fractional-unit-type') {
+            const contentType = e.target.value;
+            updateFractionalUnitSectionDropdown(contentType);
+        }
     }
 
     /**
@@ -225,6 +234,87 @@ document.addEventListener('DOMContentLoaded', () => {
         showNotification('Fractional unit updated', 'success');
     }
 
+    /**
+     * Updates the section dropdown based on content type (contextual sections)
+     * @param {string} contentType - The selected content type ('edit' or 'ad')
+     */
+    function updateFractionalUnitSectionDropdown(contentType) {
+        const sectionSelect = document.getElementById('edit-fractional-unit-section');
+        const sectionContainer = sectionSelect?.closest('div');
+        
+        if (!sectionSelect || !sectionContainer) return;
+        
+        // Store current value to try to preserve it if it exists in new options
+        const currentValue = sectionSelect.value;
+        
+        // Remove any existing help text
+        const existingHelpText = sectionContainer.querySelector('.content-type-help');
+        if (existingHelpText) {
+            existingHelpText.remove();
+        }
+        
+        // Clear and repopulate dropdown based on content type
+        populateContextualFractionalSectionDropdown(contentType, sectionSelect, sectionContainer, currentValue);
+    }
+
+    /**
+     * Populates section dropdown with contextual options based on content type
+     * @param {string} contentType - The selected content type ('edit' or 'ad')
+     * @param {HTMLElement} sectionSelect - The section select element
+     * @param {HTMLElement} sectionContainer - The container div
+     * @param {string} currentValue - The current section value to preserve if possible
+     */
+    function populateContextualFractionalSectionDropdown(contentType, sectionSelect, sectionContainer, currentValue) {
+        // Clear existing options
+        sectionSelect.innerHTML = '';
+        
+        let sections = [];
+        let helpText = '';
+        
+        if (contentType === 'edit') {
+            // Editorial content types get editorial sections
+            sections = [
+                { value: 'FOB', label: 'Front of Book' },
+                { value: 'Feature', label: 'Feature' },
+                { value: 'BOB', label: 'Back of Book' },
+                { value: 'Cover', label: 'Cover' }
+            ];
+            helpText = 'Editorial content can be assigned to different editorial sections.';
+        } else if (contentType === 'ad') {
+            // Advertisement content types get advertising sections
+            sections = [
+                { value: 'paid', label: 'Paid Advertisement' },
+                { value: 'house', label: 'House Advertisement' },
+                { value: 'Bonus', label: 'Bonus Advertisement' },
+                { value: 'Promo', label: 'Promotional Advertisement' }
+            ];
+            helpText = 'Advertisement content can be categorized by commercial type.';
+        }
+        
+        // Add sections to dropdown
+        sections.forEach(section => {
+            const option = document.createElement('option');
+            option.value = section.value;
+            option.textContent = section.label;
+            sectionSelect.appendChild(option);
+        });
+        
+        // Try to preserve current selection if it exists in new options
+        if (currentValue && sections.some(s => s.value === currentValue)) {
+            sectionSelect.value = currentValue;
+        } else {
+            sectionSelect.value = sections[0].value; // Default to first option
+        }
+        
+        // Add help text
+        if (helpText) {
+            const helpElement = document.createElement('p');
+            helpElement.className = 'text-xs text-gray-500 mt-1 content-type-help';
+            helpElement.textContent = helpText;
+            sectionContainer.appendChild(helpElement);
+        }
+    }
+
     // ===================================================
     // SECTION 3: FRACTIONAL UNIT EDITING FUNCTIONS
     // ===================================================
@@ -251,15 +341,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-fractional-unit-position').value = unitPosition;
         document.getElementById('edit-fractional-unit-size').value = unitSize;
 
-        // Set select values
+        // Set content type first
         const typeSelect = document.getElementById('edit-fractional-unit-type');
         if (typeSelect) {
             typeSelect.value = unitType;
         }
 
+        // Update section dropdown based on content type (this will populate contextual options)
+        updateFractionalUnitSectionDropdown(unitType);
+        
+        // After contextual sections are populated, try to set the current section
         const sectionSelect = document.getElementById('edit-fractional-unit-section');
-        if (sectionSelect) {
-            // Try to find the section in the existing options
+        if (sectionSelect && unitSection) {
+            // Try to find the section in the current options
             let sectionExists = false;
             for (let i = 0; i < sectionSelect.options.length; i++) {
                 if (sectionSelect.options[i].value === unitSection) {
@@ -269,14 +363,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // If section doesn't exist, add it
-            if (!sectionExists && unitSection && unitSection.trim() !== '') {
+            // If section doesn't exist in contextual options, it might be a legacy value
+            // In this case, add it as a custom option (for backward compatibility)
+            if (!sectionExists && unitSection.trim() !== '') {
                 const newOption = document.createElement('option');
                 newOption.value = unitSection;
-                newOption.textContent = unitSection;
-
-                // Insert before the "Add New Section" option
-                sectionSelect.insertBefore(newOption, sectionSelect.lastChild);
+                newOption.textContent = `${unitSection} (Custom)`;
+                sectionSelect.appendChild(newOption);
                 sectionSelect.value = unitSection;
             }
         }
@@ -324,15 +417,62 @@ document.addEventListener('DOMContentLoaded', () => {
             nameDiv.textContent = unitName;
         }
 
-        // Update the appearance based on type
-        if (unitType === 'edit') {
-            unitElement.style.backgroundColor = '#B1FCFE'; // Editorial blue
-        } else {
-            unitElement.style.backgroundColor = '#F19E9C'; // Ad pink
-        }
+        // Update the appearance based on type (comprehensive styling update)
+        const updatedElement = updateFractionalUnitStyling(unitElement, unitType);
 
         // Update the mixed page data attribute to reflect changes
-        updateMixedPageDataAttribute(unitElement);
+        updateMixedPageDataAttribute(updatedElement);
+    }
+
+    /**
+     * Updates the visual styling of a fractional unit based on its content type
+     * @param {HTMLElement} unitElement - The fractional unit element
+     * @param {string} unitType - The content type ('edit' or 'ad')
+     */
+    function updateFractionalUnitStyling(unitElement, unitType) {
+        // Clear any existing event listeners by cloning the element
+        const newElement = unitElement.cloneNode(true);
+        unitElement.parentNode.replaceChild(newElement, unitElement);
+        
+        // Set the background color and interactive styles based on type
+        const baseColor = unitType === 'edit' ? '#B1FCFE' : '#F19E9C';
+        const hoverColor = unitType === 'edit' ? '#9CFAFC' : '#F18B89';
+        const borderColor = unitType === 'edit' ? '#0891B2' : '#DC2626'; // Darker borders
+        
+        newElement.style.backgroundColor = baseColor;
+        newElement.style.cursor = 'pointer';
+        newElement.style.transition = 'all 0.2s ease';
+        newElement.style.border = `2px solid ${borderColor}`;
+        newElement.style.borderRadius = '6px';
+        newElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+        newElement.style.padding = '4px';
+        newElement.style.boxSizing = 'border-box';
+        
+        // Re-add hover effects with new colors
+        newElement.addEventListener('mouseenter', () => {
+            newElement.style.backgroundColor = hoverColor;
+            newElement.style.borderColor = '#4F46E5';
+            newElement.style.borderWidth = '3px';
+            newElement.style.transform = 'scale(1.02)';
+            newElement.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+            newElement.style.zIndex = '5';
+        });
+        
+        newElement.addEventListener('mouseleave', () => {
+            newElement.style.backgroundColor = baseColor;
+            newElement.style.borderColor = borderColor;
+            newElement.style.borderWidth = '2px';
+            newElement.style.transform = 'scale(1)';
+            newElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+            newElement.style.zIndex = '2';
+        });
+        
+        // Update the editingFractionalUnit reference if this was the element being edited
+        if (editingFractionalUnit === unitElement) {
+            editingFractionalUnit = newElement;
+        }
+        
+        return newElement;
     }
 
     /**

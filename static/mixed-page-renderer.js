@@ -315,14 +315,27 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ensure the page box has proper overflow handling
         pageBox.style.overflow = 'hidden';
         
-        // Hide the section element when fractional units are rendered
-        // This prevents the section from appearing at the top of mixed page thumbnails
+        // Hide the section and name elements when fractional units are rendered
+        // This prevents them from appearing at the top of mixed page thumbnails
         const sectionElement = pageBox.querySelector('.section');
         if (sectionElement) {
             sectionElement.style.display = 'none !important';
             sectionElement.style.visibility = 'hidden';
             sectionElement.style.opacity = '0';
             sectionElement.classList.add('mixed-page-section-hidden');
+        }
+        
+        const nameElement = pageBox.querySelector('.name');
+        const nameWrapper = pageBox.querySelector('.name-wrapper');
+        if (nameElement) {
+            nameElement.style.display = 'none !important';
+            nameElement.style.visibility = 'hidden';
+            nameElement.style.opacity = '0';
+        }
+        if (nameWrapper) {
+            nameWrapper.style.display = 'none !important';
+            nameWrapper.style.visibility = 'hidden';
+            nameWrapper.style.opacity = '0';
         }
         
         console.log(`Mixed page container setup - position: ${pageBox.style.position || currentPosition}, section hidden: ${!!sectionElement}`);
@@ -552,10 +565,22 @@ document.addEventListener('DOMContentLoaded', () => {
             </svg>
         `;
         
-        // Style the button
+        // Style the button with bilateral symmetry (like page numbers)
         editButton.style.position = 'absolute';
         editButton.style.top = '4px';
-        editButton.style.right = '4px';
+        
+        // Get page number to determine left/right positioning
+        const pageNumber = parseInt(pageBox.getAttribute('data-page-number'), 10) || 1;
+        const isEvenPage = pageNumber % 2 === 0;
+        
+        // Even pages (left-hand) get left positioning, odd pages (right-hand) get right positioning
+        if (isEvenPage) {
+            editButton.style.left = '4px';
+            editButton.style.right = 'auto';
+        } else {
+            editButton.style.right = '4px';
+            editButton.style.left = 'auto';
+        }
         editButton.style.width = '24px';
         editButton.style.height = '24px';
         editButton.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';

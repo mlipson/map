@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Updates section dropdown based on page type
+     * Updates section dropdown and page name field based on page type
      * @param {string} pageType - The selected page type
      */
     function updateSectionDropdownForPageType(pageType) {
@@ -187,28 +187,167 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (!sectionSelect || !sectionContainer) return;
         
+        // Remove any existing help text
+        const existingHelpText = sectionContainer.querySelector('.page-type-help');
+        if (existingHelpText) {
+            existingHelpText.remove();
+        }
+        
+        // Clear and repopulate dropdown based on page type
+        populateContextualSectionDropdown(pageType, sectionSelect, sectionContainer);
+        
+        // Handle page name field for mixed pages
+        updatePageNameForPageType(pageType);
+    }
+
+    /**
+     * Updates page name field based on page type
+     * @param {string} pageType - The selected page type
+     */
+    function updatePageNameForPageType(pageType) {
+        const pageNameInput = document.getElementById('edit-page-name');
+        const pageNameContainer = pageNameInput?.closest('div');
+        
+        if (!pageNameInput || !pageNameContainer) return;
+        
+        // Remove any existing help text for page name
+        const existingHelpText = pageNameContainer.querySelector('.page-name-help');
+        if (existingHelpText) {
+            existingHelpText.remove();
+        }
+        
         if (pageType === 'mixed') {
-            // For mixed pages, set section to "Mixed" and make it read-only
-            sectionSelect.value = 'Mixed';
-            sectionSelect.disabled = true;
+            // For mixed pages, set name to "Fractional" and make it read-only
+            pageNameInput.value = 'Fractional';
+            pageNameInput.disabled = false; // Keep enabled for form submission
+            pageNameInput.readOnly = true;
+            pageNameInput.style.backgroundColor = '#f9fafb'; // Visual indication it's readonly
+            pageNameInput.style.cursor = 'not-allowed';
             
             // Add explanatory text
-            let helpText = sectionContainer.querySelector('.mixed-page-help');
-            if (!helpText) {
-                helpText = document.createElement('p');
-                helpText.className = 'text-xs text-gray-500 mt-1 mixed-page-help';
-                helpText.textContent = 'Mixed pages have "Mixed" as their page-level section. Individual content areas within the page will have their own sections.';
-                sectionContainer.appendChild(helpText);
-            }
-        } else {
-            // For non-mixed pages, enable section dropdown and remove help text
-            sectionSelect.disabled = false;
+            const helpElement = document.createElement('p');
+            helpElement.className = 'text-xs text-gray-500 mt-1 page-name-help';
+            helpElement.textContent = 'Mixed pages have a fixed name "Fractional" since content is defined at the unit level.';
+            pageNameContainer.appendChild(helpElement);
+        } else if (pageType === 'placeholder') {
+            // For placeholder pages, set name to "Open" and make it read-only
+            pageNameInput.value = 'Open';
+            pageNameInput.disabled = false; // Keep enabled for form submission
+            pageNameInput.readOnly = true;
+            pageNameInput.style.backgroundColor = '#f9fafb'; // Visual indication it's readonly
+            pageNameInput.style.cursor = 'not-allowed';
             
-            // Remove help text if it exists
-            const helpText = sectionContainer.querySelector('.mixed-page-help');
-            if (helpText) {
-                helpText.remove();
+            // Add explanatory text
+            const helpElement = document.createElement('p');
+            helpElement.className = 'text-xs text-gray-500 mt-1 page-name-help';
+            helpElement.textContent = 'Placeholder pages have a fixed name "Open" indicating available space in the layout.';
+            pageNameContainer.appendChild(helpElement);
+        } else {
+            // For editable pages, enable page name input
+            pageNameInput.disabled = false;
+            pageNameInput.readOnly = false;
+            pageNameInput.style.backgroundColor = '';
+            pageNameInput.style.cursor = '';
+            
+            // If it was previously set to a fixed value, reset to a more appropriate default
+            if (pageNameInput.value === 'Fractional' || pageNameInput.value === 'Open') {
+                pageNameInput.value = 'New Page';
             }
+        }
+    }
+
+    /**
+     * Populates section dropdown with contextual options based on page type
+     * @param {string} pageType - The selected page type
+     * @param {HTMLElement} sectionSelect - The section select element
+     * @param {HTMLElement} sectionContainer - The container div
+     */
+    function populateContextualSectionDropdown(pageType, sectionSelect, sectionContainer) {
+        // Clear existing options
+        sectionSelect.innerHTML = '';
+        
+        let sections = [];
+        let helpText = '';
+        let isFixed = false;
+        
+        switch (pageType) {
+            case 'mixed':
+                sections = [{ value: 'Mixed', label: 'Mixed Content Page' }];
+                helpText = 'Mixed pages have "Mixed" as their page-level section. Individual content areas within the page will have their own sections.';
+                isFixed = true;
+                break;
+                
+            case 'placeholder':
+                sections = [{ value: 'Placeholder', label: 'Placeholder Page' }];
+                helpText = 'Placeholder pages are used for layout planning and have a fixed section type.';
+                isFixed = true;
+                break;
+                
+            case 'edit':
+                sections = [
+                    { value: 'FOB', label: 'Front of Book' },
+                    { value: 'Feature', label: 'Feature' },
+                    { value: 'BOB', label: 'Back of Book' },
+                    { value: 'Cover', label: 'Cover' }
+                ];
+                helpText = 'Editorial pages can be assigned to different editorial sections.';
+                break;
+                
+            case 'ad':
+                sections = [
+                    { value: 'paid', label: 'Paid Advertisement' },
+                    { value: 'house', label: 'House Advertisement' },
+                    { value: 'Bonus', label: 'Bonus Advertisement' },
+                    { value: 'Promo', label: 'Promotional Advertisement' }
+                ];
+                helpText = 'Advertisement pages can be categorized by their commercial type.';
+                break;
+                
+            default:
+                // Fallback for unknown page types
+                sections = [
+                    { value: 'FOB', label: 'Front of Book' },
+                    { value: 'Feature', label: 'Feature' },
+                    { value: 'BOB', label: 'Back of Book' }
+                ];
+                break;
+        }
+        
+        // Add sections to dropdown
+        sections.forEach(section => {
+            const option = document.createElement('option');
+            option.value = section.value;
+            option.textContent = section.label;
+            sectionSelect.appendChild(option);
+        });
+        
+        // For fixed types, make the dropdown readonly but keep enabled for form submission
+        if (isFixed) {
+            sectionSelect.disabled = false; // Keep enabled for form submission
+            sectionSelect.style.backgroundColor = '#f9fafb'; // Visual indication it's readonly
+            sectionSelect.style.cursor = 'not-allowed';
+            sectionSelect.style.pointerEvents = 'none'; // Prevent dropdown opening
+            sectionSelect.value = sections[0].value;
+        } else {
+            sectionSelect.disabled = false;
+            sectionSelect.style.backgroundColor = '';
+            sectionSelect.style.cursor = '';
+            sectionSelect.style.pointerEvents = '';
+            // Try to preserve current selection if it exists in new options
+            const currentValue = sectionSelect.getAttribute('data-current-value');
+            if (currentValue && sections.some(s => s.value === currentValue)) {
+                sectionSelect.value = currentValue;
+            } else {
+                sectionSelect.value = sections[0].value; // Default to first option
+            }
+        }
+        
+        // Add help text
+        if (helpText) {
+            const helpElement = document.createElement('p');
+            helpElement.className = 'text-xs text-gray-500 mt-1 page-type-help';
+            helpElement.textContent = helpText;
+            sectionContainer.appendChild(helpElement);
         }
     }
 
@@ -374,52 +513,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     /**
-     * Populates the section dropdown with options
+     * Populates the section dropdown with options (legacy function - now uses contextual system)
      * @param {string} currentSection - The current section to select
      */
     function populateSectionDropdown(currentSection) {
         const sectionSelect = document.getElementById('edit-page-section');
         if (!sectionSelect) return;
 
-        sectionSelect.innerHTML = ''; // Clear existing options
-
-        // Standard sections that always appear
-        const defaultSections = [
-            { value: 'FOB', label: 'Front of Book' },
-            { value: 'Feature', label: 'Feature' },
-            { value: 'BOB', label: 'Back of Book' },
-            { value: 'Cover', label: 'Cover' },
-            { value: 'paid', label: 'Paid Advertisement' },
-            { value: 'house', label: 'House Advertisement' },
-            { value: 'Mixed', label: 'Mixed Content Page' }
-        ];
-
-        // Get unique sections from current layout
-        const existingSections = getExistingSections(defaultSections);
-
-        // Add default sections first
-        defaultSections.forEach(section => {
-            const option = document.createElement('option');
-            option.value = section.value;
-            option.textContent = section.label;
-            sectionSelect.appendChild(option);
-        });
-
-        // Add section divider if we have custom sections
-        if (existingSections.size > 0) {
-            addSectionDivider(sectionSelect, existingSections);
-        }
-
-        // Add "Add New Section" option
-        const addNewOption = document.createElement('option');
-        addNewOption.value = 'add_new_section';
-        addNewOption.textContent = '+ Add New Section';
-        sectionSelect.appendChild(addNewOption);
-
-        // Set the current section
+        // Store the current section for preservation during page type changes
         if (currentSection) {
-            selectSection(sectionSelect, currentSection);
+            sectionSelect.setAttribute('data-current-value', currentSection);
         }
+
+        // The contextual system will be called by updateSectionDropdownForPageType
+        // This function is now mainly for preserving the current value
     }
 
     /**
@@ -520,41 +627,64 @@ document.addEventListener('DOMContentLoaded', () => {
      * Saves page edits to the UI (changes will be committed to DB on layout save)
      */
     function savePageEdits() {
+        console.log('savePageEdits called');
+        
         const pageId = document.getElementById('edit-page-id').value;
-        const pageName = document.getElementById('edit-page-name').value.trim();
+        let pageName = document.getElementById('edit-page-name').value.trim();
         const pageType = document.getElementById('edit-page-type').value;
-        const pageSection = document.getElementById('edit-page-section').value.trim();
+        let pageSection = document.getElementById('edit-page-section').value.trim();
         const formBreak = document.getElementById('edit-page-form-break').checked;
         const pageNumber = document.getElementById('edit-page-number').value;
+
+        console.log('Form values:', { pageId, pageName, pageType, pageSection, formBreak, pageNumber });
 
         let pageBox = document.getElementById(pageId);
         const isNewPage = pageModal.getAttribute('data-mode') === 'new-page';
 
-        // For mixed pages, always set section to "Mixed"
+        // For fixed page types, always set section and name to appropriate fixed values
         if (pageType === 'mixed') {
             pageSection = 'Mixed';
+            pageName = 'Fractional'; // Fixed name for mixed pages
+            console.log('Fixed values for mixed page:', { pageSection, pageName });
+        } else if (pageType === 'placeholder') {
+            pageSection = 'Placeholder';
+            pageName = 'Open'; // Fixed name for placeholder pages
+            console.log('Fixed values for placeholder page:', { pageSection, pageName });
+        }
+
+        // Validate that we have all required values
+        if (!pageId || !pageName || !pageType || !pageSection || !pageNumber) {
+            console.error('Missing required form values:', { pageId, pageName, pageType, pageSection, pageNumber });
+            showNotification('Missing required page information', 'error');
+            return;
         }
 
         // If this is a new page, create it now
         if (isNewPage) {
+            console.log('Creating new page element...');
             pageBox = createNewPageElement(pageId, pageName, pageSection, pageType, pageNumber, formBreak);
             if (!pageBox) {
+                console.error('Failed to create page element');
                 showNotification('Error creating page', 'error');
                 return;
             }
+            console.log('Page element created successfully:', pageBox);
         }
 
         // Handle mixed page template selection
         if (pageType === 'mixed') {
+            console.log('Handling mixed page save...');
             handleMixedPageSave(pageBox);
         }
 
         // Update the page element (for both new and existing pages)
+        console.log('Updating page info...');
         updatePageBasicInfo(pageBox, pageName, pageSection);
         updatePageType(pageBox, pageType, pageSection);
         updateFormBreak(pageBox, formBreak);
 
         // Close the modal
+        console.log('Closing modal and showing notification...');
         closeModal();
 
         // Show notification
@@ -563,6 +693,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             showNotification('Page updated', 'success');
         }
+        
+        console.log('savePageEdits completed successfully');
     }
 
     /**
@@ -896,8 +1028,6 @@ window.getCurrentLayoutAsJSON = function() {
         const id = box.id;
         if (id === "page-0") return; // skip placeholder
 
-        const name = box.querySelector('.name')?.textContent.trim() || '';
-
         // Get page type
         let pageType = 'unknown';
         if (box.classList.contains('edit')) pageType = 'edit';
@@ -905,10 +1035,22 @@ window.getCurrentLayoutAsJSON = function() {
         else if (box.classList.contains('mixed')) pageType = 'mixed';
         else if (box.classList.contains('placeholder')) pageType = 'placeholder';
 
-        // Get section - for mixed pages, always use "Mixed"
+        // Get page name - for fixed page types, use fixed values
+        let name;
+        if (pageType === 'mixed') {
+            name = 'Fractional';
+        } else if (pageType === 'placeholder') {
+            name = 'Open';
+        } else {
+            name = box.querySelector('.name')?.textContent.trim() || '';
+        }
+
+        // Get section - for fixed page types, use fixed values
         let section;
         if (pageType === 'mixed') {
             section = 'Mixed';
+        } else if (pageType === 'placeholder') {
+            section = 'Placeholder';
         } else {
             section = box.querySelector('.section')?.textContent.trim() || '';
         }

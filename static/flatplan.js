@@ -79,9 +79,6 @@ function getCurrentLayoutAsJSON() {
       }
     }
 
-    // Get page name
-    const name = box.querySelector('.name')?.textContent?.trim() || '';
-
     // Determine page type using class presence
     let pageType = 'unknown';
     if (box.classList.contains('edit')) pageType = 'edit';
@@ -89,11 +86,24 @@ function getCurrentLayoutAsJSON() {
     else if (box.classList.contains('mixed')) pageType = 'mixed';
     else if (box.classList.contains('placeholder')) pageType = 'placeholder';
 
-    // Get section - for mixed pages, always use "Mixed"
+    // Get page name - for fixed page types, use fixed values
+    // For other pages, read from the DOM element
+    let name;
+    if (pageType === 'mixed') {
+      name = 'Fractional';
+    } else if (pageType === 'placeholder') {
+      name = 'Open';
+    } else {
+      name = box.querySelector('.name')?.textContent?.trim() || '';
+    }
+
+    // Get section - for fixed page types, use fixed values
     // For other pages, read from the DOM element
     let section;
     if (pageType === 'mixed') {
       section = 'Mixed';
+    } else if (pageType === 'placeholder') {
+      section = 'Placeholder';
     } else {
       section = box.querySelector('.section')?.textContent?.trim() || '';
     }
