@@ -312,8 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
             pageBox.style.position = 'relative';
         }
         
-        // Ensure the page box has proper overflow handling
-        pageBox.style.overflow = 'hidden';
+        // Set overflow to visible to allow page numbers to appear below the container
+        pageBox.style.overflow = 'visible';
         
         // Hide the section and name elements when fractional units are rendered
         // This prevents them from appearing at the top of mixed page thumbnails
@@ -338,7 +338,15 @@ document.addEventListener('DOMContentLoaded', () => {
             nameWrapper.style.opacity = '0';
         }
         
-        console.log(`Mixed page container setup - position: ${pageBox.style.position || currentPosition}, section hidden: ${!!sectionElement}`);
+        // Ensure page number element is preserved and visible
+        const pageNumberElement = pageBox.querySelector('.page-number');
+        if (pageNumberElement) {
+            pageNumberElement.style.display = 'block';
+            pageNumberElement.style.visibility = 'visible';
+            pageNumberElement.style.opacity = '1';
+        }
+        
+        console.log(`Mixed page container setup - position: ${pageBox.style.position || currentPosition}, section hidden: ${!!sectionElement}, page number preserved: ${!!pageNumberElement}`);
     }
 
     /**

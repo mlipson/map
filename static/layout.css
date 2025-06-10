@@ -15,21 +15,22 @@
     margin-right: 40px;
 }
 
-/* Page number positioning for all page types */
+/* Page number positioning for all page types - positioned below thumbnail */
 .page-number {
     position: absolute;
-    bottom: 10px;
-    font-size: 0.85em;
-    color: #555;
+    bottom: -20px; /* Position below the thumbnail container */
+    font-size: 0.9em; /* Slightly larger for better prominence */
+    color: #374151; /* Darker color for better visibility */
+    font-weight: 600; /* Medium weight for prominence */
     z-index: 10; /* Ensure page numbers are always on top */
 }
 
 .page-number.even {
-    left: 10px;
+    left: 0px; /* Align with left edge of thumbnail for left-hand pages */
 }
 
 .page-number.odd {
-    right: 10px;
+    right: 0px; /* Align with right edge of thumbnail for right-hand pages */
 }
 
 
@@ -46,6 +47,11 @@
 /* Add cursor pointer to boxes for edit mode */
 .box:not(#page-0) {
     cursor: pointer;
+}
+
+/* Ensure all page boxes allow page numbers to appear below container */
+.box {
+    overflow: visible;
 }
 
 /* Transition for hover effect */
@@ -270,7 +276,7 @@
 .box.mixed {
     position: relative;
     background-color: #F3F4F6 !important; /* Light gray background like placeholder */
-    overflow: hidden;
+    overflow: visible; /* Allow page numbers to appear below the container */
 }
 
 /* The fractional ad styling */
@@ -309,23 +315,21 @@
     margin-bottom: 0.25rem;
 }
 
-/* Make sure page numbers stay visible in mixed pages */
+/* Make sure page numbers stay visible in mixed pages - positioned below thumbnail */
 .box.mixed .page-number {
     position: absolute; /* Reinforce absolute positioning */
     z-index: 10; /* Higher z-index to stay above fractional areas */
-    padding: 1px 3px;
-    border-radius: 2px;
-    bottom: 10px; /* Maintain consistent positioning with other page types */
+    /* Inherit all other styling from base .page-number rule for consistency */
 }
 
 /* Maintain left/right positioning for mixed pages */
 .box.mixed .page-number.even {
-    left: 10px;
+    left: 0px; /* Align with left edge of thumbnail */
     right: auto; /* Ensure right isn't set */
 }
 
 .box.mixed .page-number.odd {
-    right: 10px;
+    right: 0px; /* Align with right edge of thumbnail */
     left: auto; /* Ensure left isn't set */
 }
 
@@ -381,7 +385,7 @@
     z-index: 1000 !important; /* High z-index for modals */
 }
 
-/* Hide section and name elements in mixed pages with fractional units */
+/* Hide section and name elements in mixed pages with fractional units, but preserve page numbers */
 .box.mixed .section.mixed-page-section-hidden,
 .box.mixed .section,
 .box.mixed .name,
@@ -392,4 +396,12 @@
     height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
+}
+
+/* Explicitly ensure page numbers are always visible in mixed pages */
+.box.mixed .page-number {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
 }
